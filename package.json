@@ -1,0 +1,31 @@
+{
+  "name": "animare",
+  "version": "1.0.0-beta.0",
+  "description": "Light animation library based on requestanimationframe ",
+  "main": "animare.js",
+  "types": "animare.d.ts",
+  "scripts": {
+    "publish": "npm publish",
+    "publish-beta": "npm publish --tag beta"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alabsi91/animare.git"
+  },
+  "keywords": [
+    "animation",
+    "keyframe",
+    "requestanimationframe",
+    "js",
+    "transition",
+    "ease",
+    "easing",
+    "visual-timing-functions"
+  ],
+  "author": "Ahmed AlAbsi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alabsi91/ranimare/issues"
+  },
+  "homepage": "https://github.com/alabsi91/ranimare#readme"
+}
