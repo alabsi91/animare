@@ -1,12 +1,13 @@
 {
   "name": "animare",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.14",
   "description": "Light animation library based on requestanimationframe ",
   "main": "animare.js",
   "types": "animare.d.ts",
   "scripts": {
     "publish": "npm publish",
-    "publish-beta": "npm publish --tag beta"
+    "publish-beta": "npm publish --tag beta",
+    "build": "babel src -d ./"
   },
   "repository": {
     "type": "git",
@@ -22,10 +23,15 @@
     "easing",
     "visual-timing-functions"
   ],
+  "browserslist": "> 0.25%, not dead",
   "author": "Ahmed AlAbsi",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alabsi91/ranimare/issues"
+    "url": "https://github.com/alabsi91/animare/issues"
   },
-  "homepage": "https://github.com/alabsi91/ranimare#readme"
+  "homepage": "https://github.com/alabsi91/animare#readme",
+  "dependencies": {
+    "@babel/preset-env": "^7.16.11",
+    "babel-minify": "^0.5.1"
+  }
 }

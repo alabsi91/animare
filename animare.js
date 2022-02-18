@@ -1,2 +1,1 @@
-export { animare } from './methods/animare';
-export { colorToArr } from './methods/colorToRgbArray';
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),Object.defineProperty(exports,"animare",{enumerable:!0,get:function get(){return _animare.animare}}),Object.defineProperty(exports,"colorToArr",{enumerable:!0,get:function get(){return _colorToRgbArray.colorToArr}});var _animare=require("./methods/animare"),_colorToRgbArray=require("./methods/colorToRgbArray");

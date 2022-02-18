@@ -31,7 +31,161 @@ type requestFrameEasing =
   | 'easeOutBounce'
   | 'easeInOutBounce';
 
-interface animareOptions {
+type colorNames =
+  | 'aliceblue'
+  | 'antiquewhite'
+  | 'aqua'
+  | 'aquamarine'
+  | 'azure'
+  | 'beige'
+  | 'bisque'
+  | 'black'
+  | 'blanchedalmond'
+  | 'blue'
+  | 'blueviolet'
+  | 'brown'
+  | 'burlywood'
+  | 'cadetblue'
+  | 'chartreuse'
+  | 'chocolate'
+  | 'coral'
+  | 'cornflowerblue'
+  | 'cornsilk'
+  | 'crimson'
+  | 'cyan'
+  | 'darkblue'
+  | 'darkcyan'
+  | 'darkgoldenrod'
+  | 'darkgray'
+  | 'darkgreen'
+  | 'darkkhaki'
+  | 'darkmagenta'
+  | 'darkolivegreen'
+  | 'darkorange'
+  | 'darkorchid'
+  | 'darkred'
+  | 'darksalmon'
+  | 'darkseagreen'
+  | 'darkslateblue'
+  | 'darkslategray'
+  | 'darkturquoise'
+  | 'darkviolet'
+  | 'deeppink'
+  | 'deepskyblue'
+  | 'dimgray'
+  | 'dodgerblue'
+  | 'firebrick'
+  | 'floralwhite'
+  | 'forestgreen'
+  | 'fuchsia'
+  | 'gainsboro'
+  | 'ghostwhite'
+  | 'gold'
+  | 'goldenrod'
+  | 'gray'
+  | 'green'
+  | 'greenyellow'
+  | 'honeydew'
+  | 'hotpink'
+  | 'indianred'
+  | 'indigo'
+  | 'ivory'
+  | 'khaki'
+  | 'lavender'
+  | 'lavenderblush'
+  | 'lawngreen'
+  | 'lemonchiffon'
+  | 'lightblue'
+  | 'lightcoral'
+  | 'lightcyan'
+  | 'lightgoldenrodyellow'
+  | 'lightgrey'
+  | 'lightgreen'
+  | 'lightpink'
+  | 'lightsalmon'
+  | 'lightseagreen'
+  | 'lightskyblue'
+  | 'lightslategray'
+  | 'lightsteelblue'
+  | 'lightyellow'
+  | 'lime'
+  | 'limegreen'
+  | 'linen'
+  | 'magenta'
+  | 'maroon'
+  | 'mediumaquamarine'
+  | 'mediumblue'
+  | 'mediumorchid'
+  | 'mediumpurple'
+  | 'mediumseagreen'
+  | 'mediumslateblue'
+  | 'mediumspringgreen'
+  | 'mediumturquoise'
+  | 'mediumvioletred'
+  | 'midnightblue'
+  | 'mintcream'
+  | 'mistyrose'
+  | 'moccasin'
+  | 'navajowhite'
+  | 'navy'
+  | 'oldlace'
+  | 'olive'
+  | 'olivedrab'
+  | 'orange'
+  | 'orangered'
+  | 'orchid'
+  | 'palegoldenrod'
+  | 'palegreen'
+  | 'paleturquoise'
+  | 'palevioletred'
+  | 'papayawhip'
+  | 'peachpuff'
+  | 'peru'
+  | 'pink'
+  | 'plum'
+  | 'powderblue'
+  | 'purple'
+  | 'rebeccapurple'
+  | 'red'
+  | 'rosybrown'
+  | 'royalblue'
+  | 'saddlebrown'
+  | 'salmon'
+  | 'sandybrown'
+  | 'seagreen'
+  | 'seashell'
+  | 'sienna'
+  | 'silver'
+  | 'skyblue'
+  | 'slateblue'
+  | 'slategray'
+  | 'snow'
+  | 'springgreen'
+  | 'steelblue'
+  | 'tan'
+  | 'teal'
+  | 'thistle'
+  | 'tomato'
+  | 'turquoise'
+  | 'violet'
+  | 'wheat'
+  | 'white'
+  | 'whitesmoke'
+  | 'yellow'
+  | 'yellowgreen'
+  | (string & {});
+
+interface animareOptions extends nextOptions {
+  /**
+   * - Auto start the animation if true.
+   * - **Initial Value** `true`
+   */
+  autoPlay?: boolean;
+  duration?: number;
+  delay?: number;
+}
+
+interface nextOptions {
   /**
    * - Animation will starts form this number/s.
    * - takes one number or array of numbers.
@@ -49,13 +203,13 @@ interface animareOptions {
    * - the duration the function will take to change the number/s (in milliseconds).
    * - **Initial Value** `350`
    */
-  duration?: number;
+  duration?: number | string;
 
   /**
    * - Delay time before starting (in milliseconds).
    * - **Initial Value** `0`
    */
-  delay?: number;
+  delay?: number | string;
 
   /**
    * - Easing functions specify the rate of change of the number over time.
@@ -73,12 +227,6 @@ interface animareOptions {
   repeat?: number;
 
   /**
-   * - Auto start the animation if true.
-   * - **Initial Value** `true`
-   */
-  autoPlay?: boolean;
-
-  /**
    * - Animation direction.
    * - **Initial Value** `normal`
    */
@@ -92,15 +240,26 @@ export type CallbackOptions = {
   isFirstFrame?: boolean;
 
   /**
-   * - True only at last frame.
+   * - True only at last frame of every repeat cycle.
    */
   isLastFrame?: boolean;
 
   /**
-   * - Animation progress a number between 0 and 100.
+   * - True only when the animation is finished.
+   */
+  isFinished?: boolean;
+
+  /**
+   * - Animation progress a number between 0 and 100 relative to current playing animation in the timeline.
    * - Reset on every repeat cycle.
    */
   progress?: number;
+
+  /**
+   * - Animation progress a number between 0 and 100 relative to the timeline.
+   * - Reset on every repeat cycle.
+   */
+  timeLineProgress?: number;
 
   /**
    * - A descending number representing the current repeat cycle.
@@ -118,13 +277,17 @@ export type CallbackOptions = {
   fps?: number;
 
   /**
-   * - The current time in milliseconds.
+   * - The current time in milliseconds relative to current playing animation in the timeline.
    * - Reset on every repeat cycle.
    */
   time?: number;
-};
 
-interface returnObject {
+  /**
+   * - The current passed time in milliseconds relative to animation timeline.
+   * - Reset on every repeat cycle.
+   */
+  timeLineTime?: number;
+
   /**
    * - Play the animation forwards.
    * - **Note**: `play` will match the `direction` property.
@@ -150,9 +313,78 @@ interface returnObject {
   /**
    * - Stop or skip to specific time or progress percentage.
    * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
+   * - For second parameter, takes a boolean to specify the direction of the animation. `false` for forwards, `true` for backwards.
    * - If the parameter is not passed, the animation will stop at the last frame.
    */
-  stop: (stopAt?: number | string) => void;
+  stop: (stopAt?: number | string, isDirectionReversed?: boolean) => void;
+
+  /**
+   * - Pause the animation at any given point when called.
+   */
+  pause: () => void;
+
+  /**
+   * - Change the animation's initial options.
+   */
+  setOptions: (options: animareOptions) => void;
+
+  /**
+   * - Get animation's current options object.
+   */
+  getOptions: () => animareOptions;
+};
+
+interface timelineOptions {
+  /**
+   * - Repeat count after the first timeLine play.
+   * - infinite if replay is set to `-1` .
+   * - **Initial Value** `0`
+   */
+  repeat?: number;
+
+  /**
+   * - Timeline animation speed.
+   * - This will affect all animations duration in the timeline relative to speed value.
+   * - `1` normal duration (normal speed), `2` half duration (double the speed) and `-2` double duration (half the speed).
+   * - **Initial Value** `1`
+   */
+  speed?: number;
+}
+
+interface toReturnedObject extends returnedObject {
+  setTimeLineOptions: (options: timelineOptions) => void;
+}
+
+interface returnedObject {
+  /**
+   * - Play the animation forwards.
+   * - **Note**: `play` will match the `direction` property.
+   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
+   * - If the animation is already playing or paused, it will restart it.
+   * - If `autoPlay` is set to `true` it will be started automatically.
+   * - If you want the animation to play backwards, use `.reverse()` method.
+   */
+  play: (startAt?: number | string) => void;
+
+  /**
+   * - Play the animation backwards.
+   * - **Note**: `reverse` will reverse the `direction` property.
+   * - `normal` will become `reverse` and `reverse` will become `normal`.
+   * - `alternate` will become `alternate-reverse` and `alternate-reverse` will become `alternate`.
+   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
+   * - If the animation is already playing or paused, it will restart it.
+   * - If `autoPlay` is set to `true` it will play forwards automatically.
+   * - If you want the animation to play forwards, use `.play()` method.
+   */
+  reverse: (startAt?: number | string) => void;
+
+  /**
+   * - Stop or skip to specific time or progress percentage.
+   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
+   * - For second parameter, takes a boolean to specify the direction of the animation. `false` for forwards, `true` for backwards.
+   * - If the parameter is not passed, the animation will stop at the last frame.
+   */
+  stop: (stopAt?: number | string, isDirectionReversed?: boolean) => void;
 
   /**
    * - Pause the animation at any given point when called.
@@ -168,7 +400,7 @@ interface returnObject {
    * - Listen to the animation's start event.
    * - **Note**: `onStart` will not be called for `autoPlay` animations.
    * - A callback function will be called when the animation is started.
-   * - Returns a function to stop listening to the progress event.
+   * - Returns a function to stop listening to the start event.
    */
   onStart: (callback: Function) => Function;
 
@@ -206,14 +438,22 @@ interface returnObject {
   setOptions: (options: animareOptions) => void;
 
   /**
-   * - Access the animation's current options object.
+   * - Get animation's current options object.
    */
-  options: animareOptions;
+  getOptions: () => animareOptions;
+
+  /**
+   * - Play sequence of animations.
+   * - Accepts same options as animare function.
+   * - [duration] and [easingFunction] be inherited from the previous animation in the time line if not specified.
+   * - [from] will be set to [to] of the previous animation if not specified.
+   */
+  next: (options: nextOptions, callback: (variables: number[], CallbackOptions: CallbackOptions) => void) => toReturnedObject;
 }
 
 export function animare(
   options: animareOptions,
   callback: (variables: number[], CallbackOptions: CallbackOptions) => void
-): returnObject;
+): returnedObject;
 
-export function colorToArr(color: string): number[];
+export function colorToArr(color: colorNames): number[];

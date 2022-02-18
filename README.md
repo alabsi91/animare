@@ -1,45 +1,42 @@
-# Request Animation Number
+# animare
 
 ### Features
 
 - Light animation library for modern JavaScript.
-
-- Based on ` requestAnimationFrame()` method which generates smooth animation and transitions.
-
-- Matches animation speed on different screens refresh rates. _Tested on 60Hz and 145Hz_
-
-- Animate anything takes a value as number.
-
-  > E.g. scrolling , width, color ...
-
-- Contains most popular Easing functions with the ability to provide your own.
-
-  > E.g. Ease In, Ease Out, Ease In Out, .... and more
-
-- Check [easings.net](https://easings.net/) to learn more.
+- Based on `requestAnimationFrame()` method which generates smooth animation and transitions.
+- Matching the monitor refresh rate of the device. _Tested on 60Hz and 144Hz monitors._
+- Contains most popular easing timing functions with the ability to provide your own, check [easings.net](https://easings.net/) to
+  learn more.
+- Animate multiple values with different easing function for each at once.
 
 ### Syntax
 
-- `requestNum(options: object, callback: (...animatedNumbers: number[]) => void)`
+- `animare(options: object, callback: (values: number[], animationInfo: object) => void) : methods`
 
 ### Example
 
 ```javascript
-import { requestNum } from 'request-animation-number';
+import { animare } from 'animare';
 
-const element = document.getElementById('square');
+const square = document.getElementById('square');
 
 const animationOptions = {
   from: [0, 1],
   to: [90, 2],
   duration: 500,
-  easingFunction: 'easeInOutBack',
+  direction: 'normal',
+  autoplay: false,
+  easingFunction: ['linear', 'easeInOutBack'],
 };
 
-requestNum(animationOptions, (rotate, scale) => {
-  element.style.transform = `rotate(${rotate}deg) scale(${scale})`;
+const animationCallback = ([rotate, scale]) => {
+  square.style.transform = `rotate(${rotate}deg) scale(${scale})`;
   // ...
-});
+};
+
+const myAnimation = animare(animationOptions, animationCallback);
+
+myAnimation.play();
 ```
 
 ### How to animate colors
@@ -47,104 +44,74 @@ requestNum(animationOptions, (rotate, scale) => {
 - you can ether use `rgb` values as an array of numbers or you can use `colorToArr()` method to convert colors from `string` to
   array of numbers which represents `rgba` values.
 
-- `colorToArr()` method takes a `string` and returns an array of number as `[r, g, b, a]`.
+- `colorToArr()` method takes a `string` and returns an array of number `[r, g, b, a]`.
 - `colorToArr()` accept following formats: `rgb(r, g, b) , rgba(r, g, b, a) , hex (e.g. "#ffffff ") , color name (e.g. "red")`
 
 #### Example for colors animation
 
 ```javascript
-import { requestNum, colorToArr } from 'request-animation-number';
+import { animare, colorToArr } from 'animare';
 
-const element = document.getElementById('circle');
+const circle = document.getElementById('circle');
 
 const animationOptions = {
-  from: colorToArr('brown'), // returns [163, 54, 54]
-  to: colorToArr('#000000'), // returns [0, 0, 0]
+  from: colorToArr('brown'), // return [163, 54, 54]
+  to: colorToArr('#000000'), // return [0, 0, 0]
   duration: 1000,
   easingFunction: 'easeInSine',
 };
 
-requestNum(animationOptions, (r, g, b) => {
-  element.style.backgroundColor = `rgb(${r} ${g} ${b})`;
-});
-```
+const animationCallback = ([r, g, b]) => {
+  circle.style.backgroundColor = `rgb(${r} ${g} ${b})`;
+};
 
-### Sequential animation
-
-- `requestNum()` is an asynchronous function.
-
-- You can use `await` to create sequences of animation by waiting for the first animation to end then starting the next.
-
-#### Example for sequential animation
-
-```javascript
-import { requestNum } from 'request-animation-number';
-
-async function animate() {
-  const circle1 = document.getElementById('circle1');
-  const circle2 = document.getElementById('circle2');
-
-  await requestNum({ to: 350 }, left => (circle1.style.left = left + 'px'));
-
-  requestNum({ to: 350 }, right => (circle2.style.right = right + 'px'));
-}
-
-animate();
-```
-
-- Note that if `replay` set to `-1` it will repeat infinitely.
-
-#### Another way to make sequential animation without using asynchronous function
-
-```javascript
-import { requestNum } from 'request-animation-number';
-
-function animate() {
-  const circle1 = document.getElementById('circle1');
-  const circle2 = document.getElementById('circle2');
-
-  requestNum({ to: 350 }, left => {
-    circle1.style.left = left + 'px';
-
-    // detect when the animation ends
-    if (left === 350) {
-      requestNum({ to: 350 }, right => (circle2.style.right = right + 'px'));
-      // ...
-    }
-  });
-}
-
-animate();
+animare(animationOptions, animationCallback); // auto play
 ```
 
 ### Options _[Object]_
 
-#### from: _[ Number | Numbers[] ]_ _[optional]_
+#### from: _[ number | numbers[] ]_ _[optional]_
 
-- Animation will starts form this number/s.
-- Takes one number or array of numbers or if a value not provided will be set to `0` by default.
+- Animation will start form value/s.
+- Takes one number or array of numbers, if a value not provided will be set to `0 | 0[]` by default.
 - **Initial Value** `0 | [0, 0 , ...]`
 
-#### to: _[ Number | Numbers[] ]_
+#### to: _[ number | numbers[] ]_
 
-- Animation will ends at this number/s.
+- Animation will ends at this value/s.
 - takes one number or array of numbers.
 
-#### duration: _[Number]_ _[optional]_
+#### duration: _[number]_ _[optional]_
 
-- The duration the function will take to change the number/s (in milliseconds).
+- Animation duration in milliseconds.
 - **Initial Value** `350`.
 
-#### delay: _[Number]_ _[optional]_
+#### delay: _[number]_ _[optional]_
 
 - Delay time before starting the animation (in milliseconds).
 - **Initial Value** `0`.
 
-#### easingFunction: _[ String | Function ]_ _[optional]_
+#### direction: _['alternate' | 'alternate-reverse' | 'normal' | 'reverse']_
+
+- Animation direction.
+- **Initial Value** `normal`
+
+#### autoPlay?: _[boolean]_ _[optional]_;
+
+- Auto start the animation if true.
+- **Initial Value** `true`
+
+#### repeat: _[Number]_ _[optional]_
+
+- Repeat count after the first play.
+- infinite if repeat value is set to `-1`.
+- **Initial Value** `0`.
+
+#### easingFunction: _[ String | (x) => x ]_ _[optional]_
 
 - Easing functions specify the rate of change of the number over time.
-- Takes a String or Function.
-- **Initial Value** `"linear"`.
+- Takes a String or a Function.
+- **Initial Value** `"linear" | "linear"[]`.
 - Avaliable Easing functions :
   `"linear", "easeInSine", "easeOutSine", "easeInOutSine", "easeInQuad", "easeOutQuad", "easeInOutQuad", "easeInCubic", "easeOutCubic", "easeInOutCubic", "easeInQuart", "easeOutQuart", "easeInOutQuart", "easeInQuint", "easeOutQuint", "easeInOutQuint", "easeInExpo", "easeOutExpo", "easeInOutExpo", "easeInCirc", "easeOutCirc", "easeInOutCirc", "easeInBack", "easeOutBack", "easeInOutBack", "easeInElastic", "easeOutElastic", "easeInOutElastic", "easeInBounce", "easeOutBounce", "easeInOutBounce"`
 - Check [easings.net](https://easings.net/) to learn more.
@@ -156,23 +123,107 @@ function easeInQuad(x) {
 }
 ```
 
-#### yoyo: _[boolean]_ _[optional]_
+### Callback _`(numbers[], object) => void`_
 
-- Animate back to the starting point if `true`.
-- **Initial Value** `false`.
+- Takes two parameters:
+  - `numbers[]`: An array of numbers which represents the current value of the animation.
+  - `object`: An object which contains the animation information.
 
-#### yoyoDuration: _[Number]_ _[optional]_
+|       info       |   type   |                        description                        |
+| :--------------: | :------: | :-------------------------------------------------------: |
+|   isFirstFrame   | boolean  |      True only at first frame of every repeat cycle       |
+|   isLastFrame    | boolean  |       True only at last frame of every repeat cycle       |
+|    isFinished    | boolean  |         True only when the animation is finished          |
+|     progress     |  number  |               Animation progress percentage               |
+| timeLineProgress |  number  |  Animation progress percentage relative to the timeline   |
+|   repeatCount    |  number  |                 The current repeat cycle                  |
+|  alternateCycle  |  number  |                The current alternate cycle                |
+|       fps        |  number  |             The current animation frame rate              |
+|       time       |  number  |             The current time in milliseconds              |
+|   timeLineTime   |  number  | The current time in milliseconds relative to the timeline |
+|       play       | Function |                    check out _Methods_                    |
+|     reverse      | Function |                    check out _Methods_                    |
+|      pause       | Function |                    check out _Methods_                    |
+|       stop       | Function |                    check out _Methods_                    |
+|    setOptions    | Function |                    check out _Methods_                    |
+|    getOptions    | Function |                    check out _Methods_                    |
 
-- The duration to go back to starting point (in milliseconds).
-- **Initial Value** `duration`.
+### Methods
 
-#### yoyoDelay: _[Number]_ _[optional]_
+- The animare returns an object which contains the following methods:
 
-- Delay time before starting the yoyo animation (in milliseconds).
-- **Initial Value** `delay`.
+#### play : `(startAt?: number | string) => void`
 
-#### replay: _[Number]_ _[optional]_
+- Play the animation matching the `direction` option property.
+- the parameter is optional and if not provided will start the animation from the beginning.
+- Takes a number for time in milliseconds or a string for progress percentage _e.g. `'50%'`_.
+- If the animation is already playing or paused, it will restart it.
+- If you want the animation to play backwards, use `reverse()` method.
 
-- Replay count after the first play.
-- infinite if replay value is set to `-1`.
-- **Initial Value** `0`.
+#### reverse : `(startAt?: number | string) => void`
+
+- Play the animation reversing the `direction` option property.
+- the parameter is optional and if not provided will start the animation from the end.
+- Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
+- If the animation is already playing or paused, it will restart it.
+- If you want the animation to play forwards, use `play()` method.
+
+#### stop : `(stopAt?: number | string, isReversed?: boolean) => void`
+
+- Stop or skip to specific time or progress percentage.
+- Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
+- If the parameter is not passed, the animation will stop at the last frame.
+
+#### pause : `() => void`
+
+- Pause the animation at any given point when called.
+
+#### resume : `() => void`
+
+- Resume the animation from the paused or stopped state.
+
+#### next : `(options: object, callback: (numbers[], object) => void) => methods`
+
+- Play sequence of animations.
+- Accepts same options as animare function.
+- The options will be inherited from the main animations if not specified.
+- [from] will be set to [to] of the previous animation if not specified.
+
+#### onStart : `(callback: Function) => Function`
+
+- Listen to the animation's start event.
+- A callback function will be called when the animation is started.
+- Returns a function to stop listening to the start event.
+- **Note**: `onStart` will not be called for `autoPlay` animations.
+
+#### onFinish : `(callback: Function) => Function`
+
+- Listen to the animation's finish event.
+- A callback function will be called when the animation is finished.
+- Returns a function to stop listening to the progress event.
+
+#### asyncOnFinish : `() => Promise<void>`
+
+- Async function that resolves when the animation is finished.
+
+#### onProgress : `(at: number | string, callback: Function, atRepeat?: number) => Function`
+
+- Listen to the animation's progress event.
+- 1st argument accepts a number as current time in milliseconds or a string representing the progress "e.g. `'50%'`".
+- 2nd argument is a callback function that will be called when the animation reaches the progress point.
+- 3rd argument is the repeat count that the event will be fired at. set to `0` by default.
+- Returns a function to stop listening to the progress event.
+
+#### asyncOnProgress : `(at: number | string, atRepeat?: number) => Promise<void>`
+
+- Async function that resolves when the animation reaches the progress point.
+- 1st argument accepts a number as current time in milliseconds or a string representing the progress "e.g. `'50%'`".
+- 2nd argument is the repeat count that the event will be fired at. set to `0` by default.
+
+#### setOptions : `(options: animareOptions) => void`
+
+- Change the animation's initial options.
+
+#### getOptions : `() => animareOptions`
+
+- Get the animation's current options object.
