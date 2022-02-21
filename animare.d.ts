@@ -311,14 +311,6 @@ export type CallbackOptions = {
   reverse: (startAt?: number | string) => void;
 
   /**
-   * - Stop or skip to specific time or progress percentage.
-   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
-   * - For second parameter, takes a boolean to specify the direction of the animation. `false` for forwards, `true` for backwards.
-   * - If the parameter is not passed, the animation will stop at the last frame.
-   */
-  stop: (stopAt?: number | string, isDirectionReversed?: boolean) => void;
-
-  /**
    * - Pause the animation at any given point when called.
    */
   pause: () => void;
@@ -326,12 +318,12 @@ export type CallbackOptions = {
   /**
    * - Change the animation's initial options.
    */
-  setOptions: (options: animareOptions) => void;
+  setOptions: (options: animareOptions, animationIndex?: number) => void;
 
   /**
    * - Get animation's current options object.
    */
-  getOptions: () => animareOptions;
+  getOptions: (animationIndex?: number) => animareOptions;
 };
 
 interface timelineOptions {
@@ -435,12 +427,12 @@ interface returnedObject {
   /**
    * - Change the animation's initial options.
    */
-  setOptions: (options: animareOptions) => void;
+  setOptions: (options: animareOptions, animationIndex?: number) => void;
 
   /**
    * - Get animation's current options object.
    */
-  getOptions: () => animareOptions;
+  getOptions: (animationIndex?: number) => animareOptions;
 
   /**
    * - Play sequence of animations.
