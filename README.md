@@ -26,7 +26,7 @@ const animationOptions = {
   duration: 500,
   direction: 'normal',
   autoplay: false,
-  easingFunction: ['linear', 'easeInOutBack'],
+  ease: ['linear', 'easeInOutBack'],
 };
 
 const animationCallback = ([rotate, scale]) => {
@@ -58,7 +58,7 @@ const animationOptions = {
   from: colorToArr('brown'), // return [163, 54, 54]
   to: colorToArr('#000000'), // return [0, 0, 0]
   duration: 1000,
-  easingFunction: 'easeInSine',
+  ease: 'easeInSine',
 };
 
 const animationCallback = ([r, g, b]) => {
@@ -107,7 +107,7 @@ animare(animationOptions, animationCallback); // auto play
 - infinite if repeat value is set to `-1`.
 - **Initial Value** `0`.
 
-#### easingFunction: _[ String | (x) => x ]_ _[optional]_
+#### ease: _[ String | (x) => x ]_ _[optional]_
 
 - Easing functions specify the rate of change of the number over time.
 - Takes a String or a Function.

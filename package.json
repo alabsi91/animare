@@ -1,6 +1,6 @@
 {
   "name": "animare",
-  "version": "1.0.17",
+  "version": "1.0.35",
   "description": "Light animation library based on requestanimationframe ",
   "main": "animare.js",
   "types": "animare.d.ts",
@@ -30,7 +30,8 @@
     "url": "https://github.com/alabsi91/animare/issues"
   },
   "homepage": "https://github.com/alabsi91/animare#readme",
-  "dependencies": {
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
     "@babel/preset-env": "^7.16.11",
     "babel-minify": "^0.5.1"
   }

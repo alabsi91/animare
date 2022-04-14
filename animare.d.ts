@@ -1,36 +1,3 @@
-type requestFrameEasing =
-  | 'linear'
-  | 'easeInSine'
-  | 'easeOutSine'
-  | 'easeInOutSine'
-  | 'easeInQuad'
-  | 'easeOutQuad'
-  | 'easeInOutQuad'
-  | 'easeInCubic'
-  | 'easeOutCubic'
-  | 'easeInOutCubic'
-  | 'easeInQuart'
-  | 'easeOutQuart'
-  | 'easeInOutQuart'
-  | 'easeInQuint'
-  | 'easeOutQuint'
-  | 'easeInOutQuint'
-  | 'easeInExpo'
-  | 'easeOutExpo'
-  | 'easeInOutExpo'
-  | 'easeInCirc'
-  | 'easeOutCirc'
-  | 'easeInOutCirc'
-  | 'easeInBack'
-  | 'easeOutBack'
-  | 'easeInOutBack'
-  | 'easeInElastic'
-  | 'easeOutElastic'
-  | 'easeInOutElastic'
-  | 'easeInBounce'
-  | 'easeOutBounce'
-  | 'easeInOutBounce';
-
 type colorNames =
   | 'aliceblue'
   | 'antiquewhite'
@@ -212,12 +179,18 @@ interface nextOptions {
   delay?: number | string;
 
   /**
+   * - Applay delay once if there is a repeated animation.
+   * - **Initial Value** `false`
+   */
+  delayOnce?: boolean;
+
+  /**
    * - Easing functions specify the rate of change of the number over time.
    * - Takes a string or Function.
    * - Check [easings.net](https://easings.net/) to learn more.
    * - **Initial Value** `linear`
    */
-  easingFunction?: requestFrameEasing | requestFrameEasing[] | ((x: number) => number) | ((x: number) => number)[];
+  ease?: ((x: number) => number) | ((x: number) => number)[];
 
   /**
    * - Repeat count after the first play.
@@ -259,7 +232,12 @@ export type CallbackOptions = {
    * - Animation progress a number between 0 and 100 relative to the timeline.
    * - Reset on every repeat cycle.
    */
-  timeLineProgress?: number;
+  timelineProgress?: number;
+
+  /**
+   * - The current animation index in the timeline.
+   */
+  timelineIndex?: number;
 
   /**
    * - A descending number representing the current repeat cycle.
@@ -344,7 +322,7 @@ interface timelineOptions {
 }
 
 interface toReturnedObject extends returnedObject {
-  setTimeLineOptions: (options: timelineOptions) => void;
+  setTimelineOptions: (options: timelineOptions) => void;
 }
 
 interface returnedObject {
@@ -437,7 +415,7 @@ interface returnedObject {
   /**
    * - Play sequence of animations.
    * - Accepts same options as animare function.
-   * - [duration] and [easingFunction] be inherited from the previous animation in the time line if not specified.
+   * - [duration] and [ease] be inherited from the previous animation in the time line if not specified.
    * - [from] will be set to [to] of the previous animation if not specified.
    */
   next: (options: nextOptions, callback: (variables: number[], CallbackOptions: CallbackOptions) => void) => toReturnedObject;
@@ -449,3 +427,30 @@ export function animare(
 ): returnedObject;
 
 export function colorToArr(color: colorNames): number[];
+
+interface base_eases {
+  back: (progress: number) => number;
+  bounce: (progress: number) => number;
+  circ: (progress: number) => number;
+  cubic: (progress: number) => number;
+  elastic: (progress: number) => number;
+  expo: (progress: number) => number;
+  sine: (progress: number) => number;
+  quad: (progress: number) => number;
+  quart: (progress: number) => number;
+  quint: (progress: number) => number;
+}
+
+interface ease {
+  in: base_eases;
+  out: base_eases;
+  inOut: base_eases;
+  linear: (progress: number) => number;
+  cubicBezier: (X1: number, Y1: number, X2: number, Y2: number) => (progress: number) => number;
+  /**
+   * - Check [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) to learn more.
+   */
+  custom: (path: string) => (progress: number) => number;
+}
+
+export const ease: ease;

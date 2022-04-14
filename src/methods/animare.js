@@ -1,5 +1,6 @@
-import { easing } from './easingFunctions';
 const isDevMode = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+
+const linear = x => x;
 
 export function animare(options, callback) {
   options = options ?? {};
@@ -7,8 +8,9 @@ export function animare(options, callback) {
   options.autoPlay = options.autoPlay ?? true;
   options.repeat = options.repeat ?? 0;
   options.delay = options.delay ?? 0;
+  options.delayOnce = options.delayOnce ?? false;
   options.direction = options.direction ?? 'normal';
-  options.easingFunction = options.easingFunction ?? easing.linear;
+  options.ease = options.ease ?? linear;
 
   const checkInputs = () => {
     // check if [to] exists, because it's required.
@@ -43,22 +45,14 @@ export function animare(options, callback) {
     if (!['normal', 'reverse', 'alternate', 'alternate-reverse'].includes(options.direction))
       throw new Error('[direction] must be a string and one of the following: normal, reverse, alternate, alternate-reverse');
 
-    // check if [easingFunction] string is one of easing functions
-    if (typeof options.easingFunction === 'string' && !easing.hasOwnProperty(options.easingFunction)) {
-      throw new Error(
-        '[easingFunction] must be a string, array of strings, function or array of functions, and for a string value one of the following: ' +
-          Object.keys(easing).join(', ')
-      );
+    // check if [ease] string is one of easing functions
+    if (typeof options.ease !== 'function' && !Array.isArray(options.ease)) {
+      throw new Error('[ease] must be a function or array of functions.');
     }
-    // check if [easingFunction] is an array and if one of the elements is a string and one of the elements is a function.
-    if (Array.isArray(options.easingFunction)) {
-      options.easingFunction.forEach(e => {
-        if (typeof e === 'string' && !easing.hasOwnProperty(e)) {
-          throw new Error(
-            '[easingFunction] must be a string, array of strings, function or array of functions, and for a string value one of the following: ' +
-              Object.keys(easing).join(', ')
-          );
-        }
+    // check if [ease] is an array and if one of the elements is a string and one of the elements is a function.
+    if (Array.isArray(options.ease)) {
+      options.ease.forEach(e => {
+        if (typeof e !== 'function') throw new Error('[ease] must be a function or array of functions.');
       });
     }
   };
@@ -69,7 +63,27 @@ export function animare(options, callback) {
   // the overall duration will represent the both the forward and backward animation duration
   if (options.direction.includes('alternate')) options.duration = options.duration / 2;
 
-  const sleep = time => new Promise(e => setTimeout(e, time));
+  let abortController = new AbortController();
+  const sleep = time => {
+    return new Promise(resolve => {
+      if (abortController.signal.aborted) {
+        abortController = new AbortController();
+      }
+
+      const abort = () => {
+        clearTimeout(timeout);
+        resolve();
+        abortController.signal.removeEventListener('abort', abort);
+      };
+
+      const timeout = setTimeout(() => {
+        resolve();
+        abortController.signal.removeEventListener('abort', abort);
+      }, time);
+
+      abortController.signal.addEventListener('abort', abort);
+    });
+  };
 
   let reqId = null; // request id for the animation frame.
   let start = null; // start time of the animation.
@@ -95,41 +109,30 @@ export function animare(options, callback) {
   // set [from] option to default value `0` if not set, and check if it is valid.
   if (options.from === undefined) options.from = Array.isArray(options.to) ? new Array(options.to.length).fill(0) : 0;
 
-  // setup [easingFunction] to default value/s if needed.
-  const setupEasingFunction = ({ easingFunction }) => {
-    const isEaseArray = Array.isArray(easingFunction);
-    const isEaseFunction = typeof easingFunction === 'function';
-    const isEaseString = typeof easingFunction === 'string';
+  // setup [ease] to default value/s if needed.
+  const setupEase = ({ ease }) => {
+    const isEaseArray = Array.isArray(ease);
     const isToArray = Array.isArray(options.to);
 
     if (isEaseArray && isToArray) {
-      // convert easing strings to function.
-      options.easingFunction = easingFunction.map(e => (typeof e === 'string' ? easing[e] : e));
       // fill the rest of the array with linear functions to match the length of [to].
-      if (easingFunction.length < options.to.length)
-        options.easingFunction = easingFunction.concat(new Array(options.to.length - easingFunction.length).fill(easing.linear));
+      if (ease.length < options.to.length)
+        options.ease = options.ease.concat(new Array(options.to.length - ease.length).fill(linear));
       // remove unnecessary functions.
-      if (options.to.length > easingFunction.length) easingFunction.length = options.to.length;
+      if (options.to.length > ease.length) options.ease.length = options.to.length;
       // take the first easing function from its array if [to] is not an array
     } else if (isEaseArray && !isToArray) {
-      options.easingFunction = typeof easingFunction[0] === 'string' ? easing[easingFunction[0]] : easingFunction[0];
-      // create new array filled with linear functions to match the length of [to].
-    } else if (!isEaseArray && isToArray) {
-      if (isEaseFunction) {
-        options.easingFunction = new Array(options.to.length).fill(easingFunction);
-      } else if (isEaseString) options.easingFunction = new Array(options.to.length).fill(easing[easingFunction]);
-    } else if (!isEaseArray && !isToArray) {
-      options.easingFunction = isEaseFunction ? easingFunction : easing[easingFunction];
+      options.ease = ease[0];
     }
   };
-  setupEasingFunction(options);
+  setupEase(options);
 
-  const timeLine = [{ options: { ...options }, cb: callback, id: 'default', userInput: { ...options } }];
-  const timeLinePlayed = new Set(); // to check if the animation is played.
+  const timeline = [{ options: { ...options }, cb: callback, id: 'default', userInput: { ...options } }];
+  const timelinePlayed = new Set(); // to check if the animation is played.
   let isTimeLineReversed = false; // to play the timeline in reverse direction.
 
-  let timeLineOptions = { repeat: 0, speed: 1 };
-  let timeLineRepeatCount = timeLineOptions.repeat; // number of repeats left on the timeline.
+  let timelineOptions = { repeat: 0, speed: 1 };
+  let timelineRepeatCount = timelineOptions.repeat; // number of repeats left on the timeline.
 
   const progressTimeSet = new Set(); // save progress listerners id's or asyncsOnProgress times to prevent multiple calls.
 
@@ -143,34 +146,34 @@ export function animare(options, callback) {
     if (isStopped || isPaused) return;
 
     // when all the animations in the timeline are finished.
-    if (timeLinePlayed.size === timeLine.length) {
-      timeLinePlayed.clear();
+    if (timelinePlayed.size === timeline.length) {
+      timelinePlayed.clear();
       progressTimeSet.clear();
       isReversed = false;
-      options = { ...timeLine[0].options }; // reset options to the default animation.
-      callback = timeLine[0].cb;
+      options = { ...timeline[0].options }; // reset options to the default animation.
+      callback = timeline[0].cb;
 
       // repeat the timeline if needed.
-      if (timeLineRepeatCount === 0) {
-        timeLineRepeatCount = timeLineOptions.repeat;
+      if (timelineRepeatCount === 0) {
+        timelineRepeatCount = timelineOptions.repeat;
         isTimeLineReversed = false;
         return;
       }
 
-      timeLineRepeatCount = timeLineRepeatCount < 0 ? -1 : timeLineRepeatCount - 1;
-      isTimeLineReversed ? reverse() : play();
+      timelineRepeatCount = timelineRepeatCount < 0 ? -1 : timelineRepeatCount - 1;
+      isTimeLineReversed ? reverse(null, !options.delayOnce) : play(null, !options.delayOnce);
 
       return;
     }
 
     // play the next animation in the timeline.
-    const i = isTimeLineReversed ? timeLine.length - timeLinePlayed.size - 1 : timeLinePlayed.size;
-    const e = timeLine[i];
+    const i = isTimeLineReversed ? timeline.length - timelinePlayed.size - 1 : timelinePlayed.size;
+    const e = timeline[i];
     options = { ...e.options };
     callback = e.cb;
     repeatCount = options.repeat;
-    setupEasingFunction(options);
-    timeLinePlayed.add(e.id);
+    setupEase(options);
+    timelinePlayed.add(e.id);
     isReversed = false;
     isTimeLineReversed ? (options.direction.includes('alternate') ? play() : reverse()) : play();
   };
@@ -194,7 +197,7 @@ export function animare(options, callback) {
 
     repeatCount = repeatCount < 0 ? -1 : repeatCount - 1; // decrement the repeat count if it's not infinite.
 
-    if (options.delay) await sleep(options.delay); // delay between repeats.
+    if (options.delay && !options.delayOnce) await sleep(options.delay); // delay between repeats.
 
     // play alternate instead of forward or backward.
     if (options.direction.includes('alternate')) {
@@ -214,7 +217,7 @@ export function animare(options, callback) {
 
   const fireOnFinishEvent = isLastFrame => {
     // exit if there are animations didn't finish yet in the timeLine.
-    if (timeLinePlayed.size !== timeLine.length) return;
+    if (timelinePlayed.size !== timeline.length) return;
 
     // for async onFinish.
     if (resolveAsyncOnFinish && isLastFrame) {
@@ -277,7 +280,7 @@ export function animare(options, callback) {
     }
   };
 
-  const minMax = (value, min, max) => Math.max(min, Math.min(max, Math.round(value)));
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, Math.round(value)));
 
   const excute = now => {
     now = now + def;
@@ -286,7 +289,7 @@ export function animare(options, callback) {
 
     const isAlternate = options.direction.includes('alternate');
 
-    const timelineIndex = timeLinePlayed.size - 1; // current animation index in the timeline.
+    const timelineIndex = timelinePlayed.size - 1; // current animation index in the timeline.
 
     // calculate frame per second.
     const fps = Math.round(atFrame / ((performance.now() - start) / 1000));
@@ -298,21 +301,21 @@ export function animare(options, callback) {
 
     // calculate progress.
     let progress = isAlternate ? (alternateCycle === 1 ? p / 2 : p / 2 + 0.5) : p;
-    progress = minMax(Math.round(progress * 100), 0, 100);
-    let timeLineProgress = progress / timeLine.length + ((timeLinePlayed.size - 1) / timeLine.length) * 100;
-    timeLineProgress = minMax(timeLineProgress, 0, 100);
+    progress = clamp(Math.round(progress * 100), 0, 100);
+    let timelineProgress = progress / timeline.length + ((timelinePlayed.size - 1) / timeline.length) * 100;
+    timelineProgress = clamp(timelineProgress, 0, 100);
 
     // calculate passed time in the timeline.
     let d = 0;
-    for (let i = 0; i < timeLinePlayed.size - 1; i++) {
-      const e = timeLine[i].options.duration;
-      d = timeLinePlayed.size === 1 ? 0 : d + e;
+    for (let i = 0; i < timelinePlayed.size - 1; i++) {
+      const e = timeline[i].options.duration;
+      d = timelinePlayed.size === 1 ? 0 : d + e;
     }
-    const timeLineTime = d + time;
+    const timelineTime = d + time;
 
     if (p >= 1) isLastFrame = isAlternate ? alternateCycle === 2 : true;
 
-    isFinished = repeatCount === 0 && p >= 1 && isLastFrame && timeLinePlayed.size === timeLine.length;
+    isFinished = repeatCount === 0 && p >= 1 && isLastFrame && timelinePlayed.size === timeline.length;
 
     // passed information to the animation callback.
     const callbackInfo = {
@@ -324,8 +327,8 @@ export function animare(options, callback) {
       alternateCycle,
       fps,
       time,
-      timeLineTime,
-      timeLineProgress,
+      timelineTime,
+      timelineProgress,
       timelineIndex,
       play,
       reverse,
@@ -337,14 +340,17 @@ export function animare(options, callback) {
     // excute the animation callback for array of values.
     if (Array.isArray(options.to)) {
       const values = [];
+      let easeValue = null;
+      const isEaseArray = Array.isArray(options.ease);
+      if (!isEaseArray) easeValue = options.ease(p);
       options.from.forEach((f, i) => {
-        let x = f + (options.to[i] - f) * options.easingFunction[i](p);
+        let x = f + (options.to[i] - f) * (!isEaseArray ? easeValue : options.ease[i](p));
         values.push(x);
       });
       callback(values, callbackInfo);
       // excute the animation callback for single value.
     } else {
-      let x = options.from + (options.to - options.from) * options.easingFunction(p);
+      let x = options.from + (options.to - options.from) * options.ease(p);
       callback([x], callbackInfo);
     }
 
@@ -352,7 +358,7 @@ export function animare(options, callback) {
     if (repeatCount === 0 && p >= 1) fireOnFinishEvent(isLastFrame);
 
     // fire onProgress event.
-    fireOnProgressEvent(timeLineProgress, timeLineTime);
+    fireOnProgressEvent(timelineProgress, timelineTime);
 
     // exit if paused or stopped.
     if (isPaused || isStopped) {
@@ -394,7 +400,7 @@ export function animare(options, callback) {
     if (typeof at === 'string') {
       const percent = parseInt(at); // convert percentage from string to number.
       // calculate the time of all the animations in the timeline.
-      const overAllDuration = timeLine.reduce(
+      const overAllDuration = timeline.reduce(
         (acc, e) => (e.options.direction.includes('alternate') ? acc + e.options.duration * 2 : acc + e.options.duration),
         0
       );
@@ -404,11 +410,11 @@ export function animare(options, callback) {
     let overallTime = 0; // calculate the overall time that passed [at].
 
     // loop configs if reversed loop from the end else from the start.
-    let i = isTimeLineReversed ? timeLine.length - 1 : 0;
-    let condition = isTimeLineReversed ? i >= 0 && i < timeLine.length : i < timeLine.length;
+    let i = isTimeLineReversed ? timeline.length - 1 : 0;
+    let condition = isTimeLineReversed ? i >= 0 && i < timeline.length : i < timeline.length;
 
     for (i; condition; i = isTimeLineReversed ? i - 1 : i + 1) {
-      const e = timeLine[i];
+      const e = timeline[i];
       options = { ...e.options };
       callback = e.cb;
       // reverse the direction if timeLine is reversed.
@@ -420,8 +426,8 @@ export function animare(options, callback) {
       }
 
       repeatCount = options.repeat; // reset repeat count.
-      setupEasingFunction(options); // setup easing function.
-      timeLinePlayed.add(e.id); // add to the played timeLine.
+      setupEase(options); // setup easing function.
+      timelinePlayed.add(e.id); // add to the played timeLine.
 
       overallTime += options.direction.includes('alternate') ? options.duration * 2 : options.duration;
 
@@ -465,7 +471,7 @@ export function animare(options, callback) {
     def = 0;
 
     // if at not provided start from the beginning and exit.
-    if (at === undefined || at === 0 || at === '0%') {
+    if (at === undefined) {
       reqId = requestAnimationFrame(startAnim);
       return;
     }
@@ -523,25 +529,25 @@ export function animare(options, callback) {
     }
   };
 
-  const play = async at => {
+  const play = async (at, withDelay = true) => {
     isStopped = false;
     isPaused = false;
     isReversedAlternate = false;
     alternateCycle = 1;
     repeatCount = options.repeat;
 
-    if (timeLinePlayed.size === 0) {
-      const first = timeLine[0];
+    if (timelinePlayed.size === 0) {
+      const first = timeline[0];
       options = { ...first.options };
       callback = first.cb;
-      setupEasingFunction(options);
+      setupEase(options);
       repeatCount = options.repeat;
-      timeLinePlayed.add(first.id);
+      timelinePlayed.add(first.id);
     }
 
-    if (options.delay) await sleep(options.delay);
+    if (options.delay && withDelay) await sleep(options.delay);
 
-    if (listenrs.onStart.length > 0 && timeLinePlayed.size === 1) listenrs.onStart.forEach(item => item.cb());
+    if (listenrs.onStart.length > 0 && timelinePlayed.size === 1) listenrs.onStart.forEach(item => item.cb());
 
     if (options.direction.includes('reverse')) {
       backward(at);
@@ -552,13 +558,19 @@ export function animare(options, callback) {
   };
 
   const stop = async (at = '100%', reversed = false) => {
-    reversed ? reverse(at) : play(at);
+    abortController.abort();
+    await new Promise(resolve => setTimeout(resolve, 5));
+
+    reversed ? reverse(at, false) : play(at, false);
     cancelAnimationFrame(reqId);
     isStopped = true;
     stoppedAt = at;
+    timelinePlayed.clear();
+    progressTimeSet.clear();
+    isReversed = reversed;
   };
 
-  const reverse = async at => {
+  const reverse = async (at, withDelay = true) => {
     isReversedAlternate = true;
     isTimeLineReversed = true;
     isStopped = false;
@@ -566,18 +578,18 @@ export function animare(options, callback) {
     alternateCycle = 1;
     repeatCount = options.repeat;
 
-    if (timeLinePlayed.size === 0) {
-      const last = timeLine[timeLine.length - 1];
+    if (timelinePlayed.size === 0) {
+      const last = timeline[timeline.length - 1];
       options = { ...last.options };
       callback = last.cb;
-      setupEasingFunction(options);
+      setupEase(options);
       repeatCount = options.repeat;
-      timeLinePlayed.add(last.id);
+      timelinePlayed.add(last.id);
     }
 
-    if (options.delay) await sleep(options.delay);
+    if (options.delay && withDelay) await sleep(options.delay);
 
-    if (listenrs.onStart.length > 0 && timeLinePlayed.size === 1) listenrs.onStart.forEach(item => item.cb());
+    if (listenrs.onStart.length > 0 && timelinePlayed.size === 1) listenrs.onStart.forEach(item => item.cb());
 
     if (options.direction.includes('reverse')) {
       forward(at);
@@ -588,14 +600,14 @@ export function animare(options, callback) {
   };
 
   const setOptions = (op, index = 0) => {
-    if (index > timeLine.length - 1) {
+    if (index > timeline.length - 1) {
       if (isDevMode) console.warn('[setOptions] Index param is out of range');
       return;
     }
 
     // add or subtract the duration and delay from the previous animation option in the timeLine.
     if (index > 0) {
-      const previous = timeLine[index - 1];
+      const previous = timeline[index - 1];
 
       const previousDuration = previous.options.direction.includes('alternate')
         ? previous.options.duration * 2
@@ -605,22 +617,22 @@ export function animare(options, callback) {
       if (typeof op.delay === 'string') op.delay = Math.abs(previous.options.delay + parseInt(op.delay));
     }
 
-    const timelineOptions = timeLine[index].options;
+    const timelineOptions = timeline[index].options;
     const isOldAlternate = timelineOptions.direction.includes('alternate');
     const isNewAlternate = op.direction?.includes('alternate');
     const isDuration = typeof op.duration === 'number';
     const isEasing = typeof op.easing !== 'undefined';
     const isFrom = op.from !== undefined;
     const isTo = op.to !== undefined;
-    const isMounted = timeLinePlayed.size - 1 === index || (timeLinePlayed.size === 0 && index === 0);
+    const isMounted = timelinePlayed.size - 1 === index || (timelinePlayed.size === 0 && index === 0);
 
-    const after = timeLine[index + 1];
+    const after = timeline[index + 1];
     if (after) {
       if (isTo && after.userInput.from === undefined) after.options.from = op.to;
       // loop through the timeLine and update the duration and easing function of the next animation.
-      for (let i = index + 1; i < timeLine.length; i++) {
-        const nextAnim = timeLine[i];
-        if (isEasing && nextAnim.userInput.easingFunction === undefined) nextAnim.options.easingFunction = op.easingFunction;
+      for (let i = index + 1; i < timeline.length; i++) {
+        const nextAnim = timeline[i];
+        if (isEasing && nextAnim.userInput.ease === undefined) nextAnim.options.ease = op.ease;
         if (isDuration && nextAnim.userInput.duration === undefined)
           nextAnim.options.duration = nextAnim.options.direction?.includes('alternate') ? op.duration / 2 : op.duration;
       }
@@ -629,12 +641,12 @@ export function animare(options, callback) {
     // set the duration depending on the direction.
     if (op.direction) {
       if (isNewAlternate && !isOldAlternate) {
-        isDuration ? (op.duration = op.duration / 2) : (timeLine[index].options.duration = timeLine[index].options.duration / 2);
+        isDuration ? (op.duration = op.duration / 2) : (timeline[index].options.duration = timeline[index].options.duration / 2);
         // if mounted
         options.duration = isMounted ? options.duration / 2 : options.duration;
         //
       } else if (!isNewAlternate && isOldAlternate) {
-        isDuration ? (op.duration = op.duration * 2) : (timeLine[index].options.duration = timeLine[index].options.duration * 2);
+        isDuration ? (op.duration = op.duration * 2) : (timeline[index].options.duration = timeline[index].options.duration * 2);
         // if mounted
         options.duration = isMounted ? options.duration * 2 : options.duration;
       }
@@ -668,20 +680,20 @@ export function animare(options, callback) {
       }
 
       options = { ...options, ...op, ...fromTo };
+      if (op.ease) setupEase(op);
       if (isDevMode) checkInputs();
-      if (op.easingFunction) setupEasingFunction(op);
     }
 
-    timeLine[index].options = { ...timelineOptions, ...op };
-    timeLine[index].userInput = { ...timeLine[index].userInput, ...op };
+    timeline[index].options = { ...timelineOptions, ...op };
+    timeline[index].userInput = { ...timeline[index].userInput, ...op };
   };
 
   const getOptions = (index = 0) => {
-    if (index > timeLine.length - 1) {
+    if (index > timeline.length - 1) {
       if (isDevMode) console.warn('[getOptions] Index param is out of range');
       return;
     }
-    return timeLine[index].options;
+    return timeline[index].options;
   };
 
   const onProgress = (at, cb, atRepeat = 0) => {
@@ -750,10 +762,10 @@ export function animare(options, callback) {
   const next = (op, cb) => {
     const userInput = { ...op };
 
-    const last = timeLine[timeLine.length - 1];
+    const last = timeline[timeline.length - 1];
     op.from = op.from ?? last.options.to; // take [from] value from last timeLine item if not provided.
     op.direction = op.direction ?? 'normal';
-    op.easingFunction = op.easingFunction ?? last.options.easingFunction; // easing function inherited if not provided.
+    op.ease = op.ease ?? last.options.ease; // easing function inherited if not provided.
     op.delay = op.delay ?? 0;
     op.repeat = op.repeat ?? 0;
     cb = cb ?? last.cb; // callback inherited if not provided.
@@ -778,24 +790,24 @@ export function animare(options, callback) {
       op.duration = last.options.duration / 2;
     } else op.duration = op.duration ?? last.options.duration;
 
-    timeLine.push({ options: op, cb, id: `to${Math.random() * 100}`, userInput });
+    timeline.push({ options: op, cb, id: `to${Math.random() * 100}`, userInput });
 
-    return { ...returned, setTimeLineOptions };
+    return { ...returned, setTimelineOptions };
   };
 
-  const setTimeLineOptions = ob => {
+  const setTimelineOptions = ob => {
     if (typeof ob !== 'object') {
       if (isDevMode) throw new Error('[setTimeLineOptions] param must be an object');
       return;
     }
 
-    if (ob.repeat !== undefined) timeLineRepeatCount = ob.repeat;
+    if (ob.repeat !== undefined) timelineRepeatCount = ob.repeat;
     if (ob.speed !== undefined) {
-      timeLine.forEach(item => {
+      timeline.forEach(item => {
         item.options.duration = ob.speed < 0 ? item.options.duration * -ob.speed : item.options.duration / ob.speed;
       });
     }
-    timeLineOptions = { ...timeLineOptions, ...ob };
+    timelineOptions = { ...timelineOptions, ...ob };
   };
 
   if (options.autoPlay) play();
