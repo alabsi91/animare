@@ -1,5 +1,7 @@
 # animare
 
+# Still under development documentation and examples are incomplete and subject to change.
+
 ### Features
 
 - Light animation library for modern JavaScript.

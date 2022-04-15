@@ -1,12 +1,12 @@
 {
   "name": "animare",
-  "version": "1.0.35",
+  "version": "1.0.37",
   "description": "Light animation library based on requestanimationframe ",
   "main": "animare.js",
   "types": "animare.d.ts",
   "scripts": {
-    "publish": "npm publish",
-    "publish-beta": "npm publish --tag beta",
+    "publish": "npm run build && npm publish",
+    "publish-beta": "npm run build && npm publish --tag beta",
     "build": "babel src -d ./"
   },
   "repository": {
