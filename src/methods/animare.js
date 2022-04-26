@@ -1,912 +1,829 @@
-const isDevMode = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+/** @enum {string} */
+const DIRECTION = {
+  NORMAL: 'normal',
+  REVERSE: 'reverse',
+  ALTERNATE: 'alternate',
+  ALTERNATE_REVERSE: 'alternate-reverse',
+};
+/** @enum {string} */
+const TIMELINE_TYPE = {
+  WAIT: 'wait',
+  IMMEDIATE: 'immediate',
+};
 
-const linear = x => x;
+/**
+ * @param {animareOptions} options
+ * @param {animationCallback} callback - callback function that will be called on every animation frame
+ * @returns {animareReturned}
+ */
+export default function animare(options, callback) {
+  if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
+  const userInput = { ...options };
 
-export function animare(options, callback) {
-  options = options ?? {};
-  options.duration = options.duration ?? 350;
-  options.autoPlay = options.autoPlay ?? true;
-  options.repeat = options.repeat ?? 0;
-  options.delay = options.delay ?? 0;
-  options.delayOnce = options.delayOnce ?? false;
-  options.direction = options.direction ?? 'normal';
-  options.ease = options.ease ?? linear;
+  options.from ??= 0;
+  options.to = Array.isArray(options.to) ? options.to : [options.to];
+  options.delay ??= 0;
+  options.delayOnce ??= false;
+  options.duration ??= 350;
+  options.direction ??= DIRECTION.NORMAL;
+  options.repeat ??= 0;
+  options.ease ??= x => x;
+  options.autoPlay ??= true;
+  options.type ??= TIMELINE_TYPE.IMMEDIATE;
 
-  // check user input for errors.
-  const checkInputs = () => {
-    // check if [to] exists, because it's required.
-    if (typeof options.to !== 'number' && !Array.isArray(options.to)) throw new Error('[to] is required');
+  /** @param {animareOptions} options */
+  const checkInputs = options => {
+    if (
+      (typeof options.from !== 'number' && !Array.isArray(options.from)) ||
+      (Array.isArray(options.from) && options.from.some(e => typeof e !== 'number'))
+    )
+      throw new Error('animare: [from] must be a number or an array of numbers');
 
-    // check if [to] is a number or an array of numbers
-    if (Array.isArray(options.to)) {
-      if (!options.to.every(e => typeof e === 'number')) throw new Error('[to] must be a number or an array of numbers');
-    } else if (typeof options.to !== 'number') throw new Error('[to] must be a number or an array of numbers');
+    if (
+      (typeof options.to !== 'number' && !Array.isArray(options.to)) ||
+      (Array.isArray(options.to) && options.to.some(e => typeof e !== 'number'))
+    )
+      throw new Error('animare: [to] must be a number or an array of numbers');
 
-    // check if [from] is a number or an array of numbers and [to] has the same length.
-    if (Array.isArray(options.from)) {
-      if (!options.from.every(e => typeof e === 'number')) throw new Error('[from] must be a number or an array of numbers');
-      if (options.from.length !== options.to.length) throw new Error('[from] and [to] must have the same length');
-    } else if (options.from && typeof options.from !== 'number')
-      throw new Error('[from] must be a number or an array of numbers');
+    if (
+      (typeof options.delay !== 'number' && !Array.isArray(options.delay)) ||
+      (Array.isArray(options.delay) && options.delay.some(e => typeof e !== 'number' || e < 0)) ||
+      (typeof options.delay === 'number' && options.delay < 0)
+    )
+      throw new Error('animare: [delay] must be a number or an array of numbers greater than or equal to 0');
 
-    // check if [duration] is a number and greater than -1
-    if (typeof options.duration !== 'number' || options.duration < 0)
-      throw new Error('[duration] must be a number greater than -1');
+    if (
+      (typeof options.delayOnce !== 'boolean' && !Array.isArray(options.delayOnce)) ||
+      (Array.isArray(options.delayOnce) && options.delayOnce.some(e => typeof e !== 'boolean'))
+    )
+      throw new Error('animare: [delayOnce] must be a boolean or an array of booleans');
 
-    // check if [delay] is a number and greater than 0
-    if (typeof options.delay !== 'number' || options.delay < 0) throw new Error('[delay] must be a number greater than -1');
+    if (
+      (typeof options.duration !== 'number' && !Array.isArray(options.duration)) ||
+      (Array.isArray(options.duration) && options.duration.some(e => typeof e !== 'number' || e < 0)) ||
+      (typeof options.duration === 'number' && options.duration < 0)
+    )
+      throw new Error('animare: [duration] must be a number or an array of numbers greater than or equal to 0');
 
-    // check if [delayOnce] is a boolean
-    if (typeof options.delayOnce !== 'boolean') throw new Error('[delayOnce] must be a boolean');
+    if (
+      (typeof options.direction === 'string' && !Object.values(DIRECTION).includes(options.direction)) ||
+      (Array.isArray(options.direction) &&
+        options.direction.some(e => typeof e !== 'string' && !Object.values(DIRECTION).includes(e)))
+    )
+      throw new Error(
+        'animare: [direction] must be a string or an array of strings and one of the following: ' +
+          Object.values(DIRECTION).join(', ')
+      );
 
-    // check if [repeat] is a number
-    if (typeof options.repeat !== 'number') throw new Error('[repeat] must be a number');
+    if (
+      (typeof options.repeat !== 'number' && !Array.isArray(options.repeat)) ||
+      (Array.isArray(options.repeat) && options.repeat.some(e => typeof e !== 'number'))
+    )
+      throw new Error('animare: [repeat] must be a number or an array of numbers');
 
-    // check if [autoPlay] is a boolean
-    if (typeof options.autoPlay !== 'boolean') throw new Error('[autoPlay] must be a boolean');
+    if (
+      (typeof options.ease !== 'function' && !Array.isArray(options.ease)) ||
+      (Array.isArray(options.ease) && options.ease.some(e => typeof e !== 'function'))
+    )
+      throw new Error('animare: [ease] must be a function or an array of functions');
 
-    // check if [direction] one of the following:
-    if (!['normal', 'reverse', 'alternate', 'alternate-reverse'].includes(options.direction))
-      throw new Error('[direction] must be a string and one of the following: normal, reverse, alternate, alternate-reverse');
+    if (typeof options.autoPlay !== 'boolean') throw new Error('animare: [autoPlay] must be a boolean');
 
-    // check if [ease] string is one of easing functions
-    if (typeof options.ease !== 'function' && !Array.isArray(options.ease)) {
-      throw new Error('[ease] must be a function or array of functions.');
-    }
-    // check if [ease] is an array and if one of the elements is a string and one of the elements is a function.
-    if (Array.isArray(options.ease)) {
-      options.ease.forEach(e => {
-        if (typeof e !== 'function') throw new Error('[ease] must be a function or array of functions.');
-      });
-    }
+    if (typeof callback !== 'function') throw new Error('animare: [callback] must be a function');
   };
+  checkInputs(options);
 
-  if (isDevMode) checkInputs(); // check if inputs are valid only in development mode.
+  let start = [], // start time of each animation.
+    fpsTimeStamp, // used to calulate fps.
+    excuteTimeStamp, // start time of the excute function.
+    excuteDuration, // duration of the excute function.
+    isFirstFrame, // is the first frame of the animation
+    pausedAt, // time when the animation was paused.
+    isStoped, // to play one frame only for stop method.
+    progresses = [...options.to].fill(0), // progress of each animation.
+    isReversePlay = false, // is the animation playing backward?
+    resolveAsyncOnFinish, // to resolve the promise when the animation is finished.
+    resolveAsyncOnProgress, // to resolve the promise for onProgressAsync event.
+    reqId; // requestAnimationFrame id used to cancel the animation.
 
-  // when the animation direction is 'alternate' or 'alternate-reverse',
-  // the overall duration will represent the both the forward and backward animation duration
-  if (options.direction.includes('alternate')) options.duration = options.duration / 2;
+  // create initial repeat count from [repeat]
+  // if [repeat] is not an array, create an array with the same length as [to]
+  let repeatCount = Array.isArray(options.repeat) ? [...options.repeat] : [...options.to].fill(options.repeat);
 
-  // delay wating with the ability cancle the waiting.
-  let abortController = new AbortController();
-  let aborted = false;
-  const sleep = time => {
-    return new Promise(resolve => {
-      if (abortController.signal.aborted) {
-        abortController = new AbortController();
-      }
-      aborted = false;
+  const alternateCycle = [...options.to].fill(1);
 
-      const abort = () => {
-        aborted = true;
-        clearTimeout(timeout);
-        resolve();
-        abortController.signal.removeEventListener('abort', abort);
-      };
+  // finished animations indexes will be stored here.
+  const finished = new Set();
+  // used to fill the animation value when it's finished and other animations still playing to keep the passed array of values at the same length
+  const lastKnownValue = [...options.to];
 
-      const timeout = setTimeout(() => {
-        resolve();
-        abortController.signal.removeEventListener('abort', abort);
-      }, time);
+  const timeline = [
+    {
+      options: { ...options },
+      // cb: callback, // ? you can't change the callback function for now at least.
+      userInput, // used to know how to set the default values when the user changes the options using setOptions method.
+    },
+  ];
 
-      abortController.signal.addEventListener('abort', abort);
-    });
-  };
+  const timelineAt = [...options.to].fill(0);
 
-  let reqId = null, // request id for the animation frame.
-    start = null, // start time of the animation.
-    def = 0, // used to correct the animation progress when playing at a specific time.
-    atFrame = 1, // frame counter used to calulate fps.
-    repeatCount = options.repeat, // number of repeats left.
-    alternateCycle = 1, // 1 for the first cycle, 2 for the second cycle.
-    isFirstFrame = true, // true when the animation is in the first frame.
-    isLastFrame = false, // true when the animation is in the last frame.
-    isPlaying = false, // is the animation playing.
-    isStopped = true, // this will stop the animation.
-    stoppedAt = null, // time or progress when the animation was stopped.
-    isPaused = false, // this will pause the animation.
-    pausedAt = null, // time when the animation was paused.
-    isFinished = false, // true when the animation is finished.
-    isReversed = false, // which direction the animation is going depending on [to] and [from].
-    isReversedAlternate = false, // to reverse play animation in alternate direction.
-    resolveAsyncOnFinish = null, // to resolve the promise when the animation is finished.
-    resolveAsyncOnProgress = null; // to resolve the promise when the animation reaches the progress.
+  let tlOptions = { repeat: 0, speed: 1 }, // ? maybe add more options in the future? like timeline direction.
+    tlRepeatCount = [...options.to].fill(tlOptions.repeat); // number of repeats left on the timeline is not set yet.
 
-  // set [from] option to default value `0` if not set, and check if it is valid.
-  if (options.from === undefined) options.from = Array.isArray(options.to) ? new Array(options.to.length).fill(0) : 0;
-
-  // setup [ease] to default value/s if needed.
-  const setupEase = ({ ease }) => {
-    const isEaseArray = Array.isArray(ease);
-    const isToArray = Array.isArray(options.to);
-
-    if (isEaseArray && isToArray) {
-      // fill the rest of the array with linear functions to match the length of [to].
-      if (ease.length < options.to.length)
-        options.ease = options.ease.concat(new Array(options.to.length - ease.length).fill(linear));
-      // remove unnecessary functions.
-      if (options.to.length > ease.length) options.ease.length = options.to.length;
-      // take the first easing function from its array if [to] is not an array
-    } else if (isEaseArray && !isToArray) {
-      options.ease = ease[0];
-    }
-  };
-  setupEase(options);
-
-  // time line
-  const timeline = [{ options: { ...options }, cb: callback, id: 'default', userInput: { ...options } }];
-  const timelinePlayed = new Set(); // all played animations in the timeline go here.
-  let isTimeLineReversed = false, // to play the timeline in reverse direction.
-    timelinePlayCount = 0, // to count the number of times the timeline was repeated. used for delayOnce.
-    timelineOptions = { repeat: 0, speed: 1 }, // hoping to add more options in the future.
-    timelineRepeatCount = timelineOptions.repeat; // number of repeats left on the timeline.
-
-  const progressTimeSet = new Set(); // save progress listerners id's or asyncsOnProgress times to prevent multiple calls.
-
-  const listenrs = {
+  const listeners = {
     onProgress: [], // save progress listeners at, callback, repeatAt, and id.
     onStart: [], // save start listeners callback and id.
     onFinish: [], // save finish listeners callback and id.
   };
 
-  const fireTimeLine = () => {
-    if (isStopped || isPaused) return;
-
-    // when all the animations in the timeline are finished.
-    if (timelinePlayed.size === timeline.length) {
-      // clean preparing next move.
-      if (isTimeLineReversed) {
-        reset();
-        isReversedAlternate = true;
-        isTimeLineReversed = true;
-
-        // play get last animation in the timeline.
-        const last = timeline[timeline.length - 1];
-        options = { ...last.options };
-        callback = last.cb;
-        setupEase(options);
-        timelinePlayed.add(last.id);
-      } else {
-        reset();
-        timelinePlayed.add(timeline[0].id); // first animation in the time line
-      }
-
-      if (timelineRepeatCount === 0) {
-        // if the timeline is not repeating, finish the animation.
-        timelineRepeatCount = timelineOptions.repeat;
-        isTimeLineReversed = false;
-        isPlaying = false;
-        return;
-      }
-
-      // repeat the timeline if needed.
-      timelineRepeatCount = timelineRepeatCount < 0 ? -1 : timelineRepeatCount - 1;
-      timelinePlayCount++;
-      isTimeLineReversed ? reverseTimeline(!options.delayOnce) : playTimeline(!options.delayOnce);
-
-      return;
-    }
-
-    // play the next animation in the timeline.
-    const i = isTimeLineReversed ? timeline.length - timelinePlayed.size - 1 : timelinePlayed.size;
-    const e = timeline[i];
-    options = { ...e.options };
-    callback = e.cb;
-    repeatCount = options.repeat;
-    setupEase(options);
-    timelinePlayed.add(e.id);
-    const withDelay = options.delayOnce ? timelinePlayCount === 0 : true;
-    isTimeLineReversed
-      ? options.direction.includes('alternate')
-        ? playTimeline(withDelay)
-        : reverseTimeline(withDelay)
-      : playTimeline(withDelay);
-  };
-
-  const playTimeline = async (withDelay = true) => {
-    isStopped = false;
-    isReversedAlternate = false;
-    alternateCycle = 1;
-    repeatCount = options.repeat;
-    isReversed = false;
-
-    if (options.delay && withDelay) await sleep(options.delay);
-
-    if (options.direction.includes('reverse')) {
-      backward();
-      return;
-    }
-
-    forward();
-  };
-
-  const reverseTimeline = async (withDelay = true) => {
-    isStopped = false;
-    isReversedAlternate = true;
-    isTimeLineReversed = true;
-    alternateCycle = 1;
-    repeatCount = options.repeat;
-    isReversed = false;
-
-    if (options.delay && withDelay) await sleep(options.delay);
-
-    if (options.direction.includes('reverse')) {
-      forward();
-      return;
-    }
-
-    backward();
-  };
-
-  const repeat = async () => {
-    // exit if the user didn't set any repeats.
-    if (options.repeat === 0) {
-      fireTimeLine(); // play the next animation in the timeline.
-      return;
-    }
-
-    // exit if no repeats left and reset the repeat count for future use.
-    if (repeatCount === 0) {
-      repeatCount = options.repeat;
-      isReversedAlternate = false;
-      fireTimeLine(); // play the next animation in the timeline.
-      return;
-    }
-
-    if (repeatCount < 0) progressTimeSet.clear(); // if the repeat is infinite, clear the progressSet on every repeat.
-
-    repeatCount = repeatCount < 0 ? -1 : repeatCount - 1; // decrement the repeat count if it's not infinite.
-
-    if (options.delay && !options.delayOnce) await sleep(options.delay); // delay between repeats.
-
-    // play alternate instead of forward or backward.
-    if (options.direction.includes('alternate')) {
-      alternate(true);
-      return;
-    }
-
-    isReversed ? backward() : forward(); // play the next repeat if direction is normal or reverse.
-  };
+  const progressTimeSet = new Set(); // save progress listerners id's or asyncsOnProgress times to prevent multiple calls.
 
   const startAnim = timeStamp => {
-    isFirstFrame = alternateCycle === 1;
-    start = timeStamp;
-    excute(timeStamp, true);
+    start = [...options.to].fill(timeStamp);
+    excuteTimeStamp = fpsTimeStamp = timeStamp;
+    // fire onStart event listeners.
+    listeners.onStart.forEach(({ cb }) => cb());
+    isFirstFrame = true;
+    excute(timeStamp);
     isFirstFrame = false;
   };
 
-  const fireOnFinishEvent = isLastFrame => {
-    // exit if there are animations didn't finish yet in the timeLine.
-    if (timelinePlayed.size !== timeline.length) return;
+  const excute = now => {
+    const callbackParams = [];
 
-    // for async onFinish.
-    if (resolveAsyncOnFinish && isLastFrame) {
-      resolveAsyncOnFinish();
-      resolveAsyncOnFinish = null;
+    for (let i = 0; i < options.to.length; i++) {
+      // skip finished animation
+      if (finished.has(i)) {
+        callbackParams.push(lastKnownValue[i]); // put a value until animation starts
+        continue;
+      }
+      // get animation options from the current timeline.
+      const op = timeline[timelineAt[i]].options;
+      // if [direction] is an array pick the value at the current index , if doesn't exist use `normal`.
+      // if [direction] is a single value (string), use that value for all animations.
+      const direction = Array.isArray(op.direction) ? op.direction[i] ?? DIRECTION.NORMAL : op.direction;
+      // decide if the animation will play backward.
+      // if the [direction] is `reversed`, `alternate-reverse` at the first cycle, or `alternate` at the second cycle.
+      let isReversed =
+        direction === DIRECTION.REVERSE ||
+        (direction === DIRECTION.ALTERNATE_REVERSE && alternateCycle[i] === 1) ||
+        (direction === DIRECTION.ALTERNATE && alternateCycle[i] === 2);
+      // reverse timeline play.
+      isReversed = isReversePlay ? (direction.includes(DIRECTION.ALTERNATE) ? isReversed : !isReversed) : isReversed;
+      // if [repeat] is an array pick the value at the current index , if doesn't exist use 0.
+      // if [repeat] is a number, use that value for all animations.
+      const repeat = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : op.repeat;
+      // if [delayOnce] is an array pick the value at the current index , if doesn't exist use false.
+      // if [delayOnce] is a single value (boolean), use that value for all animations.
+      const delayOnce = Array.isArray(op.delayOnce) ? op.delayOnce[i] ?? false : op.delayOnce;
+      // if [delay] is an array pick the value at the current index , if doesn't exist use 0.
+      // if [delay] is a number, use that value for all animations.
+      // if [delayOnce] is true, apply the delay only in the first repeat.
+      const delay =
+        (alternateCycle[i] === 2 || (delayOnce && repeatCount[i] < repeat) || (delayOnce && tlRepeatCount[i] < tlOptions.repeat)
+          ? 0
+          : Array.isArray(op.delay)
+          ? op.delay[i] ?? 0
+          : op.delay) * tlOptions.speed;
+
+      // if [duration] is an array pick the value at the current index , if doesn't exist pick the last one.
+      // if [duration] is a number, use that value for all animations.
+      let duration = Array.isArray(op.duration) ? op.duration[i] ?? op.duration.at(-1) : op.duration;
+      // if [direction] is type `alternate` the [duration] will be divided by 2 to match overall duration.
+      duration = (direction.includes(DIRECTION.ALTERNATE) ? duration / 2 : duration) * tlOptions.speed;
+      // if [ease] is an array, pick the value at the current index, if doesn't exist pick the last one.
+      // if [ease] a single value (function), use it for all animations.
+      const ease = Array.isArray(op.ease) ? op.ease[i] ?? (x => x) : op.ease;
+      // if [from] is an array pick the value at the current index , if doesn't exist use 0.
+      // if [from] is a number, use that value for all animations.
+      // if the animation is reversed then [from] will be replaced with [to].
+      const from = isReversed ? op.to[i] : Array.isArray(op.from) ? op.from[i] ?? 0 : op.from;
+      // if the animation is reversed then [to] will be replaced with [from]
+      const to = isReversed ? (Array.isArray(op.from) ? op.from[i] ?? 0 : op.from) : op.to[i];
+
+      // wait for delay
+      if (now - start[i] - delay < 0) {
+        // put a value until animation starts to keep callbackParams at the same length as [to].
+        callbackParams.push(from);
+        continue;
+      }
+
+      // calculate progress and params
+      let p = (now - (start[i] + delay)) / duration;
+      p = p >= 1 || Number.isNaN(p) ? 1 : p; // correct the progress if it is over 100 percent or the duration is 0.
+      const x = from + (to - from) * ease(p);
+      callbackParams.push(x);
+      progresses[i] = p;
+      if (p === 1) lastKnownValue[i] = x; // save the last known value for the next animation.
+
+      if (now - (start[i] + delay) < duration) continue; // wait for duration
+
+      // * alternate
+      if (direction.includes(DIRECTION.ALTERNATE) && alternateCycle[i] === 1) {
+        start[i] = now; // reset timer.
+        alternateCycle[i] = 2;
+        continue;
+      }
+
+      // * repeat
+      if (repeat > 0 && repeatCount[i] > 0) {
+        repeatCount[i]--;
+        start[i] = now; // reset timer.
+        alternateCycle[i] = 1; // reset alternate cycle
+        continue;
+      }
+
+      // * infinite repeat
+      if (repeat === -1) {
+        if (repeatCount[i] === -1) repeatCount[i] = -2; // this to trigger [delayOnce] in infinite repeat.
+        start[i] = now; // reset timer.
+        alternateCycle[i] = 1; // reset alternate cycle
+        continue;
+      }
+
+      // * play next timeline only timeline type `IMMEDIATE`
+      if ((isReversePlay && timelineAt[i] > 0) || (!isReversePlay && timelineAt[i] < timeline.length - 1)) {
+        const nextTimelineType = timeline[isReversePlay ? timelineAt[i] - 1 : timelineAt[i] + 1].options.type;
+        if (nextTimelineType === TIMELINE_TYPE.IMMEDIATE) {
+          isReversePlay ? timelineAt[i]-- : timelineAt[i]++; // switch to next timeline.
+          // reset repeat count
+          let nextRepeat = timeline[timelineAt[i]].options.repeat;
+          nextRepeat = Array.isArray(nextRepeat) ? nextRepeat[i] ?? 0 : nextRepeat;
+
+          alternateCycle[i] = 1; // reset alternate cycle
+          start[i] = now; // reset timer.
+
+          continue;
+        }
+      }
+
+      // * repeat the timeline only timeline type `IMMEDIATE`
+      const isTimelineFinished =
+        (isReversePlay && timelineAt[i] === 0) || (!isReversePlay && timelineAt[i] === timeline.length - 1);
+      if (
+        isTimelineFinished &&
+        ((tlOptions.repeat > 0 && tlRepeatCount[i] > 0) || (tlOptions.repeat === -1 && isTimelineFinished))
+      ) {
+        // check next timeline type.
+        if (timeline.at(isReversePlay ? -1 : 0).options.type === TIMELINE_TYPE.IMMEDIATE) {
+          if (tlOptions.repeat !== -1) tlRepeatCount[i]--;
+          if (tlRepeatCount[i] === -1) tlRepeatCount[i] = -2; // this to trigger [delayOnce] in infinite repeat.
+
+          // reset repeat count.
+          const op = timeline.at(reverse ? -1 : 0).options;
+          repeatCount[i] = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : op.repeat;
+
+          timelineAt[i] = isReversePlay ? timeline.length - 1 : 0;
+          alternateCycle[i] = 1; // reset alternate cycle
+          finished.delete(i); // reset finished
+          start[i] = now; // reset timer.
+          continue;
+        }
+      }
+
+      // finished... no repeat or timeline
+      finished.add(i);
     }
 
-    // for onFinish listeners.
-    if (listenrs.onFinish.length > 0) {
-      listenrs.onFinish.forEach(l => {
-        const { cb } = l;
-        if (isLastFrame) cb();
-      });
-    }
-  };
+    // ! [calbackParams] and [to] should be the same length.
+    if (callbackParams.length !== options.to.length) console.warn(`callbackParams length is not equal to to length.`);
 
-  const fireOnProgressEvent = (progress, time) => {
-    // for async onProgress.
-    if (resolveAsyncOnProgress) {
-      const { at, resolve, atRepeat } = resolveAsyncOnProgress;
+    // * callback info
+    // calculate frame per second.
+    const fps = isFinite(Math.round(1000 / (now - fpsTimeStamp))) ? Math.round(1000 / (now - fpsTimeStamp)) : 0;
+    fpsTimeStamp = now;
+    // true only when all animations are finished.
+    const isFinished =
+      finished.size === options.to.length &&
+      timelineAt.every(t => (isReversePlay ? t === 0 : t === timeline.length - 1)) &&
+      repeatCount.every(x => x === 0) &&
+      tlRepeatCount.every(x => x === 0);
+    // time passed since the animation started.
+    const time = ~~(now - excuteTimeStamp);
+    // overall progress including timeline and repeats. -1 if infinite repeat detected.
+    const progress = excuteDuration === -1 ? -1 : +(time / excuteDuration > 1 ? 1 : time / excuteDuration).toFixed(3);
 
-      // percentage of the progress.
-      if (typeof at === 'string') {
-        const percent = parseInt(at);
-        if (progress >= percent && atRepeat === repeatCount && !progressTimeSet.has(progress)) {
-          progressTimeSet.add(progress);
+    // * callback
+    callback(callbackParams, {
+      fps,
+      isFirstFrame,
+      isFinished,
+      time,
+      timelineProgress: progress,
+      progress: progresses,
+      timelineIndex: timelineAt,
+      repeatCount,
+      timelineRepeatCount: tlRepeatCount,
+      play,
+      reverse,
+      pause,
+      stop,
+      getOptions,
+    });
+
+    // * fire onProgress listeners.
+    if (progress !== -1) {
+      for (let i = 0; i < listeners.onProgress.length; i++) {
+        const listener = listeners.onProgress[i];
+        const { at, cb, id } = listener;
+
+        if (progress >= at && !progressTimeSet.has(id)) {
+          cb();
+          progressTimeSet.add(id); // prevent firing the same listener twice.
+        }
+      }
+      // resolve onProgress promise.
+      if (resolveAsyncOnProgress) {
+        const { at, resolve } = resolveAsyncOnProgress;
+        // time of the progress.
+        if (progress >= at && !progressTimeSet.has(time)) {
+          progressTimeSet.add(time);
           resolve();
           resolveAsyncOnProgress = null;
         }
       }
-
-      // time of the progress.
-      if (time >= at && !progressTimeSet.has(time)) {
-        progressTimeSet.add(time);
-        resolve();
-        resolveAsyncOnProgress = null;
-      }
     }
 
-    // for onProgress listeners.
-    if (listenrs.onProgress.length > 0) {
-      listenrs.onProgress.forEach(l => {
-        const { at, cb, id, atRepeat } = l;
+    // * if not finished or not stopped keep going
+    if (finished.size !== options.to.length && !isStoped) {
+      reqId = requestAnimationFrame(excute);
+      return;
+    }
 
-        // percentage of the progress.
-        if (typeof at === 'string') {
-          const percent = parseInt(at);
-          if (progress >= percent && atRepeat === repeatCount && !progressTimeSet.has(id)) {
-            cb();
-            progressTimeSet.add(id);
+    // ! at this point [timelineAt] array elements should all have the same value.
+    if (new Set(timelineAt).size !== 1) console.warn('[timelineAt] array elements are not the same.');
+
+    // * play the next animation in the timeline type `WAIT` only.
+    if ((isReversePlay && timelineAt[0] > 0) || (!isReversePlay && timelineAt[0] < timeline.length - 1)) {
+      // play only timeline type `wait`.
+      const timelineType = timeline[isReversePlay ? timelineAt[0] - 1 : timelineAt[0] + 1].options.type;
+      if (timelineType !== TIMELINE_TYPE.WAIT) return;
+
+      // tell all animations to switch to the next timeline.
+      timelineAt.fill(isReversePlay ? timelineAt[0] - 1 : timelineAt[0] + 1);
+      // reset repeat count
+      const nextRepeat = timeline[timelineAt[0]].options.repeat;
+      repeatCount = Array.isArray(nextRepeat) ? [...nextRepeat] : [...options.to].fill(nextRepeat);
+
+      alternateCycle.fill(1); // reset alternate cycle
+      finished.clear(); // reset finished animations.
+      start.fill(now); // reset timer.
+      reqId = requestAnimationFrame(excute); // start the timeline.
+      return;
+    }
+
+    // * repeat the timeline only timeline type `wait`
+    if ((tlOptions.repeat > 0 && tlRepeatCount[0] > 0) || tlOptions.repeat === -1) {
+      const timelineType = timeline.at(isReversePlay ? -1 : 0).options.type;
+      if (timelineType !== TIMELINE_TYPE.WAIT) return;
+      if (tlOptions.repeat !== -1) tlRepeatCount.fill(tlRepeatCount[0] - 1);
+      if (tlRepeatCount[0] === -1) tlRepeatCount.fill(-2); // this to trigger delay once in infinite repeat.
+
+      // reset repeat count.
+      const op = timeline.at(isReversePlay ? -1 : 0).options;
+      repeatCount = Array.isArray(op.repeat) ? [...op.repeat] : [...op.to].fill(op.repeat);
+
+      // reset timeline.
+      isReversePlay ? timelineAt.fill(timeline.length - 1) : timelineAt.fill(0);
+      alternateCycle.fill(1); // reset alternate cycle
+      finished.clear(); // reset finished animations.
+      start.fill(now); // reset timer.
+      reqId = requestAnimationFrame(excute); // start the timeline.
+      return;
+    }
+
+    // * fire onFinishe event listeners.
+    listeners.onFinish.forEach(({ cb }) => cb());
+    if (resolveAsyncOnFinish) {
+      resolveAsyncOnFinish();
+      resolveAsyncOnFinish = null;
+    }
+
+    reqId = null;
+
+    finished.clear(); // reset finished animations.
+  };
+
+  // caluculate the duration of overall animation with timeline and repeats.
+  const calculateTime = () => {
+    // ! over complicated it's gonna be easier way to do this.
+    // ! if the browser paused the animation. calculated progress will be wrong.
+    // ! maybe doesn't work if frame rate drops. to be tested.
+    let time = 0;
+
+    // if infinite repeat detected return -1.
+    const isInfinitive =
+      tlOptions.repeat === -1 ||
+      timeline.some(x => (Array.isArray(x.options.repeat) ? x.options.repeat.some(r => r === -1) : x.options.repeat === -1));
+
+    if (isInfinitive) {
+      time = -1;
+      return time;
+    }
+
+    /* 
+
+    first calculate the duration of each animation in the timeline with its repeat count considering if delayOnce is true.
+    create two arrays of that: with delay and without dela.
+    
+    then group timelines with type `immediate` together over timeline repaet count,
+        then sum the duration of each animation with the next in the same group onsidering if delayOnce is true,
+        then take the longest duration of each group.
+
+    then group timeline with type `wait` together over timeline repaet count onsidering if delayOnce is true,
+        then take the longest duration of the group
+
+    now we sum the two groups together and we have the total duration of the animation.
+
+    */
+
+    // reverse timeline for reverse play.
+    const tl = isReversePlay ? [...timeline].reverse() : timeline;
+
+    // * calculate the duration of each animation in the timeline with its repeat count considering if delayOnce is true.
+    // ============ ===============
+    // ============= ==============
+    //    ^ column      ^ column
+    const columns = []; // the length is timeline.length, each array length is animated values length.
+    const columnsWithoutDelay = []; // if delayOnce is true the delay added only once.
+    for (let t = 0; t < tl.length; t++) {
+      const column = [];
+      const columnWithoutDelay = [];
+      for (let i = 0; i < options.to.length; i++) {
+        const { options } = tl[t];
+        const delay = Array.isArray(options.delay) ? options.delay[i] ?? 0 : options.delay;
+        const duration = Array.isArray(options.duration) ? options.duration[i] ?? options.duration[i].at(-1) : options.duration;
+        const repeat = (Array.isArray(options.repeat) ? options.repeat[i] ?? 0 : options.repeat) + 1;
+        const delayOnce = Array.isArray(options.delayOnce) ? options.delayOnce[i] ?? false : options.delayOnce;
+        const withDelay = (delayOnce ? duration * repeat + delay : (delay + duration) * repeat) * tlOptions.speed;
+        column.push(withDelay);
+        columnWithoutDelay.push(duration * repeat * tlOptions.speed);
+      }
+      columns.push(column);
+      columnsWithoutDelay.push(columnWithoutDelay);
+    }
+
+    // * group timelines types over timeline repaet count
+    const immediateGroups = []; // group timeline with type `immediate` together.
+    const waitGroups = []; // group timeline type `wait` longest duration together
+    for (let i = 0; i < tlOptions.repeat + 1; i++) {
+      for (let t = 0; t < tl.length; t++) {
+        const next = t + 1 >= tl.length ? 0 : t + 1;
+        const isLastIteration = i === tlOptions.repeat && t === tl.length - 1;
+        const op = tl[next];
+        // for immediate
+        if (op.options.type === TIMELINE_TYPE.IMMEDIATE) {
+          const isDelayOnce = i > 0 && tl[t].options.delayOnce; // if the timeline repeating and the delayOnce is true.
+          const isNextDelayOnce = (t + 1 >= tl.length && tl[0].options.delayOnce) || (i > 0 && tl[next].options.delayOnce);
+          const putNext = isLastIteration && t + 1 < tl.length ? true : !isLastIteration; // if the timeline is the last iteration put the next timeline or not.
+
+          // put next with the last group if after each other.
+          if (immediateGroups?.at(-1)?.at(-1)?.[0] === t) {
+            if (putNext) immediateGroups.at(-1).push([next, isNextDelayOnce]);
+            // create new group
+          } else if (putNext) {
+            immediateGroups.push([
+              [t, isDelayOnce],
+              [next, isNextDelayOnce],
+            ]);
+            // put single value if last iteration.
+          } else {
+            immediateGroups.push([[t, isDelayOnce]]);
           }
         }
 
-        // time of the progress.
-        if (time >= at && !progressTimeSet.has(id)) {
-          cb();
-          progressTimeSet.add(id);
+        // for wait
+        const isNextWait = tl[next].options.type === TIMELINE_TYPE.WAIT;
+        const isCurrentWait = tl[t].options.type === TIMELINE_TYPE.WAIT || (i === 0 && t === 0); // treat first animation at first play as wait.
+        if (isCurrentWait && isNextWait) {
+          const cl = i > 0 && tl[t].options.delayOnce ? columnsWithoutDelay[t] : columns[t];
+          waitGroups.push(Math.max(...cl));
         }
-      });
-    }
-  };
-
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, Math.round(value)));
-
-  const excute = now => {
-    isPlaying = true;
-    now = now + def;
-    let p = (now - start) / options.duration; // p as progress
-    p = p >= 1 || Number.isNaN(p) ? 1 : p; // correct the progress if it is over 100 percent or the duration is 0.
-
-    const isAlternate = options.direction.includes('alternate');
-
-    const timelineIndex = timelinePlayed.size - 1; // current animation index in the timeline.
-
-    // calculate frame per second.
-    const fps = Math.round(atFrame / ((performance.now() - start) / 1000));
-    atFrame += 1;
-
-    // calculate time passed.
-    let time = now - start > options.duration ? options.duration : Math.round(now - start);
-    time = isAlternate && alternateCycle === 2 ? time + options.duration : time;
-
-    // calculate progress.
-    let progress = isAlternate ? (alternateCycle === 1 ? p / 2 : p / 2 + 0.5) : p;
-    progress = clamp(Math.round(progress * 100), 0, 100);
-    let timelineProgress = progress / timeline.length + ((timelinePlayed.size - 1) / timeline.length) * 100;
-    timelineProgress = clamp(timelineProgress, 0, 100);
-
-    // calculate passed time in the timeline.
-    let d = 0;
-    for (let i = 0; i < timelinePlayed.size - 1; i++) {
-      const e = timeline[i].options.duration;
-      d = timelinePlayed.size === 1 ? 0 : d + e;
-    }
-    const timelineTime = d + time;
-
-    if (p >= 1) isLastFrame = isAlternate ? alternateCycle === 2 : true;
-
-    isFinished = repeatCount === 0 && p >= 1 && isLastFrame && timelinePlayed.size === timeline.length;
-
-    // passed information to the animation callback.
-    const callbackInfo = {
-      isFirstFrame,
-      isLastFrame,
-      isFinished,
-      progress,
-      repeatCount,
-      alternateCycle,
-      fps,
-      time,
-      timelineTime,
-      timelineProgress,
-      timelineIndex,
-      play,
-      reverse,
-      pause,
-      setOptions,
-      getOptions,
-    };
-
-    // excute the animation callback for array of values.
-    if (Array.isArray(options.to)) {
-      const values = [];
-      let easeValue = null;
-      const isEaseArray = Array.isArray(options.ease);
-      if (!isEaseArray) easeValue = options.ease(p);
-
-      for (let i = 0; i < options.from.length; i++) {
-        const f = isReversed ? options.to[i] : options.from[i];
-        const t = isReversed ? options.from[i] : options.to[i];
-        const x = f + (t - f) * (!isEaseArray ? easeValue : options.ease[i](p));
-        values.push(x);
       }
-
-      callback(values, callbackInfo);
-      // excute the animation callback for single value.
-    } else {
-      const f = isReversed ? options.to : options.from;
-      const t = isReversed ? options.from : options.to;
-      const x = f + (t - f) * options.ease(p);
-      callback([x], callbackInfo);
     }
 
-    // is the animation finished?
-    if (repeatCount === 0 && p >= 1) fireOnFinishEvent(isLastFrame);
-
-    // fire onProgress event.
-    fireOnProgressEvent(timelineProgress, timelineTime);
-
-    // exit if paused or stopped.
-    if (isPaused || isStopped) {
-      cancelAnimationFrame(reqId);
-      isPlaying = false;
-      return;
-    }
-
-    !(now - start >= options.duration)
-      ? (reqId = requestAnimationFrame(excute)) // continue to the next frame.
-      : alternate(); // play alternate or repeat or stop.
-  };
-
-  const alternate = (initiate, at) => {
-    if (initiate) {
-      isReversedAlternate
-        ? options.direction === 'alternate'
-          ? backward(at)
-          : forward(at)
-        : options.direction === 'alternate'
-        ? forward(at)
-        : backward(at);
-      return;
-    }
-
-    if (options.direction === 'alternate' && alternateCycle === 1) {
-      isReversedAlternate ? forward() : backward();
-      alternateCycle = 2;
-    } else if (options.direction === 'alternate-reverse' && alternateCycle === 1) {
-      !isReversedAlternate ? forward() : backward();
-      alternateCycle = 2;
-    } else {
-      alternateCycle = 1;
-      repeat();
-    }
-  };
-
-  const reset = () => {
-    abortController.abort();
-    cancelAnimationFrame(reqId);
-    if (isReversed) {
-      const temp = options.to;
-      options.to = options.from;
-      options.from = temp;
-    }
-    reqId = null;
-    start = null;
-    atFrame = 1;
-    def = 0;
-    isFirstFrame = true;
-    isLastFrame = false;
-    isFinished = false;
-    isReversed = false;
-    isReversedAlternate = false;
-    resolveAsyncOnFinish = null;
-    resolveAsyncOnProgress = null;
-    isStopped = true;
-    isPlaying = false;
-    stoppedAt = null;
-    isPaused = false;
-    pausedAt = null;
-    alternateCycle = 1;
-    repeatCount = options.repeat;
-
-    timelinePlayed.clear();
-    progressTimeSet.clear();
-    options = { ...timeline[0].options }; // reset options to the default animation.
-    callback = timeline[0].cb;
-    setupEase(options);
-    timelineRepeatCount = timelineOptions.repeat;
-    isTimeLineReversed = false;
-  };
-
-  const initAt = (at, play = true) => {
-    // if percentage is given -> convert [at] to time.
-    if (typeof at === 'string') {
-      const percent = parseInt(at); // convert percentage from string to number.
-      // calculate the time of all the animations in the timeline.
-      const overAllDuration = timeline.reduce(
-        (acc, e) => (e.options.direction.includes('alternate') ? acc + e.options.duration * 2 : acc + e.options.duration),
-        0
-      );
-      at = Math.floor((percent / 100) * overAllDuration); // convert [at] to time.
-    }
-
-    let overallTime = 0; // calculate the overall time that passed [at].
-
-    // loop configs, if reversed loop from the end else from the start.
-    let i = isTimeLineReversed ? timeline.length - 1 : 0;
-    let condition = isTimeLineReversed ? i >= 0 && i < timeline.length : i < timeline.length;
-
-    for (i; condition; i = isTimeLineReversed ? i - 1 : i + 1) {
-      const e = timeline[i];
-      options = { ...e.options };
-      callback = e.cb;
-      // reverse the direction if timeLine is reversed.
-      if (isTimeLineReversed) isReversed = true;
-
-      repeatCount = options.repeat; // reset repeat count.
-      setupEase(options); // setup easing function.
-      timelinePlayed.add(e.id); // add to the played timeLine.
-
-      overallTime += options.direction.includes('alternate') ? options.duration * 2 : options.duration;
-
-      // in case of direction is alternate or alternate-reverse.
-      if (options.direction.includes('alternate')) {
-        const remainingTime = Math.abs(overallTime - at - options.duration * 2);
-        alternateCycle = remainingTime > options.duration ? 2 : 1; // in which cycle the animation is in.
-        start = performance.now();
-        def = Math.abs(alternateCycle === 2 ? remainingTime - options.duration : remainingTime);
-
-        if (alternateCycle === 2 && !isTimeLineReversed && !isReversed) {
-          isReversed = true;
-        } else if (alternateCycle === 2 && isTimeLineReversed && isReversed) {
-          isReversed = false;
-        }
-      } else {
-        start = performance.now();
-        def = Math.abs(overallTime - at - options.duration);
+    // * sum animations in each group of type `immediate` together.
+    const mixed = []; // array of the max value of sum of each group.
+    for (let i = 0; i < immediateGroups.length; i++) {
+      const group = immediateGroups[i];
+      let last = null;
+      for (let g = 0; g < group.length; g = g + 2) {
+        const a = group[g][0]; // timeline index
+        const b = group[g + 1]?.[0]; // next timeline index
+        const columnA = group[g][1] ? columnsWithoutDelay : columns;
+        const columnB = group[g + 1]?.[1] ? columnsWithoutDelay : columns;
+        const ab = b !== undefined ? columnA[a].map((num, i) => num + columnB[b][i]) : columnA[a];
+        last = last ? last.map((num, i) => num + ab[i]) : ab;
       }
-
-      if (overallTime >= at) break; // break to countinue the animation from [at] time.
+      mixed.push(Math.max(...last));
     }
 
-    if (play) excute(start);
+    // * sum the two groups together.
+    const overall = [...mixed, ...waitGroups].reduce((a, b) => a + b);
+
+    time = overall;
+    time += 25 * tlOptions.repeat; // add some buffer.
+
+    return time;
   };
 
-  const init = async at => {
+  /** @param {boolean} reverse - reset for backward or forward */
+  const reset = reverse => {
+    // cancel the animation if it is already running.
     cancelAnimationFrame(reqId);
-    isFirstFrame = alternateCycle === 1;
-    isLastFrame = false;
-    atFrame = 1;
-    def = 0;
+    // reset repeat count.
+    const op = timeline.at(reverse ? -1 : 0).options;
+    repeatCount = Array.isArray(op.repeat) ? [...op.repeat] : [...op.to].fill(op.repeat);
 
-    // if at not provided start from the beginning and exit.
-    if (at === undefined) {
-      reqId = requestAnimationFrame(startAnim);
-      return;
-    }
-
-    initAt(at);
-
-    isFirstFrame = false;
-  };
-
-  const forward = at => {
-    isReversed = false;
-    init(at);
-  };
-
-  const backward = at => {
-    isReversed = true;
-    isLastFrame = false;
-    init(at);
-  };
-
-  const stop = (at = '100%', reversed = false) => {
-    abortController.abort(); // cancel delays.
-    isReversed = reversed;
-    isTimeLineReversed = reversed;
-    initAt(at, !isPlaying);
-    isStopped = true;
-    stoppedAt = at;
-    timelinePlayed.clear();
+    // reset timeline repeat count.
+    tlRepeatCount = [...options.to].fill(tlOptions.repeat);
+    // reset alternate cycle
+    alternateCycle.fill(1);
+    // reset finished animations.
+    finished.clear();
+    // reset onProgress listeners.
     progressTimeSet.clear();
+    // reset atFrame counter.
+    fpsTimeStamp = 0;
+    // reset isStoped vairable that is used in stop() method to play one frame at the end or at the start.
+    isStoped = false;
+  };
+
+  const play = () => {
+    reset(false);
+    // play forward.
+    isReversePlay = false;
+    timelineAt.fill(0);
+
+    // start the animation.
+    excuteDuration = calculateTime();
+    reqId = requestAnimationFrame(startAnim);
+  };
+
+  const reverse = () => {
+    reset(true);
+    // reverse the direction.
+    isReversePlay = true;
+    timelineAt.fill(timeline.length - 1);
+    // start the animation.
+    excuteDuration = calculateTime();
+    reqId = requestAnimationFrame(startAnim);
   };
 
   const pause = () => {
-    isPaused = true;
+    cancelAnimationFrame(reqId);
     pausedAt = performance.now();
   };
 
   const resume = () => {
-    if (isPaused) {
-      isPaused = false;
-      isStopped = false;
-      progressTimeSet.clear();
-      start += performance.now() - pausedAt;
+    if (pausedAt) {
+      const now = performance.now();
+      const delta = now - pausedAt;
+      start = start.map(s => s + delta);
+      excuteTimeStamp = excuteTimeStamp + delta;
       pausedAt = null;
-      if (listenrs.onStart.length > 0) listenrs.onStart.forEach(item => item.cb());
-      reqId = requestAnimationFrame(excute);
-    } else if (isStopped) {
-      isPaused = false;
-      isStopped = false;
-      if (listenrs.onStart.length > 0) listenrs.onStart.forEach(item => item.cb());
-      init(stoppedAt);
-    } else {
-      play();
     }
+    isStoped = false;
+    reqId = requestAnimationFrame(excute);
   };
 
-  const play = async (at, withDelay = true) => {
-    reset();
-    isStopped = false;
-    timelinePlayCount = 0;
-
-    timelinePlayed.add(timeline[0].id); // first animation in the time line
-
-    if (options.delay && withDelay) await sleep(options.delay);
-    // fire onStart event.
-    if (listenrs.onStart.length > 0 && timelinePlayed.size === 1) listenrs.onStart.forEach(item => item.cb());
-
-    if (aborted) return;
-
-    if (options.direction.includes('reverse')) {
-      backward(at);
-      return;
-    }
-
-    forward(at);
+  /** @type {stop}  */
+  const stop = (stopAtStart = true) => {
+    stopAtStart ? play() : reverse();
+    isStoped = true;
+    reqId = null;
   };
 
-  const reverse = async (at, withDelay = true) => {
-    reset();
-    timelinePlayCount = 0;
-    isReversedAlternate = true;
-    isTimeLineReversed = true;
-    isStopped = false;
+  /** @type {next}  */
+  const next = op => {
+    if (typeof op !== 'object') throw new Error('animare: next() expects an object as the first argument.');
+    if (!Array.isArray(op.to) && typeof op.to !== 'number')
+      throw new Error('animare: next() [to] must be a number or an array of numbers.');
 
-    // play get last animation in the timeline.
-    const last = timeline[timeline.length - 1];
-    options = { ...last.options };
-    callback = last.cb;
-    setupEase(options);
-    timelinePlayed.add(last.id);
+    const userInput = { ...op };
 
-    if (options.delay && withDelay) await sleep(options.delay);
-    // fire onStart event.
-    if (listenrs.onStart.length > 0 && timelinePlayed.size === 1) listenrs.onStart.forEach(item => item.cb());
+    const previousTimeline = { ...timeline.at(-1) };
 
-    if (options.direction.includes('reverse')) {
-      forward(at);
-      return;
-    }
+    if (previousTimeline.options.to.length !== op.to.length)
+      throw new Error('animare: next() [to] must have the same length as the previous animation.');
 
-    backward(at);
-  };
-
-  const setOptions = (op, index = 0) => {
-    if (index > timeline.length - 1) {
-      if (isDevMode) console.warn('[setOptions] Index param is out of range');
-      return;
-    }
-
-    // add or subtract the duration and delay from the previous animation option in the timeLine.
-    if (index > 0) {
-      const previous = timeline[index - 1];
-
-      const previousDuration = previous.options.direction.includes('alternate')
-        ? previous.options.duration * 2
-        : previous.options.duration;
-
-      // for "+" and "-" duration.
-      if (typeof op.duration === 'string') op.duration = Math.abs(previousDuration + parseInt(op.duration));
-      if (typeof op.delay === 'string') op.delay = Math.abs(previous.options.delay + parseInt(op.delay));
-    }
-
-    const timelineOptions = timeline[index].options; // the options of the animation in the timeLine.
-    const isOldAlternate = timelineOptions.direction.includes('alternate'); // is the current direction option is alternate.
-    const isNewAlternate = op.direction?.includes('alternate'); // is the entered direction option alternate.
-    const isDuration = typeof op.duration === 'number'; // is [duration] entered.
-    const isEasing = typeof op.easing !== 'undefined'; // is [easing] entered.
-    const isFrom = op.from !== undefined; // is [from] entered.
-    const isTo = op.to !== undefined; // is [to] entered.
-    const isMounted = timelinePlayed.size - 1 === index || (timelinePlayed.size === 0 && index === 0); // is the animation is currently playing.
-    const after = timeline[index + 1]; // the next animation in the timeLine.
-
-    if (after) {
-      // if [to] entered and the next animation [from] is a default value.
-      if (isTo && after.userInput.from === undefined) after.options.from = op.to;
-      // loop through the timeLine and update the duration and easing function of the next animation.
-      for (let i = index + 1; i < timeline.length; i++) {
-        const nextAnim = timeline[i];
-        if (isEasing && nextAnim.userInput.ease === undefined) nextAnim.options.ease = op.ease;
-        if (isDuration && nextAnim.userInput.duration === undefined)
-          nextAnim.options.duration = nextAnim.options.direction?.includes('alternate') ? op.duration / 2 : op.duration;
+    // * inherit options from previous animation if not specified.
+    // if from is not specified, use the last known value based on the direction from the previous animation.
+    if (typeof op.from === 'undefined') {
+      // case previous animation direction is an array.
+      if (Array.isArray(previousTimeline.options.direction)) {
+        const from = [];
+        for (let i = 0; i < options.to.length; i++) {
+          const prevDirection = previousTimeline.options.direction[i] ?? DIRECTION.NORMAL;
+          const isPrevReverse = prevDirection === DIRECTION.REVERSE;
+          const isPrevAlternate = prevDirection === DIRECTION.ALTERNATE;
+          const prevFrom = Array.isArray(previousTimeline.options.from)
+            ? previousTimeline.options.from[i] ?? 0
+            : previousTimeline.options.from;
+          from[i] = isPrevAlternate || isPrevReverse ? prevFrom : previousTimeline.options.to[0];
+        }
+        op.from = from;
+        // case previous animation direction is a single value (string).
+      } else {
+        const prevDirection = previousTimeline.options.direction;
+        const isPrevReverse = prevDirection === DIRECTION.REVERSE;
+        const isPrevAlternate = prevDirection === DIRECTION.ALTERNATE;
+        op.from ??= isPrevAlternate || isPrevReverse ? previousTimeline.options.from : previousTimeline.options.to;
       }
     }
+    op.duration ??= previousTimeline.options.duration;
+    op.ease ??= previousTimeline.options.ease;
+    op.type ??= previousTimeline.options.type;
 
-    // set the duration depending on the direction.
-    if (op.direction) {
-      if (isNewAlternate && !isOldAlternate) {
-        isDuration ? (op.duration = op.duration / 2) : (timeline[index].options.duration = timeline[index].options.duration / 2);
-        // if mounted
-        options.duration = isMounted ? options.duration / 2 : options.duration;
-        //
-      } else if (!isNewAlternate && isOldAlternate) {
-        isDuration ? (op.duration = op.duration * 2) : (timeline[index].options.duration = timeline[index].options.duration * 2);
-        // if mounted
-        options.duration = isMounted ? options.duration * 2 : options.duration;
-      }
-    } else if (isDuration) {
-      op.duration = isOldAlternate ? op.duration / 2 : op.duration;
-    }
+    // * set to default if not specified.
+    op.repeat ??= [...op.to].fill(0);
+    op.direction ??= DIRECTION.NORMAL;
+    op.delay ??= 0;
+    op.delayOnce ??= false;
+    op.autoPlay = false;
 
-    if (isMounted) {
-      // apply new duration to the current animation.
-      if (isDuration) {
-        start = isPaused
-          ? pausedAt - op.duration * ((pausedAt - start) / options.duration)
-          : performance.now() - op.duration * ((performance.now() - start) / options.duration);
-      }
+    // check user input.
+    checkInputs(op);
 
-      // apply [repeat] to the current animation.
-      if (typeof op.repeat === 'number') repeatCount = op.repeat;
+    // check if the next animation in the timeline is reachable.
+    if (timeline.some(t => (Array.isArray(t.options.repeat) ? t.options.repeat.some(r => r === -1) : t.options.repeat === -1)))
+      console.warn('animare: next() Some animations are blocked by infinite repeat.');
 
-      // set [from] to default values.
-      if (options.from === undefined && isTo && !isFrom)
-        options.from = Array.isArray(op.to) ? new Array(op.to.length).fill(0) : 0;
+    timeline.push({ options: op, userInput });
 
-      const fromTo = {};
-      if (isTo && isFrom && isReversed) {
-        fromTo.to = op.from;
-        fromTo.from = op.to;
-      } else if (isTo && !isFrom && isReversed) {
-        fromTo.from = op.to;
-      } else if (!isTo && isFrom && isReversed) {
-        fromTo.to = op.from;
-      }
-
-      options = { ...options, ...op, ...fromTo };
-      if (op.ease) setupEase(op);
-      if (isDevMode) checkInputs();
-    }
-
-    timeline[index].options = { ...timelineOptions, ...op };
-    timeline[index].userInput = { ...timeline[index].userInput, ...op };
+    return returned;
   };
 
-  const getOptions = (index = 0) => {
-    if (index > timeline.length - 1) {
-      if (isDevMode) console.warn('[getOptions] Index param is out of range');
-      return;
-    }
-    return timeline[index].options;
+  /** @type {setTimelineOptions}  */
+  const setTimelineOptions = op => {
+    if (typeof op !== 'object') throw new Error('animare: setTimelineOptions() expects an object as the first argument.');
+    if (op.repeat && typeof op.repeat !== 'number') throw new Error('animare: setTimelineOptions() [repeat] must be a number.');
+    tlOptions = { ...tlOptions, ...op };
+    tlRepeatCount = [...options.to].fill(tlOptions.repeat);
+    if (reqId) excuteDuration = calculateTime();
   };
 
-  const onProgress = (at, cb, atRepeat = 0) => {
-    if ((typeof at !== 'number' && typeof at !== 'string') || typeof cb !== 'function' || typeof atRepeat !== 'number') {
-      if (isDevMode)
-        throw new Error(
-          '[onProgress] first param must be a number or string, second param must be a callback function, third param must be a number'
-        );
-      return;
-    }
-    const id = `onProgress_${Math.random() * 100}`;
-    listenrs.onProgress.push({ at, cb, atRepeat, id });
-
-    return () => {
-      listenrs.onProgress = listenrs.onProgress.filter(item => item.id !== id);
-    };
-  };
-
-  const asyncOnProgress = (at, atRepeat = 0) => {
-    if ((typeof at !== 'number' && typeof at !== 'string') || typeof atRepeat !== 'number') {
-      if (isDevMode)
-        throw new Error('[asyncOnProgress] first param must be a number or string, the second param must be a number');
-      return;
-    }
-    if (resolveAsyncOnProgress) return;
-    return new Promise(resolve => {
-      resolveAsyncOnProgress = { at, atRepeat, resolve };
-    });
-  };
-
+  /** @type {onStart}  */
   const onStart = cb => {
-    if (typeof cb !== 'function') {
-      if (isDevMode) throw new Error('[onStart] param must be a callback function');
-      return;
-    }
+    if (typeof cb !== 'function') throw new Error('[onStart] param must be a callback function');
 
     const id = `onStart_${Math.random() * 100}`;
-    listenrs.onStart.push({ cb, id });
+    listeners.onStart.push({ cb, id });
 
+    // return a function to remove the listener.
     return () => {
-      listenrs.onStart = listenrs.onStart.filter(item => item.id !== id);
+      listeners.onStart = listeners.onStart.filter(listener => listener.id !== id);
     };
   };
 
+  /** @type {onFinish}  */
   const onFinish = cb => {
-    if (typeof cb !== 'function') {
-      if (isDevMode) throw new Error('[onFinish] accept a callback function only');
-      return;
-    }
+    if (typeof cb !== 'function') throw new Error('animare: [onFinish] accept a callback function only');
 
-    const id = `onFinish_${Math.random() * 100}`;
-    listenrs.onFinish.push({ cb, id });
+    const id = `onFinish_${Math.random()}`;
+    listeners.onFinish.push({ cb, id });
 
+    // return a function to remove the listener.
     return () => {
-      listenrs.onFinish = listenrs.onFinish.filter(item => item.id !== id);
+      listeners.onFinish = listeners.onFinish.filter(listener => listener.id !== id);
     };
   };
 
-  const asyncOnFinish = () => {
+  /** @type {onFinishAsync}  */
+  const onFinishAsync = () => {
     if (resolveAsyncOnFinish) return;
     return new Promise(resolve => {
       resolveAsyncOnFinish = resolve;
     });
   };
 
-  const next = (op, cb) => {
-    const userInput = { ...op };
+  /** @type {onProgress}  */
+  const onProgress = (at, cb) => {
+    if (typeof at !== 'number') throw new Error('animare: [onProgress] accept a number as the first argument.');
+    if (at < 0 || at > 1) throw new Error('animare: [onProgress] [at] must be between 0 and 1');
+    if (typeof cb !== 'function') throw new Error('animare: [onFinish] accept a callback function only');
 
-    const last = timeline[timeline.length - 1];
-    op.from = op.from ?? last.options.to; // take [from] value from last timeLine item if not provided.
-    op.direction = op.direction ?? 'normal';
-    op.ease = op.ease ?? last.options.ease; // easing function inherited if not provided.
-    op.delay = op.delay ?? 0;
-    op.repeat = op.repeat ?? 0;
-    cb = cb ?? last.cb; // callback inherited if not provided.
-    op.autoPlay = false; // autoPlay is false by default.
+    const id = `onProgress_${Math.random()}`;
+    listeners.onProgress.push({ at, cb, id });
 
-    const lastDuration = last.options.direction.includes('alternate') ? last.options.duration * 2 : last.options.duration;
-    if (typeof op.duration === 'string') op.duration = Math.abs(lastDuration + parseInt(op.duration));
-    if (typeof op.delay === 'string') op.delay = Math.abs(last.options.delay + parseInt(op.delay));
-
-    const isLastAlternate = last.options?.direction.includes('alternate');
-    const isNewAlternate = op.direction?.includes('alternate');
-    const isDuration = typeof op.duration === 'number';
-
-    // inherit duration depending on direction.
-    if (isDuration && isNewAlternate) {
-      op.duration = op.duration / 2;
-    } else if (!isDuration && isNewAlternate && isLastAlternate) {
-      op.duration = last.options.duration;
-    } else if (!isDuration && !isNewAlternate && isLastAlternate) {
-      op.duration = last.options.duration * 2;
-    } else if (!isDuration && isNewAlternate && !isLastAlternate) {
-      op.duration = last.options.duration / 2;
-    } else op.duration = op.duration ?? last.options.duration;
-
-    timeline.push({ options: op, cb, id: `to${Math.random() * 100}`, userInput });
-    const isBlocked = timeline.some((e, i) => e.options.repeat === -1 && i !== timeline.length - 1);
-    if (isBlocked) console.warn('[next] Some animations are blocked by infinite repeat');
-
-    return { ...returned, setTimelineOptions };
+    // return a function to remove the listener.
+    return () => {
+      listeners.onProgress = listeners.onProgress.filter(listener => listener.id !== id);
+    };
   };
 
-  const setTimelineOptions = ob => {
-    if (typeof ob !== 'object' && !Array.isArray(ob)) {
-      if (isDevMode) throw new Error('[setTimelineOptions] first param must be an object');
-      return;
-    }
+  /** @type {onProgressAsync}  */
+  const onProgressAsync = at => {
+    if (typeof at !== 'number') throw new Error('animare: [onProgress] accept a number as the first argument.');
+    if (at < 0 || at > 1) throw new Error('animare: [onProgress] first argument must be a number between 0 and 1');
 
-    ob.repeat = ob.repeat ?? timelineOptions.repeat;
-    ob.speed = ob.speed ?? timelineOptions.speed;
+    if (resolveAsyncOnProgress) return;
 
-    if (typeof ob.repeat !== 'number') {
-      if (isDevMode) throw new Error('[setTimelineOptions] repeat must be a number');
-      return;
-    }
-
-    if (typeof ob.speed !== 'number') {
-      if (isDevMode) throw new Error('[setTimelineOptions] speed must be a number');
-      return;
-    }
-
-    timelineRepeatCount = ob.repeat;
-
-    timeline.forEach(item => {
-      item.options.duration = ob.speed < 0 ? item.options.duration * -ob.speed : item.options.duration / ob.speed;
+    return new Promise(resolve => {
+      resolveAsyncOnProgress = { at, resolve };
     });
-    timelineOptions = { ...timelineOptions, ...ob };
+  };
+
+  /** @type {setOptions}  */
+  const setOptions = (op, index = 0) => {
+    if (typeof op !== 'object' || Array.isArray(op))
+      throw new Error('animare: setOptions() expects an object as the first argument.');
+    if (typeof index !== 'number') throw new Error('animare: setOptions() expects a number as the second argument.');
+    if (index < 0 || index >= timeline.length) throw new Error('animare: setOptions() [index] is out of range.');
+
+    const isTo = op.to !== undefined; // is [to] entered.
+    const isDuration = op.duration !== undefined; // is [duration] entered.
+    const isDelay = op.delay !== undefined; // is [delay] entered.
+    const isRepeat = op.repeat !== undefined; // is [repeat] entered.
+    const nextTl = timeline?.[index + 1]; // the next timeLine that come after index.
+    const tlDurationChanged = []; // timeline index that affected by duration change.
+
+    if (nextTl) {
+      // reset inherited options for the next animations.
+      // for example, if you changed the duration of a timeline the next timeline that doesn't has an entered one it will inherit it.
+      if (isTo && nextTl.userInput.from === undefined) nextTl.options.from = op.to;
+
+      for (let i = index + 1; i < timeline.length; i++) {
+        const nextAnim = timeline[i];
+        if (op.ease && !nextAnim.userInput.ease) nextAnim.options.ease = op.ease;
+        if (isDuration && typeof nextAnim.userInput.duration === 'undefined') {
+          nextAnim.options.duration = op.duration;
+          tlDurationChanged.push(i);
+        }
+      }
+    }
+
+    // adjust start time for current mounted animation or the animation that is affected by duration change.
+    if (isDuration || isDelay) {
+      for (let i = 0; i < timelineAt.length; i++) {
+        // check if the currently playing animation is affected by duration change.
+        const isMounted = timelineAt[i] === index || tlDurationChanged.includes(timelineAt[i]);
+        const OldOp = timeline[index].options; // animation options before the change for targeted timeline.
+        const oldDuration = Array.isArray(OldOp.duration) ? OldOp.duration[i] ?? OldOp.duration.at(-1) : OldOp.duration; // duration before the change.
+        const duration = isDuration
+          ? Array.isArray(op.duration)
+            ? op.duration[i] ?? op.duration.at(-1)
+            : op.duration
+          : oldDuration; // new entered duration.
+        const delayOnce = Array.isArray(OldOp.delayOnce) ? OldOp.delayOnce[i] ?? false : OldOp.delayOnce;
+        const repeat = Array.isArray(OldOp.repeat) ? OldOp.repeat[i] ?? 0 : OldOp.repeat;
+        const currentDelay = isDelay && timelineAt[i] === index ? op.delay : timeline[timelineAt[i]].options.delay;
+        const oldDelay =
+          alternateCycle[i] === 2 || (delayOnce && repeatCount[i] < repeat) || (delayOnce && tlRepeatCount[i] < tlOptions.repeat)
+            ? 0
+            : Array.isArray(timeline[timelineAt[i]].options.delay)
+            ? timeline[timelineAt[i]].options.delay[i] ?? 0
+            : timeline[timelineAt[i]].options.delay;
+        const delay =
+          alternateCycle[i] === 2 || (delayOnce && repeatCount[i] < repeat) || (delayOnce && tlRepeatCount[i] < tlOptions.repeat)
+            ? 0
+            : Array.isArray(currentDelay)
+            ? currentDelay[i] ?? 0
+            : currentDelay;
+        // readjust the start time.
+        if (isMounted) {
+          const p = (performance.now() - (start[i] + oldDelay)) / oldDuration;
+          start[i] = performance.now() - duration * p - delay;
+          // if the animation is paused, readjust the start time.
+          if (pausedAt) start[i] = pausedAt - duration * ((pausedAt - (start[i] + oldDelay)) / oldDuration) - delay;
+        }
+      }
+    }
+
+    // update the options.
+    timeline[index].options = { ...timeline[index].options, ...op };
+    timeline[index].userInput = { ...timeline[index].userInput, ...op };
+    // recalculate the progress of the animation.
+    if (isDuration || isDelay || isRepeat) excuteDuration = calculateTime();
+    // check user input for errors.
+    checkInputs(timeline[index].options);
+  };
+
+  /** @type {getOptions}  */
+  const getOptions = (index = 0) => {
+    if (index > timeline.length - 1) throw new Error('animare: getOptions() index out of range.');
+    return timeline[index].options;
+  };
+
+  /** @type {animareReturned} */
+  const returned = {
+    play,
+    reverse,
+    pause,
+    resume,
+    stop,
+    next,
+    setTimelineOptions,
+    onStart,
+    onFinish,
+    onFinishAsync,
+    onProgress,
+    onProgressAsync,
+    setOptions,
+    getOptions,
   };
 
   if (options.autoPlay) play();
 
-  const returned = {
-    play,
-    reverse,
-    stop,
-    pause,
-    resume,
-    onStart,
-    onFinish,
-    asyncOnFinish,
-    onProgress,
-    asyncOnProgress,
-    setOptions,
-    getOptions,
-    next,
-  };
   return returned;
 }
