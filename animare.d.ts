@@ -148,62 +148,73 @@ interface animareOptions extends nextOptions {
    * - **Initial Value** `true`
    */
   autoPlay?: boolean;
-  duration?: number;
-  delay?: number;
+  duration?: number | number[];
+  delay?: number | number[];
 }
 
 interface nextOptions {
   /**
-   * - Animation will starts form this number/s.
-   * - takes one number or array of numbers.
+   * - start from the current value/s.
    * **Initial Value** `0 | [0, 0 , ...]`
    */
   from?: number | number[];
 
   /**
-   * - Animation will ends at this number/s.
-   * - takes one number or array of numbers.
+   * - end at the current value/s.
+   * **Required**
    */
   to: number | number[];
+
+  /**
+   * - next animation in the timeline playing behaviour.
+   * - `wait` - wait for the all animations in the previous animation to complete.
+   * - `immediate` - play the next animation immediately after the previous animation completes.
+   * - **Initial Value** `immediate`
+   */
+  type: 'wait' | 'immediate';
 
   /**
    * - the duration the function will take to change the number/s (in milliseconds).
    * - **Initial Value** `350`
    */
-  duration?: number | string;
+  duration?: number | number[];
 
   /**
    * - Delay time before starting (in milliseconds).
    * - **Initial Value** `0`
    */
-  delay?: number | string;
+  delay?: number | number[];
 
   /**
-   * - Applay delay once if there is a repeated animation.
+   * - Apply delay once if there is a repeated animation.
    * - **Initial Value** `false`
    */
-  delayOnce?: boolean;
+  delayOnce?: boolean | boolean[];
 
   /**
    * - Easing functions specify the rate of change of the number over time.
-   * - Takes a string or Function.
    * - Check [easings.net](https://easings.net/) to learn more.
-   * - **Initial Value** `linear`
+   * - **Initial Value** `(x: number) => number`
    */
   ease?: ((x: number) => number) | ((x: number) => number)[];
 
   /**
    * - Repeat count after the first play.
-   * - infinite if replay is set to `-1` .
+   * - `-1` for infinite.
    * - **Initial Value** `0`
    */
-  repeat?: number;
+  repeat?: number | number[];
 
   /**
    * - Animation direction.
    * - **Initial Value** `normal`
    */
-  direction?: 'alternate' | 'alternate-reverse' | 'normal' | 'reverse';
+  direction?:
+    | 'alternate'
+    | 'alternate-reverse'
+    | 'normal'
+    | 'reverse'
+    | Array<'alternate' | 'alternate-reverse' | 'normal' | 'reverse'>;
 }
 
 export type CallbackOptions = {
@@ -213,41 +224,42 @@ export type CallbackOptions = {
   isFirstFrame?: boolean;
 
   /**
-   * - True only at last frame of every repeat cycle.
-   */
-  isLastFrame?: boolean;
-
-  /**
    * - True only when the animation is finished.
    */
   isFinished?: boolean;
 
   /**
-   * - Animation progress a number between 0 and 100 relative to current playing animation in the timeline.
+   * - Animations progress a number between 0 and 1 relative to current playing animation in the timeline.
    * - Reset on every repeat cycle.
    */
-  progress?: number;
+  progress?: number[];
 
   /**
-   * - Animation progress a number between 0 and 100 relative to the timeline.
-   * - Reset on every repeat cycle.
+   * - overall animation progress a number between 0 and 1 including repeats.
+   * - returns `-1` if the timeline infinitely repeats.
    */
   timelineProgress?: number;
 
   /**
-   * - The current animation index in the timeline.
+   * - The current timeline index that the animation is playing on.
    */
-  timelineIndex?: number;
+  timelineIndex?: number[];
 
   /**
    * - A descending number representing the current repeat cycle.
    */
-  repeatCount?: number;
+  repeatCount?: number[];
 
   /**
-   * - The current alternate cycle.
+   * - A descending number representing the current repeat cycle.
    */
-  alternateCycle?: 1 | 2;
+  timelineRepeatCount?: number;
+
+  /**
+   * - The current alternate cycle that the animation is playing on.
+   * - if the direction is `alternate` or `alternate-reverse`
+   */
+  alternateCycle?: Array<1 | 2>;
 
   /**
    * - The current refresh rate.
@@ -255,38 +267,29 @@ export type CallbackOptions = {
   fps?: number;
 
   /**
-   * - The current time in milliseconds relative to current playing animation in the timeline.
-   * - Reset on every repeat cycle.
+   * - The progress time in milliseconds of overall animation.
    */
   time?: number;
 
   /**
-   * - The current passed time in milliseconds relative to animation timeline.
-   * - Reset on every repeat cycle.
-   */
-  timeLineTime?: number;
-
-  /**
    * - Play the animation forwards.
    * - **Note**: `play` will match the `direction` property.
-   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
-   * - If the animation is already playing or paused, it will restart it.
+   * - If the animation is already playing or paused, it will be restarted.
    * - If `autoPlay` is set to `true` it will be started automatically.
    * - If you want the animation to play backwards, use `.reverse()` method.
    */
-  play: (startAt?: number | string) => void;
+  play: () => void;
 
   /**
    * - Play the animation backwards.
    * - **Note**: `reverse` will reverse the `direction` property.
    * - `normal` will become `reverse` and `reverse` will become `normal`.
    * - `alternate` will become `alternate-reverse` and `alternate-reverse` will become `alternate`.
-   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
-   * - If the animation is already playing or paused, it will restart it.
+   * - If the animation is already playing or paused, it will be restarted.
    * - If `autoPlay` is set to `true` it will play forwards automatically.
    * - If you want the animation to play forwards, use `.play()` method.
    */
-  reverse: (startAt?: number | string) => void;
+  reverse: () => void;
 
   /**
    * - Pause the animation at any given point when called.
@@ -315,46 +318,36 @@ interface timelineOptions {
   /**
    * - Timeline animation speed.
    * - This will affect all animations duration in the timeline relative to speed value.
-   * - `1` normal duration (normal speed), `2` half duration (double the speed) and `-2` double duration (half the speed).
    * - **Initial Value** `1`
    */
   speed?: number;
-}
-
-interface toReturnedObject extends returnedObject {
-  setTimelineOptions: (options: timelineOptions) => void;
 }
 
 interface returnedObject {
   /**
    * - Play the animation forwards.
    * - **Note**: `play` will match the `direction` property.
-   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
-   * - If the animation is already playing or paused, it will restart it.
+   * - If the animation is already playing or paused, it will be restarted.
    * - If `autoPlay` is set to `true` it will be started automatically.
    * - If you want the animation to play backwards, use `.reverse()` method.
    */
-  play: (startAt?: number | string) => void;
+  play: () => void;
 
   /**
    * - Play the animation backwards.
    * - **Note**: `reverse` will reverse the `direction` property.
    * - `normal` will become `reverse` and `reverse` will become `normal`.
    * - `alternate` will become `alternate-reverse` and `alternate-reverse` will become `alternate`.
-   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
-   * - If the animation is already playing or paused, it will restart it.
+   * - If the animation is already playing or paused, it will be restarted.
    * - If `autoPlay` is set to `true` it will play forwards automatically.
    * - If you want the animation to play forwards, use `.play()` method.
    */
-  reverse: (startAt?: number | string) => void;
+  reverse: () => void;
 
   /**
-   * - Stop or skip to specific time or progress percentage.
-   * - Takes a number for time in milliseconds or a string for progress percentage e.g. `'50%'`.
-   * - For second parameter, takes a boolean to specify the direction of the animation. `false` for forwards, `true` for backwards.
-   * - If the parameter is not passed, the animation will stop at the last frame.
+   * - Stop the animation at the beginning or at the end.
    */
-  stop: (stopAt?: number | string, isDirectionReversed?: boolean) => void;
+  stop: (stopAtStart?: boolean) => void;
 
   /**
    * - Pause the animation at any given point when called.
@@ -402,6 +395,8 @@ interface returnedObject {
    */
   asyncOnProgress: (at: number | string, atRepeat?: number) => Promise<void>;
 
+  setTimelineOptions: (options: timelineOptions) => void;
+
   /**
    * - Change the animation's initial options.
    */
@@ -415,10 +410,10 @@ interface returnedObject {
   /**
    * - Play sequence of animations.
    * - Accepts same options as animare function.
-   * - [duration] and [ease] be inherited from the previous animation in the time line if not specified.
-   * - [from] will be set to [to] of the previous animation if not specified.
+   * - [duration] , [ease] and [type] will be inherited from the previous animation in the timeline if not specified.
+   * - [from] will be when the previous animation stoped if not specified.
    */
-  next: (options: nextOptions, callback: (variables: number[], CallbackOptions: CallbackOptions) => void) => toReturnedObject;
+  next: (options: nextOptions) => returnedObject;
 }
 
 export function animare(

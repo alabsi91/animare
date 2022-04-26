@@ -314,6 +314,7 @@ export default function animare(options, callback) {
       timelineIndex: timelineAt,
       repeatCount,
       timelineRepeatCount: tlRepeatCount,
+      alternateCycle,
       play,
       reverse,
       pause,
