@@ -377,7 +377,7 @@ interface returnedObject {
   /**
    * - Async function that resolves when the animation is finished.
    */
-  asyncOnFinish: () => Promise<void>;
+  onFinishAsync: () => Promise<void>;
 
   /**
    * - Listen to the animation's progress event.
@@ -393,7 +393,7 @@ interface returnedObject {
    * - 1st argument accepts a number as current time in milliseconds or a string representing the progress "e.g. `'50%'`".
    * - 2nd argument is the repeat count that the event will be fired at. set to `0` by default.
    */
-  asyncOnProgress: (at: number | string, atRepeat?: number) => Promise<void>;
+  onProgressAsync: (at: number | string, atRepeat?: number) => Promise<void>;
 
   setTimelineOptions: (options: timelineOptions) => void;
 

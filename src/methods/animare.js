@@ -16,12 +16,12 @@ const TIMELINE_TYPE = {
  * @param {animationCallback} callback - callback function that will be called on every animation frame
  * @returns {animareReturned}
  */
-export default function animare(options, callback) {
+export function animare(options, callback) {
   if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
-  const userInput = { ...options };
-
-  options.from ??= 0;
+  
   options.to = Array.isArray(options.to) ? options.to : [options.to];
+  const userInput = { ...options };
+  options.from ??= 0;
   options.delay ??= 0;
   options.delayOnce ??= false;
   options.duration ??= 350;
@@ -598,8 +598,10 @@ export default function animare(options, callback) {
   /** @type {next}  */
   const next = op => {
     if (typeof op !== 'object') throw new Error('animare: next() expects an object as the first argument.');
-    if (!Array.isArray(op.to) && typeof op.to !== 'number')
+    if ((!Array.isArray(op.to) && typeof op.to !== 'number') || (Array.isArray(op.to) && op.to.some(t => typeof t !== 'number')))
       throw new Error('animare: next() [to] must be a number or an array of numbers.');
+
+    op.to = Array.isArray(op.to) ? op.to : [op.to];
 
     const userInput = { ...op };
 
@@ -738,6 +740,7 @@ export default function animare(options, callback) {
     const isRepeat = op.repeat !== undefined; // is [repeat] entered.
     const nextTl = timeline?.[index + 1]; // the next timeLine that come after index.
     const tlDurationChanged = []; // timeline index that affected by duration change.
+    if (isTo) op.to = Array.isArray(op.to) ? op.to : [op.to];
 
     if (nextTl) {
       // reset inherited options for the next animations.
