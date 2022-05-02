@@ -18,7 +18,7 @@ const TIMELINE_TYPE = {
  */
 export function animare(options, callback) {
   if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
-  
+
   options.to = Array.isArray(options.to) ? options.to : [options.to];
   const userInput = { ...options };
   options.from ??= 0;
@@ -104,7 +104,9 @@ export function animare(options, callback) {
     isReversePlay = false, // is the animation playing backward?
     resolveAsyncOnFinish, // to resolve the promise when the animation is finished.
     resolveAsyncOnProgress, // to resolve the promise for onProgressAsync event.
-    reqId; // requestAnimationFrame id used to cancel the animation.
+    reqId, // requestAnimationFrame id used to cancel the animation.
+    diff, //
+    timer; // timer to detect when the browser is pausing the animation.
 
   // create initial repeat count from [repeat]
   // if [repeat] is not an array, create an array with the same length as [to]
@@ -149,6 +151,22 @@ export function animare(options, callback) {
   };
 
   const excute = now => {
+    // correct the timeStamp if the browser is pausing the animation.
+    if (diff) {
+      const now = performance.now();
+      const delta = now - diff;
+      start = start.map(s => s + delta);
+      excuteTimeStamp = excuteTimeStamp + delta;
+      diff = null;
+    }
+
+    // to detect when the browser is pausing the animation.
+    // ! I'm not sure 60ms is gonna be enough for all browsers.
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      diff = now;
+    }, 60);
+
     const callbackParams = [];
 
     for (let i = 0; i < options.to.length; i++) {
@@ -407,8 +425,7 @@ export function animare(options, callback) {
 
   // caluculate the duration of overall animation with timeline and repeats.
   const calculateTime = () => {
-    // ! over complicated it's gonna be easier way to do this.
-    // ! if the browser paused the animation. calculated progress will be wrong.
+    // ! over complicated it's gonna be an easier way to do this.
     // ! maybe doesn't work if frame rate drops. to be tested.
     let time = 0;
 
@@ -548,6 +565,7 @@ export function animare(options, callback) {
     fpsTimeStamp = 0;
     // reset isStoped vairable that is used in stop() method to play one frame at the end or at the start.
     isStoped = false;
+    diff = null;
   };
 
   const play = () => {
@@ -583,9 +601,13 @@ export function animare(options, callback) {
       start = start.map(s => s + delta);
       excuteTimeStamp = excuteTimeStamp + delta;
       pausedAt = null;
+      diff = null;
+      isStoped = false;
+      reqId = requestAnimationFrame(excute);
+      return;
     }
-    isStoped = false;
-    reqId = requestAnimationFrame(excute);
+    // if the animation is not paused, play it.
+    play();
   };
 
   /** @type {stop}  */

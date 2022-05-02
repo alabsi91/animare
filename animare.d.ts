@@ -1,155 +1,9 @@
-type colorNames =
-  | 'aliceblue'
-  | 'antiquewhite'
-  | 'aqua'
-  | 'aquamarine'
-  | 'azure'
-  | 'beige'
-  | 'bisque'
-  | 'black'
-  | 'blanchedalmond'
-  | 'blue'
-  | 'blueviolet'
-  | 'brown'
-  | 'burlywood'
-  | 'cadetblue'
-  | 'chartreuse'
-  | 'chocolate'
-  | 'coral'
-  | 'cornflowerblue'
-  | 'cornsilk'
-  | 'crimson'
-  | 'cyan'
-  | 'darkblue'
-  | 'darkcyan'
-  | 'darkgoldenrod'
-  | 'darkgray'
-  | 'darkgreen'
-  | 'darkkhaki'
-  | 'darkmagenta'
-  | 'darkolivegreen'
-  | 'darkorange'
-  | 'darkorchid'
-  | 'darkred'
-  | 'darksalmon'
-  | 'darkseagreen'
-  | 'darkslateblue'
-  | 'darkslategray'
-  | 'darkturquoise'
-  | 'darkviolet'
-  | 'deeppink'
-  | 'deepskyblue'
-  | 'dimgray'
-  | 'dodgerblue'
-  | 'firebrick'
-  | 'floralwhite'
-  | 'forestgreen'
-  | 'fuchsia'
-  | 'gainsboro'
-  | 'ghostwhite'
-  | 'gold'
-  | 'goldenrod'
-  | 'gray'
-  | 'green'
-  | 'greenyellow'
-  | 'honeydew'
-  | 'hotpink'
-  | 'indianred'
-  | 'indigo'
-  | 'ivory'
-  | 'khaki'
-  | 'lavender'
-  | 'lavenderblush'
-  | 'lawngreen'
-  | 'lemonchiffon'
-  | 'lightblue'
-  | 'lightcoral'
-  | 'lightcyan'
-  | 'lightgoldenrodyellow'
-  | 'lightgrey'
-  | 'lightgreen'
-  | 'lightpink'
-  | 'lightsalmon'
-  | 'lightseagreen'
-  | 'lightskyblue'
-  | 'lightslategray'
-  | 'lightsteelblue'
-  | 'lightyellow'
-  | 'lime'
-  | 'limegreen'
-  | 'linen'
-  | 'magenta'
-  | 'maroon'
-  | 'mediumaquamarine'
-  | 'mediumblue'
-  | 'mediumorchid'
-  | 'mediumpurple'
-  | 'mediumseagreen'
-  | 'mediumslateblue'
-  | 'mediumspringgreen'
-  | 'mediumturquoise'
-  | 'mediumvioletred'
-  | 'midnightblue'
-  | 'mintcream'
-  | 'mistyrose'
-  | 'moccasin'
-  | 'navajowhite'
-  | 'navy'
-  | 'oldlace'
-  | 'olive'
-  | 'olivedrab'
-  | 'orange'
-  | 'orangered'
-  | 'orchid'
-  | 'palegoldenrod'
-  | 'palegreen'
-  | 'paleturquoise'
-  | 'palevioletred'
-  | 'papayawhip'
-  | 'peachpuff'
-  | 'peru'
-  | 'pink'
-  | 'plum'
-  | 'powderblue'
-  | 'purple'
-  | 'rebeccapurple'
-  | 'red'
-  | 'rosybrown'
-  | 'royalblue'
-  | 'saddlebrown'
-  | 'salmon'
-  | 'sandybrown'
-  | 'seagreen'
-  | 'seashell'
-  | 'sienna'
-  | 'silver'
-  | 'skyblue'
-  | 'slateblue'
-  | 'slategray'
-  | 'snow'
-  | 'springgreen'
-  | 'steelblue'
-  | 'tan'
-  | 'teal'
-  | 'thistle'
-  | 'tomato'
-  | 'turquoise'
-  | 'violet'
-  | 'wheat'
-  | 'white'
-  | 'whitesmoke'
-  | 'yellow'
-  | 'yellowgreen'
-  | (string & {});
-
 interface animareOptions extends nextOptions {
   /**
    * - Auto start the animation if true.
    * - **Initial Value** `true`
    */
   autoPlay?: boolean;
-  duration?: number | number[];
-  delay?: number | number[];
 }
 
 interface nextOptions {
@@ -166,15 +20,15 @@ interface nextOptions {
   to: number | number[];
 
   /**
-   * - next animation in the timeline playing behaviour.
-   * - `wait` - wait for the all animations in the previous animation to complete.
+   * - playing behaviour of the next animation in the timeline.
+   * - `wait` - wait for the all animations in the previous animations to be completed.
    * - `immediate` - play the next animation immediately after the previous animation completes.
    * - **Initial Value** `immediate`
    */
   type: 'wait' | 'immediate';
 
   /**
-   * - the duration the function will take to change the number/s (in milliseconds).
+   * - the duration the animation/s will take to change the number/s (in milliseconds).
    * - **Initial Value** `350`
    */
   duration?: number | number[];
@@ -186,7 +40,7 @@ interface nextOptions {
   delay?: number | number[];
 
   /**
-   * - Apply delay once if there is a repeated animation.
+   * - Apply delay once if there is a repeated animation (in milliseconds).
    * - **Initial Value** `false`
    */
   delayOnce?: boolean | boolean[];
@@ -219,7 +73,7 @@ interface nextOptions {
 
 export type CallbackOptions = {
   /**
-   * - True only at first frame of every repeat cycle.
+   * - True only at first frame of the animation.
    */
   isFirstFrame?: boolean;
 
@@ -229,24 +83,24 @@ export type CallbackOptions = {
   isFinished?: boolean;
 
   /**
-   * - Animations progress a number between 0 and 1 relative to current playing animation in the timeline.
+   * - Animations progresses an array of numbers between 0 and 1 representing the progress of the animation.
    * - Reset on every repeat cycle.
    */
   progress?: number[];
 
   /**
-   * - overall animation progress a number between 0 and 1 including repeats.
+   * - overall animation progress a number between 0 and 1 including repeats , delays and timeline repeats.
    * - returns `-1` if the timeline infinitely repeats.
    */
   timelineProgress?: number;
 
   /**
-   * - The current timeline index that the animation is playing on.
+   * - The current timeline index that the animations are playing on.
    */
   timelineIndex?: number[];
 
   /**
-   * - A descending number representing the current repeat cycle.
+   * - A descending numbers representing the current repeat cycle.
    */
   repeatCount?: number[];
 
@@ -256,8 +110,8 @@ export type CallbackOptions = {
   timelineRepeatCount?: number;
 
   /**
-   * - The current alternate cycle that the animation is playing on.
-   * - if the direction is `alternate` or `alternate-reverse`
+   * - The current alternate cycle that the animations are playing on.
+   * - for direction type `alternate` or `alternate-reverse`
    */
   alternateCycle?: Array<1 | 2>;
 
@@ -355,13 +209,14 @@ interface returnedObject {
   pause: () => void;
 
   /**
-   * - Resume the animation from the paused or stopped state.
+   * - Resume the animation from the paused state.
+   * - If the animation is not paused, it will be played.
    */
   resume: () => void;
 
   /**
    * - Listen to the animation's start event.
-   * - **Note**: `onStart` will not be called for `autoPlay` animations.
+   * - **Note**: `onStart` will not be called for `autoPlay` animation too.
    * - A callback function will be called when the animation is started.
    * - Returns a function to stop listening to the start event.
    */
