@@ -2,4 +2,5 @@ node_modules
 src
 .babelrc
 README.md
-types.js
+tsconfig.json
+package-tmp.json

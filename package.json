@@ -1,13 +1,15 @@
 {
   "name": "animare",
-  "version": "1.0.44",
+  "version": "1.0.52",
   "description": "Light animation library based on requestanimationframe ",
-  "main": "animare.js",
-  "types": "animare.d.ts",
+  "main": "lib/animare.js",
+  "types": "lib/animare.d.ts",
   "scripts": {
-    "publish": "npm run build && npm publish",
+    "publish": "npm run build && npm run remove-devDep && (npm publish || echo 'publish failed!') && @Powershell Copy-item package-tmp.json package.json; Remove-Item package-tmp.json",
     "publish-beta": "npm run build && npm publish --tag beta",
-    "build": "babel src -d ./"
+    "build": "npm run build-ts && babel lib -d lib",
+    "build-ts": "tsc",
+    "remove-devDep": "@Powershell Copy-item package.json package-tmp.json; npx json -f package.json -I -e '[delete this.devDependencies, delete this.scripts]'"
   },
   "repository": {
     "type": "git",
@@ -33,6 +35,7 @@
   "devDependencies": {
     "@babel/cli": "^7.17.6",
     "@babel/preset-env": "^7.16.11",
-    "babel-minify": "^0.5.1"
+    "babel-minify": "^0.5.1",
+    "typescript": "^4.6.4"
   }
 }

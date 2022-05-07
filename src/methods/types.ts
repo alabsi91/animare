@@ -1,4 +1,16 @@
-interface animareOptions extends nextOptions {
+export enum DIRECTION {
+  normal = 'normal',
+  reverse = 'reverse',
+  alternate = 'alternate',
+  'alternate-reverse' = 'alternate-reverse',
+}
+
+export enum TIMELINE_TYPE {
+  wait = 'wait',
+  immediate = 'immediate', 
+}
+
+export interface animareOptions extends nextOptions {
   /**
    * - Auto start the animation if true.
    * - **Initial Value** `true`
@@ -6,7 +18,7 @@ interface animareOptions extends nextOptions {
   autoPlay?: boolean;
 }
 
-interface nextOptions {
+export interface nextOptions {
   /**
    * - start from the current value/s.
    * **Initial Value** `0 | [0, 0 , ...]`
@@ -25,7 +37,7 @@ interface nextOptions {
    * - `immediate` - play the next animation immediately after the previous animation completes.
    * - **Initial Value** `immediate`
    */
-  type: 'wait' | 'immediate';
+  type?: keyof typeof TIMELINE_TYPE;
 
   /**
    * - the duration the animation/s will take to change the number/s (in milliseconds).
@@ -63,12 +75,7 @@ interface nextOptions {
    * - Animation direction.
    * - **Initial Value** `normal`
    */
-  direction?:
-    | 'alternate'
-    | 'alternate-reverse'
-    | 'normal'
-    | 'reverse'
-    | Array<'alternate' | 'alternate-reverse' | 'normal' | 'reverse'>;
+  direction?: keyof typeof DIRECTION | (keyof typeof DIRECTION)[];
 }
 
 export type CallbackOptions = {
@@ -107,13 +114,13 @@ export type CallbackOptions = {
   /**
    * - A descending number representing the current repeat cycle.
    */
-  timelineRepeatCount?: number;
+  timelineRepeatCount?: number[];
 
   /**
    * - The current alternate cycle that the animations are playing on.
    * - for direction type `alternate` or `alternate-reverse`
    */
-  alternateCycle?: Array<1 | 2>;
+  alternateCycle?: number[];
 
   /**
    * - The current refresh rate.
@@ -151,6 +158,11 @@ export type CallbackOptions = {
   pause: () => void;
 
   /**
+   * - Stop the animation at the beginning or at the end.
+   */
+  stop: (stopAtStart?: boolean) => void;
+
+  /**
    * - Change the animation's initial options.
    */
   setOptions: (options: animareOptions, animationIndex?: number) => void;
@@ -161,7 +173,7 @@ export type CallbackOptions = {
   getOptions: (animationIndex?: number) => animareOptions;
 };
 
-interface timelineOptions {
+export interface timelineOptions {
   /**
    * - Repeat count after the first timeLine play.
    * - infinite if replay is set to `-1` .
@@ -177,7 +189,7 @@ interface timelineOptions {
   speed?: number;
 }
 
-interface returnedObject {
+export interface returnedObject {
   /**
    * - Play the animation forwards.
    * - **Note**: `play` will match the `direction` property.
@@ -232,7 +244,7 @@ interface returnedObject {
   /**
    * - Async function that resolves when the animation is finished.
    */
-  onFinishAsync: () => Promise<void>;
+  onFinishAsync: () => Promise<unknown> | undefined;
 
   /**
    * - Listen to the animation's progress event.
@@ -241,14 +253,14 @@ interface returnedObject {
    * - 3rd argument is the repeat count that the event will be fired at. set to `0` by default.
    * - Returns a function to stop listening to the progress event.
    */
-  onProgress: (at: number | string, callback: Function, atRepeat?: number) => Function;
+  onProgress: (at: number, callback: Function) => Function;
 
   /**
    * - Async function that resolves when the animation reaches the progress point.
    * - 1st argument accepts a number as current time in milliseconds or a string representing the progress "e.g. `'50%'`".
    * - 2nd argument is the repeat count that the event will be fired at. set to `0` by default.
    */
-  onProgressAsync: (at: number | string, atRepeat?: number) => Promise<void>;
+  onProgressAsync: (at: number) => Promise<unknown> | undefined;
 
   setTimelineOptions: (options: timelineOptions) => void;
 
@@ -271,36 +283,8 @@ interface returnedObject {
   next: (options: nextOptions) => returnedObject;
 }
 
-export function animare(
-  options: animareOptions,
-  callback: (variables: number[], CallbackOptions: CallbackOptions) => void
-): returnedObject;
-
-export function colorToArr(color: colorNames): number[];
-
-interface base_eases {
-  back: (progress: number) => number;
-  bounce: (progress: number) => number;
-  circ: (progress: number) => number;
-  cubic: (progress: number) => number;
-  elastic: (progress: number) => number;
-  expo: (progress: number) => number;
-  sine: (progress: number) => number;
-  quad: (progress: number) => number;
-  quart: (progress: number) => number;
-  quint: (progress: number) => number;
+export interface Ilisteners {
+  onStart: { id: string; cb: Function }[];
+  onFinish: { id: string; cb: Function }[];
+  onProgress: { at: number | string; id: string; cb: Function }[];
 }
-
-interface ease {
-  in: base_eases;
-  out: base_eases;
-  inOut: base_eases;
-  linear: (progress: number) => number;
-  cubicBezier: (X1: number, Y1: number, X2: number, Y2: number) => (progress: number) => number;
-  /**
-   * - Check [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) to learn more.
-   */
-  custom: (path: string) => (progress: number) => number;
-}
-
-export const ease: ease;
