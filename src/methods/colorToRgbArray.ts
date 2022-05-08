@@ -1,4 +1,4 @@
-const colorNames = {
+const colorsNames = {
   aliceblue: '#f0f8ff',
   antiquewhite: '#faebd7',
   aqua: '#00ffff',
@@ -166,16 +166,16 @@ const hslToRgb = (h: number, s: number, l: number): number[] => {
  * 
  * - **Note:** the function will return `[0, 0, 0]` if the color is not recognized.
 */
-export const colorToArr = (color: keyof typeof colorNames | (string & {})): number[] => {
+export const colorToArr = (color: keyof typeof colorsNames | (string & {})): number[] => {
   const hexReg = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
   const rgbReg =
     /^(rgb)?\(?([01]?\d\d?|2[0-4]\d|25[0-5])(\W+)([01]?\d\d?|2[0-4]\d|25[0-5])\W+(([01]?\d\d?|2[0-4]\d|25[0-5])\)?)$/;
-  const isName = colorNames.hasOwnProperty(color);
+  const isName = colorsNames.hasOwnProperty(color);
   const isHex = hexReg.test(color);
   const isRgb = rgbReg.test(color);
   const isHsl = color.includes('hsl');
 
-  if (isName) return hexToRgbA(colorNames[color as keyof typeof colorNames]);
+  if (isName) return hexToRgbA(colorsNames[color as keyof typeof colorsNames]);
 
   if (isHex) return hexToRgbA(color);
 

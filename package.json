@@ -1,16 +1,9 @@
 {
   "name": "animare",
-  "version": "1.0.52",
+  "version": "1.0.60",
   "description": "Light animation library based on requestanimationframe ",
   "main": "lib/animare.js",
   "types": "lib/animare.d.ts",
-  "scripts": {
-    "publish": "npm run build && npm run remove-devDep && (npm publish || echo 'publish failed!') && @Powershell Copy-item package-tmp.json package.json; Remove-Item package-tmp.json",
-    "publish-beta": "npm run build && npm publish --tag beta",
-    "build": "npm run build-ts && babel lib -d lib",
-    "build-ts": "tsc",
-    "remove-devDep": "@Powershell Copy-item package.json package-tmp.json; npx json -f package.json -I -e '[delete this.devDependencies, delete this.scripts]'"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alabsi91/animare.git"
@@ -25,7 +18,7 @@
     "easing",
     "visual-timing-functions"
   ],
-  "browserslist": "> 0.25%, not dead",
+  "browserslist": "> 0.5%, not dead",
   "author": "Ahmed AlAbsi",
   "license": "ISC",
   "bugs": {
@@ -36,6 +29,13 @@
     "@babel/cli": "^7.17.6",
     "@babel/preset-env": "^7.16.11",
     "babel-minify": "^0.5.1",
+    "colors": "^1.4.0",
     "typescript": "^4.6.4"
+  },
+  "scripts": {
+    "publish": "node publish.js",
+    "build": "npm run build-ts && npm run build-babel",
+    "build-babel": "babel lib -d lib",
+    "build-ts": "tsc"
   }
 }

@@ -1,17 +1,7 @@
-import {
-  animareOptions,
-  CallbackOptions,
-  DIRECTION,
-  Ilisteners,
-  nextOptions,
-  returnedObject,
-  timelineOptions,
-  TIMELINE_TYPE,
-} from './types';
+import { animareOptions, cbInfo, DIRECTION, Ilisteners, returnedObject, TIMELINE_TYPE } from './types';
 
-export function animare(options: animareOptions, callback: (values: number[], info: CallbackOptions) => void) {
+export function animare(options: animareOptions, callback: (values: number[], info: cbInfo) => void) {
   if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
-
   options.to = Array.isArray(options.to) ? options.to : [options.to];
   const userInput = { ...options };
   options.from ??= 0;
@@ -108,14 +98,13 @@ export function animare(options: animareOptions, callback: (values: number[], in
   const alternateCycle = [...options.to].fill(1);
 
   // finished animations indexes will be stored here.
-  const finished = new Set();
+  const finished = new Set<number>();
   // used to fill the animation value when it's finished and other animations still playing to keep the passed array of values at the same length
   const lastKnownValue = [...options.to];
 
   const timeline = [
     {
       options: { ...options },
-      // cb: callback, // ? you can't change the callback function for now at least.
       userInput, // used to know how to set the default values when the user changes the options using setOptions method.
     },
   ];
@@ -160,7 +149,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
       diff = now;
     }, 60);
 
-    const callbackParams = [];
+    const callbackParams: number[] = [];
 
     for (let i = 0; i < (options.to as number[]).length; i++) {
       // skip finished animation
@@ -172,7 +161,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
       const op = timeline[timelineAt[i]].options;
       // if [direction] is an array pick the value at the current index , if doesn't exist use `normal`.
       // if [direction] is a single value (string), use that value for all animations.
-      const direction = Array.isArray(op.direction) ? op.direction[i] ?? DIRECTION.normal : op.direction;
+      const direction = Array.isArray(op.direction) ? op.direction[i] ?? DIRECTION.normal : op.direction!;
       // decide if the animation will play backward.
       // if the [direction] is `reversed`, `alternate-reverse` at the first cycle, or `alternate` at the second cycle.
       let isReversed =
@@ -183,10 +172,10 @@ export function animare(options: animareOptions, callback: (values: number[], in
       isReversed = isReversePlay ? (direction?.includes(DIRECTION.alternate) ? isReversed : !isReversed) : isReversed;
       // if [repeat] is an array pick the value at the current index , if doesn't exist use 0.
       // if [repeat] is a number, use that value for all animations.
-      const repeat = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : (op.repeat as number);
+      const repeat = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : op.repeat!;
       // if [delayOnce] is an array pick the value at the current index , if doesn't exist use false.
       // if [delayOnce] is a single value (boolean), use that value for all animations.
-      const delayOnce = Array.isArray(op.delayOnce) ? op.delayOnce[i] ?? false : op.delayOnce;
+      const delayOnce = Array.isArray(op.delayOnce) ? op.delayOnce[i] ?? false : op.delayOnce!;
       // if [delay] is an array pick the value at the current index , if doesn't exist use 0.
       // if [delay] is a number, use that value for all animations.
       // if [delayOnce] is true, apply the delay only in the first repeat.
@@ -199,18 +188,18 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
       // if [duration] is an array pick the value at the current index , if doesn't exist pick the last one.
       // if [duration] is a number, use that value for all animations.
-      let duration = Array.isArray(op.duration) ? op.duration[i] ?? op.duration.at(-1) : op.duration;
+      let duration = Array.isArray(op.duration) ? op.duration[i] ?? op.duration.at(-1) : op.duration!;
       // if [direction] is type `alternate` the [duration] will be divided by 2 to match overall duration.
-      duration = (direction?.includes(DIRECTION.alternate) ? duration! / 2 : duration)! * tlOptions.speed;
+      duration = (direction.includes(DIRECTION.alternate) ? duration / 2 : duration) * tlOptions.speed;
       // if [ease] is an array, pick the value at the current index, if doesn't exist pick the last one.
       // if [ease] a single value (function), use it for all animations.
-      const ease = Array.isArray(op.ease) ? op.ease[i] ?? (x => x) : op.ease;
+      const ease = Array.isArray(op.ease) ? op.ease[i] ?? ((x: number): number => x) : op.ease!;
       // if [from] is an array pick the value at the current index , if doesn't exist use 0.
       // if [from] is a number, use that value for all animations.
       // if the animation is reversed then [from] will be replaced with [to].
-      const from = isReversed ? (op.to as number[])[i] : Array.isArray(op.from) ? op.from[i] ?? 0 : op.from;
+      const from = isReversed ? (op.to as number[])[i] : Array.isArray(op.from) ? op.from[i] ?? 0 : op.from!;
       // if the animation is reversed then [to] will be replaced with [from]
-      const to = isReversed ? (Array.isArray(op.from) ? op.from[i] ?? 0 : op.from) : (op.to as number[])[i];
+      const to = isReversed ? (Array.isArray(op.from) ? op.from[i] ?? 0 : op.from!) : (op.to as number[])[i];
 
       // wait for delay
       if (now - start[i] - delay < 0) {
@@ -222,7 +211,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
       // calculate progress and params
       let p = (now - (start[i] + delay)) / duration;
       p = p >= 1 || Number.isNaN(p) ? 1 : p; // correct the progress if it is over 100 percent or the duration is 0.
-      const x = from! + (to! - from!) * ease!(p);
+      const x = from + (to - from) * ease(p);
       callbackParams.push(x);
       progresses[i] = p;
       if (p === 1) lastKnownValue[i] = x; // save the last known value for the next animation.
@@ -282,7 +271,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
           // reset repeat count.
           const op = timeline.at(isReversePlay ? -1 : 0)!.options;
-          repeatCount[i] = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : (op.repeat as number);
+          repeatCount[i] = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : op.repeat!;
 
           timelineAt[i] = isReversePlay ? timeline.length - 1 : 0;
           alternateCycle[i] = 1; // reset alternate cycle
@@ -316,7 +305,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     const progress = excuteDuration === -1 ? -1 : +(time / excuteDuration > 1 ? 1 : time / excuteDuration).toFixed(3);
 
     // * callback
-    callback(callbackParams as number[], {
+    callback(callbackParams, {
       fps,
       isFirstFrame,
       isFinished,
@@ -376,8 +365,8 @@ export function animare(options: animareOptions, callback: (values: number[], in
       // tell all animations to switch to the next timeline.
       timelineAt.fill(isReversePlay ? timelineAt[0] - 1 : timelineAt[0] + 1);
       // reset repeat count
-      const nextRepeat = timeline[timelineAt[0]].options.repeat as number | number[];
-      repeatCount = Array.isArray(nextRepeat) ? [...nextRepeat] : [...(options.to as number[])].fill(nextRepeat);
+      const nextRepeat = timeline[timelineAt[0]].options.repeat;
+      repeatCount = Array.isArray(nextRepeat) ? [...nextRepeat] : [...(options.to as number[])].fill(nextRepeat!);
 
       alternateCycle.fill(1); // reset alternate cycle
       finished.clear(); // reset finished animations.
@@ -395,7 +384,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
       // reset repeat count.
       const op = timeline.at(isReversePlay ? -1 : 0)!.options;
-      repeatCount = Array.isArray(op.repeat) ? [...op.repeat] : [...(op.to as number[])].fill(op.repeat as number);
+      repeatCount = Array.isArray(op.repeat) ? [...op.repeat] : [...(op.to as number[])].fill(op.repeat!);
 
       // reset timeline.
       isReversePlay ? timelineAt.fill(timeline.length - 1) : timelineAt.fill(0);
@@ -570,7 +559,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     diff = null;
   };
 
-  const play = () => {
+  const play: returnedObject['play'] = () => {
     reset(false);
     // play forward.
     isReversePlay = false;
@@ -581,7 +570,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     reqId = requestAnimationFrame(startAnim);
   };
 
-  const reverse = () => {
+  const reverse: returnedObject['reverse'] = () => {
     reset(true);
     // reverse the direction.
     isReversePlay = true;
@@ -591,12 +580,12 @@ export function animare(options: animareOptions, callback: (values: number[], in
     reqId = requestAnimationFrame(startAnim);
   };
 
-  const pause = () => {
+  const pause: returnedObject['pause'] = () => {
     if (reqId) cancelAnimationFrame(reqId);
     pausedAt = performance.now();
   };
 
-  const resume = () => {
+  const resume: returnedObject['resume'] = () => {
     if (pausedAt) {
       const now = performance.now();
       const delta = now - pausedAt;
@@ -612,13 +601,13 @@ export function animare(options: animareOptions, callback: (values: number[], in
     play();
   };
 
-  const stop = (stopAtStart = true) => {
+  const stop: returnedObject['stop'] = (stopAtStart = true) => {
     stopAtStart ? play() : reverse();
     isStoped = true;
     reqId = null;
   };
 
-  const next = (op: nextOptions) => {
+  const next: returnedObject['next'] = op => {
     if (typeof op !== 'object') throw new Error('animare: next() expects an object as the first argument.');
     if ((!Array.isArray(op.to) && typeof op.to !== 'number') || (Array.isArray(op.to) && op.to.some(t => typeof t !== 'number')))
       throw new Error('animare: next() [to] must be a number or an array of numbers.');
@@ -627,38 +616,38 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
     const userInput = { ...op };
 
-    const previousTimeline = { ...timeline.at(-1) };
+    const previousTimeline = { ...timeline.at(-1)! };
 
-    if ((previousTimeline.options!.to as number[]).length !== op.to.length)
+    if ((previousTimeline.options.to as number[]).length !== op.to.length)
       throw new Error('animare: next() [to] must have the same length as the previous animation.');
 
     // * inherit options from previous animation if not specified.
     // if from is not specified, use the last known value based on the direction from the previous animation.
     if (typeof op.from === 'undefined') {
       // case previous animation direction is an array.
-      if (Array.isArray(previousTimeline.options!.direction)) {
+      if (Array.isArray(previousTimeline.options.direction)) {
         const from = [];
         for (let i = 0; i < (options.to as number[]).length; i++) {
-          const prevDirection = previousTimeline.options!.direction[i] ?? DIRECTION.normal;
+          const prevDirection = previousTimeline.options.direction[i] ?? DIRECTION.normal;
           const isPrevReverse = prevDirection === DIRECTION.reverse;
           const isPrevAlternate = prevDirection === DIRECTION.alternate;
-          const prevFrom = Array.isArray(previousTimeline.options!.from)
-            ? previousTimeline.options!.from[i] ?? 0
-            : (previousTimeline.options!.from as number);
-          from[i] = isPrevAlternate || isPrevReverse ? prevFrom : (previousTimeline.options!.to as number[])[0];
+          const prevFrom = Array.isArray(previousTimeline.options.from)
+            ? previousTimeline.options.from[i] ?? 0
+            : (previousTimeline.options.from as number);
+          from[i] = isPrevAlternate || isPrevReverse ? prevFrom : (previousTimeline.options.to as number[])[0];
         }
         op.from = from;
         // case previous animation direction is a single value (string).
       } else {
-        const prevDirection = previousTimeline.options!.direction;
+        const prevDirection = previousTimeline.options.direction!;
         const isPrevReverse = prevDirection === DIRECTION.reverse;
         const isPrevAlternate = prevDirection === DIRECTION.alternate;
-        op.from ??= isPrevAlternate || isPrevReverse ? previousTimeline.options!.from : previousTimeline.options!.to;
+        op.from ??= isPrevAlternate || isPrevReverse ? previousTimeline.options.from : previousTimeline.options.to;
       }
     }
-    op.duration ??= previousTimeline.options!.duration;
-    op.ease ??= previousTimeline.options!.ease;
-    op.type ??= previousTimeline.options!.type;
+    op.duration ??= previousTimeline.options.duration;
+    op.ease ??= previousTimeline.options.ease;
+    op.type ??= previousTimeline.options.type;
 
     // * set to default if not specified.
     op.repeat ??= [...op.to].fill(0);
@@ -678,7 +667,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     return returned;
   };
 
-  const setTimelineOptions = (op: timelineOptions) => {
+  const setTimelineOptions: returnedObject['setTimelineOptions'] = op => {
     if (typeof op !== 'object') throw new Error('animare: setTimelineOptions() expects an object as the first argument.');
     if (op.repeat && typeof op.repeat !== 'number') throw new Error('animare: setTimelineOptions() [repeat] must be a number.');
     tlOptions = { ...tlOptions, ...op };
@@ -686,7 +675,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     if (reqId) excuteDuration = calculateTime();
   };
 
-  const onStart = (cb: Function): Function => {
+  const onStart: returnedObject['onStart'] = cb => {
     if (typeof cb !== 'function') throw new Error('[onStart] param must be a callback function');
 
     const id = `onStart_${Math.random() * 100}`;
@@ -698,7 +687,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     };
   };
 
-  const onFinish = (cb: Function): Function => {
+  const onFinish: returnedObject['onFinish'] = cb => {
     if (typeof cb !== 'function') throw new Error('animare: [onFinish] accept a callback function only');
 
     const id = `onFinish_${Math.random()}`;
@@ -710,14 +699,14 @@ export function animare(options: animareOptions, callback: (values: number[], in
     };
   };
 
-  const onFinishAsync = () => {
+  const onFinishAsync: returnedObject['onFinishAsync'] = () => {
     if (resolveAsyncOnFinish) return;
     return new Promise(resolve => {
       resolveAsyncOnFinish = resolve;
     });
   };
 
-  const onProgress = (at: number, cb: Function): Function => {
+  const onProgress: returnedObject['onProgress'] = (at, cb) => {
     if (typeof at !== 'number') throw new Error('animare: [onProgress] accept a number as the first argument.');
     if (at < 0 || at > 1) throw new Error('animare: [onProgress] [at] must be between 0 and 1');
     if (typeof cb !== 'function') throw new Error('animare: [onFinish] accept a callback function only');
@@ -731,7 +720,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     };
   };
 
-  const onProgressAsync = (at: number) => {
+  const onProgressAsync: returnedObject['onProgressAsync'] = at => {
     if (typeof at !== 'number') throw new Error('animare: [onProgress] accept a number as the first argument.');
     if (at < 0 || at > 1) throw new Error('animare: [onProgress] first argument must be a number between 0 and 1');
 
@@ -742,7 +731,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     });
   };
 
-  const setOptions = (op: animareOptions, index = 0) => {
+  const setOptions: returnedObject['setOptions'] = (op, index = 0) => {
     if (typeof op !== 'object' || Array.isArray(op))
       throw new Error('animare: setOptions() expects an object as the first argument.');
     if (typeof index !== 'number') throw new Error('animare: setOptions() expects a number as the second argument.');
@@ -820,7 +809,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     checkInputs(timeline[index].options);
   };
 
-  const getOptions = (index = 0): animareOptions => {
+  const getOptions: returnedObject['getOptions'] = (index = 0): animareOptions => {
     if (index > timeline.length - 1) throw new Error('animare: getOptions() index out of range.');
     return timeline[index].options;
   };
@@ -846,3 +835,5 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
   return returned;
 }
+
+export default animare;

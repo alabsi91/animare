@@ -7,7 +7,7 @@ export enum DIRECTION {
 
 export enum TIMELINE_TYPE {
   wait = 'wait',
-  immediate = 'immediate', 
+  immediate = 'immediate',
 }
 
 export interface animareOptions extends nextOptions {
@@ -78,7 +78,7 @@ export interface nextOptions {
   direction?: keyof typeof DIRECTION | (keyof typeof DIRECTION)[];
 }
 
-export type CallbackOptions = {
+export type cbInfo = {
   /**
    * - True only at first frame of the animation.
    */
