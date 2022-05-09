@@ -409,9 +409,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
   // caluculate the duration of overall animation with timeline and repeats.
   const calculateTime = () => {
-    // ! over complicated it's gonna be an easier way to do this.
     // ! maybe doesn't work if frame rate drops. to be tested.
-    // ! if delayOnce is an array this will be wrong.
     let time = 0;
 
     // if infinite repeat detected return -1.
@@ -424,114 +422,46 @@ export function animare(options: animareOptions, callback: (values: number[], in
       return time;
     }
 
-    /* 
-
-    first calculate the duration of each animation in the timeline with its repeat count considering if delayOnce is true.
-    create two arrays of that: with delay and without dela.
-    
-    then group timelines with type `immediate` together over timeline repaet count,
-        then sum the duration of each animation with the next in the same group onsidering if delayOnce is true,
-        then take the longest duration of each group.
-
-    then group timeline with type `wait` together over timeline repaet count onsidering if delayOnce is true,
-        then take the longest duration of the group
-
-    now we sum the two groups together and we have the total duration of the animation.
-
-    */
-
-    // reverse timeline for reverse play.
     const tl = isReversePlay ? [...timeline].reverse() : timeline;
 
-    // * calculate the duration of each animation in the timeline with its repeat count considering if delayOnce is true.
-    // ============ ===============
-    // ============= ==============
-    //    ^ column      ^ column
-    const columns = []; // the length is timeline.length, each array length is animated values length.
-    const columnsWithoutDelay = []; // if delayOnce is true the delay added only once.
-    for (let t = 0; t < tl.length; t++) {
-      const column = [];
-      const columnWithoutDelay = [];
-      for (let i = 0; i < (options.to as number[]).length; i++) {
-        const { options } = tl[t];
-        const delay = Array.isArray(options.delay) ? options.delay[i] ?? 0 : (options.delay as number);
-        const duration = Array.isArray(options.duration)
-          ? options.duration[i] ?? options.duration.at(-1)
-          : (options.duration as number);
-        const repeat = (Array.isArray(options.repeat) ? options.repeat[i] ?? 0 : (options.repeat as number)) + 1;
-        const delayOnce = Array.isArray(options.delayOnce) ? options.delayOnce[i] ?? false : options.delayOnce;
-        const withDelay = (delayOnce ? duration * repeat + delay : (delay + duration) * repeat) * tlOptions.speed;
-        column.push(withDelay);
-        columnWithoutDelay.push(duration * repeat * tlOptions.speed);
-      }
-      columns.push(column);
-      columnsWithoutDelay.push(columnWithoutDelay);
-    }
+    const results = [];
+    for (let v = 0; v < (options.to as number[]).length; v++) {
+      const groups = [];
+      for (let r = 0; r < tlOptions.repeat + 1; r++) {
+        for (let t = 0; t < tl.length; t++) {
+          const { options } = tl[t];
+          const isWait = options.type === TIMELINE_TYPE.wait;
+          const delay = Array.isArray(options.delay) ? options.delay[v] ?? 0 : options.delay!;
+          const duration = Array.isArray(options.duration) ? options.duration[v] ?? options.duration.at(-1) : options.duration!;
+          const repeat = (Array.isArray(options.repeat) ? options.repeat[v] ?? 0 : options.repeat!) + 1;
+          const delayOnce = Array.isArray(options.delayOnce) ? options.delayOnce[v] ?? false : options.delayOnce;
+          const length =
+            (delayOnce && r === 0
+              ? duration * repeat + delay
+              : delayOnce && r > 0
+              ? duration * repeat
+              : (delay + duration) * repeat) * tlOptions.speed;
 
-    // * group timelines types over timeline repaet count
-    const immediateGroups: [number, boolean][][] = []; // group timeline with type `immediate` together.
-    const waitGroups = []; // group timeline type `wait` longest duration together
-    for (let i = 0; i < tlOptions.repeat + 1; i++) {
-      for (let t = 0; t < tl.length; t++) {
-        const next = t + 1 >= tl.length ? 0 : t + 1;
-        const isLastIteration = i === tlOptions.repeat && t === tl.length - 1;
-        const op = tl[next];
-        // for immediate
-        if (op.options.type === TIMELINE_TYPE.immediate) {
-          const delayOnce = tl[t].options.delayOnce;
-          const nextDelayOnce = tl[next].options.delayOnce;
-          const firstDelayOnce = tl[0].options.delayOnce;
-          const isDelayOnce = i > 0 && (Array.isArray(delayOnce) ? delayOnce[0] : (delayOnce as boolean)); // if the timeline repeating and the delayOnce is true.
-          const isNextDelayOnce =
-            (t + 1 >= tl.length && (Array.isArray(firstDelayOnce) ? firstDelayOnce[0] : (firstDelayOnce as boolean))) ||
-            (i > 0 && (Array.isArray(nextDelayOnce) ? nextDelayOnce[0] : (nextDelayOnce as boolean)));
-          const putNext = isLastIteration && t + 1 < tl.length ? true : !isLastIteration; // if the timeline is the last iteration put the next timeline or not.
-
-          // put next with the last group if after each other.
-          if (immediateGroups?.at(-1)?.at(-1)?.[0] === t) {
-            if (putNext) immediateGroups.at(-1)?.push([next, isNextDelayOnce]);
-            // create new group
-          } else if (putNext) {
-            immediateGroups.push([
-              [t, isDelayOnce],
-              [next, isNextDelayOnce],
-            ]);
-            // put single value if last iteration.
+          if (isWait) {
+            groups.push(length);
+          } else if (groups.at(-1) !== undefined) {
+            groups[groups.length - 1] += length;
           } else {
-            immediateGroups.push([[t, isDelayOnce]]);
+            groups.push(length);
           }
         }
-
-        // for wait
-        const isNextWait = tl[next].options.type === TIMELINE_TYPE.wait;
-        const isCurrentWait = tl[t].options.type === TIMELINE_TYPE.wait || (i === 0 && t === 0); // treat first animation at first play as wait.
-        if (isCurrentWait && isNextWait) {
-          const cl = i > 0 && tl[t].options.delayOnce ? columnsWithoutDelay[t] : columns[t];
-          waitGroups.push(Math.max(...cl));
-        }
       }
+      results.push(groups);
     }
 
-    // * sum animations in each group of type `immediate` together.
-    const mixed = []; // array of the max value of sum of each group.
-    for (let i = 0; i < immediateGroups.length; i++) {
-      const group = immediateGroups[i];
-      let last = null;
-      for (let g = 0; g < group.length; g = g + 2) {
-        const a = group[g][0]; // timeline index
-        const b = group[g + 1]?.[0]; // next timeline index
-        const columnA = group[g][1] ? columnsWithoutDelay : columns;
-        const columnB = group[g + 1]?.[1] ? columnsWithoutDelay : columns;
-        const ab = b !== undefined ? columnA[a].map((num, i) => num + columnB[b][i]) : columnA[a];
-        last = last ? last.map((num, i) => num + ab[i]) : ab;
-      }
-      mixed.push(Math.max(...last!));
+    const waitAndImmediate = [];
+    for (let i = 0; i < results[0].length; i++) {
+      const g = [];
+      for (let t = 0; t < results.length; t++) g.push(results[t][i]);
+      waitAndImmediate.push(g);
     }
 
-    // * sum the two groups together.
-    const overall = [...mixed, ...waitGroups].reduce((a, b) => a + b);
-
-    time = overall;
+    time = waitAndImmediate.map(e => Math.max(...e)).reduce((a, b) => a + b, 0);
     time += 25 * tlOptions.repeat; // add some buffer.
 
     return time;
@@ -663,6 +593,10 @@ export function animare(options: animareOptions, callback: (values: number[], in
       console.warn('animare: next() Some animations are blocked by infinite repeat.');
 
     timeline.push({ options: op, userInput });
+
+    // recalculate animation duration, if the animation is already running.
+    // this is necessary if autoPlay is true.
+    if (reqId) excuteDuration = calculateTime();
 
     return returned;
   };

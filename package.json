@@ -1,6 +1,6 @@
 {
   "name": "animare",
-  "version": "1.0.60",
+  "version": "1.0.63",
   "description": "Light animation library based on requestanimationframe ",
   "main": "lib/animare.js",
   "types": "lib/animare.d.ts",

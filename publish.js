@@ -1,4 +1,5 @@
 require('colors');
+const { yellow } = require('colors');
 const fs = require('fs');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
@@ -32,7 +33,15 @@ async function app() {
   // update version.
   packageJson.version = packageJson.version.replace(/[0-9]+$/, +oldVersion.match(/[0-9]+$/)[0] + 1);
   console.log('Updating package.json version to'.blue, packageJson.version.yellow, '...'.blue);
-  console.log('\nRemoving'.blue, 'scripts'.yellow, 'and'.blue, 'devDependencies'.yellow, 'from package.json...\n'.blue);
+  console.log(
+    '\nRemoving'.blue,
+    'scripts'.yellow,
+    'and'.blue,
+    'devDependencies'.yellow,
+    'from'.blue,
+    'package.json'.magenta,
+    '...\n'.blue
+  );
   // remove devDependencies.
   delete packageJson.devDependencies;
   // remove scripts.
@@ -45,7 +54,7 @@ async function app() {
   try {
     await exec('npm publish');
     console.log('\nPublished successfully.\n'.green);
-    console.log('Restoring package.json scripts and devDependencies...\n'.blue);
+    console.log('Restoring'.blue, 'package.json'.magenta, 'scripts'.yellow, 'and'.blue, 'devDependencies'.yellow, '...\n'.blue);
     packageJson.devDependencies = devDependencies;
     packageJson.scripts = scripts;
     await writeFile('package.json', JSON.stringify(packageJson, null, 2));
