@@ -1,4 +1,4 @@
-const colorNames = {
+const colorsNames = {
   aliceblue: '#f0f8ff',
   antiquewhite: '#faebd7',
   aqua: '#00ffff',
@@ -142,35 +142,51 @@ const colorNames = {
   yellowgreen: '#9acd32',
 };
 
-const hexToRgbA = hex => {
+const hexToRgbA = (hex: string): number[] => {
   return hex
     .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
     .substring(1)
-    .match(/.{2}/g)
+    .match(/.{2}/g)!
     .map((x, i) => (i === 3 ? +(parseInt(x, 16) / 255).toFixed(1) : parseInt(x, 16)));
 };
 
-const hslToRgb = (h, s, l) => {
+const hslToRgb = (h: number, s: number, l: number): number[] => {
   s /= 100;
   l /= 100;
-  const k = n => (n + h / 30) % 12;
+  const k = (n: number) => (n + h / 30) % 12;
   const a = s * Math.min(l, 1 - l);
-  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
   return [255 * f(0), 255 * f(8), 255 * f(4)];
 };
 
-export const colorToArr = color => {
-  const isName = colorNames.hasOwnProperty(color);
-  const isHex = color.includes('#');
-  const isRgb = color.includes('rgb');
+/**
+ * - converts a color to array of RGB values.
+ * - the color could be a string of a`hex`, `rgb`, `hsl` or a `named color`.
+ * - **Examples:** `colorToRgb('#ff0000')` , `colorToRgb('rgb(255, 0, 0)')` , `colorToRgb('hsl(0, 100%, 50%)')` , `colorToRgb('red')`.
+ * 
+ * - **Note:** the function will return `[0, 0, 0]` if the color is not recognized.
+*/
+export const colorToArr = (color: keyof typeof colorsNames | (string & {})): number[] => {
+  const hexReg = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
+  const rgbReg =
+    /^(rgb)?\(?([01]?\d\d?|2[0-4]\d|25[0-5])(\W+)([01]?\d\d?|2[0-4]\d|25[0-5])\W+(([01]?\d\d?|2[0-4]\d|25[0-5])\)?)$/;
+  const isName = colorsNames.hasOwnProperty(color);
+  const isHex = hexReg.test(color);
+  const isRgb = rgbReg.test(color);
   const isHsl = color.includes('hsl');
-  if (isName) {
-    return hexToRgbA(colorNames[color]);
-  } else if (isHex) {
-    return hexToRgbA(color);
-  } else if (isRgb) {
-    return color.match(/([\d]*[.])?[\d]+/g).map(e => +e);
-  } else if (isHsl) {
-    return hslToRgb(...color.match(/([\d]*[.])?[\d]+/g).map(e => +e));
+
+  if (isName) return hexToRgbA(colorsNames[color as keyof typeof colorsNames]);
+
+  if (isHex) return hexToRgbA(color);
+
+  if (isRgb) return color.match(/([\d]*[.])?[\d]+/g)!.map(e => +e);
+
+  if (isHsl) {
+    const match = color.match(/([\d]*[.])?[\d]+/g);
+    const [h, s, l] = match && match?.length >= 3 ? match.map(e => +e) : [0, 0, 0];
+    return hslToRgb(h, s, l);
   }
+  
+  console.error('Invalid color');
+  return [0, 0, 0];
 };
