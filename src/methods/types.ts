@@ -82,45 +82,45 @@ export type cbInfo = {
   /**
    * - True only at first frame of the animation.
    */
-  isFirstFrame?: boolean;
+  isFirstFrame: boolean;
 
   /**
    * - True only when the animation is finished.
    */
-  isFinished?: boolean;
+  isFinished: boolean;
 
   /**
    * - Animations progresses an array of numbers between 0 and 1 representing the progress of the animation.
    * - Reset on every repeat cycle.
    */
-  progress?: number[];
+  progress: number[];
 
   /**
    * - overall animation progress a number between 0 and 1 including repeats , delays and timeline repeats.
    * - returns `-1` if the timeline infinitely repeats.
    */
-  timelineProgress?: number;
+  timelineProgress: number;
 
   /**
    * - The current timeline index that the animations are playing on.
    */
-  timelineIndex?: number[];
+  timelineIndex: number[];
 
   /**
    * - A descending numbers representing the current repeat cycle.
    */
-  repeatCount?: number[];
+  repeatCount: number[];
 
   /**
    * - A descending number representing the current repeat cycle.
    */
-  timelineRepeatCount?: number[];
+  timelineRepeatCount: number[];
 
   /**
    * - The current alternate cycle that the animations are playing on.
    * - for direction type `alternate` or `alternate-reverse`
    */
-  alternateCycle?: number[];
+  alternateCycle: number[];
 
   /**
    * - The current refresh rate.
@@ -130,7 +130,7 @@ export type cbInfo = {
   /**
    * - The progress time in milliseconds of overall animation.
    */
-  time?: number;
+  time: number;
 
   /**
    * - Play the animation forwards.

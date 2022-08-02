@@ -1,5 +1,9 @@
 import { animareOptions, cbInfo, DIRECTION, Ilisteners, returnedObject, TIMELINE_TYPE } from './types';
 
+// todo fix value's default when waiting for delay
+// todo react useAnimare hook
+// todo play , reverse and stop at progress
+
 export function animare(options: animareOptions, callback: (values: number[], info: cbInfo) => void) {
   if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
   options.to = Array.isArray(options.to) ? options.to : [options.to];
@@ -78,15 +82,15 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
   let start: number[] = [], // start time of each animation.
     fpsTimeStamp: number, // used to calulate fps.
-    excuteTimeStamp: number, // start time of the excute function.
+    excuteTimeStamp: number, // start time used to calculate overall progress.
     excuteDuration: number, // duration of the excute function.
     isFirstFrame: boolean, // is the first frame of the animation
     pausedAt: number | null, // time when the animation was paused.
     isStoped: boolean, // to play one frame only for stop method.
     progresses = [...options.to].fill(0), // progress of each animation.
     isReversePlay = false, // is the animation playing backward?
-    resolveAsyncOnFinish: any, // to resolve the promise when the animation is finished.
-    resolveAsyncOnProgress: any, // to resolve the promise for onProgressAsync event.
+    resolveAsyncOnFinish: Function | null, // to resolve the promise when the animation is finished.
+    resolveAsyncOnProgress: { at: number; resolve: Function } | null, // to resolve the promise for onProgressAsync event.
     reqId: number | null, // requestAnimationFrame id used to cancel the animation.
     diff: number | null, //
     timer: number; // timer to detect when the browser is pausing the animation.
@@ -120,7 +124,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     onFinish: [], // save finish listeners callback and id.
   };
 
-  const progressTimeSet = new Set(); // save progress listerners id's or asyncsOnProgress times to prevent multiple calls.
+  const progressTimeSet = new Set<string>(); // save progress listerners id's or asyncsOnProgress times to prevent multiple calls.
 
   const startAnim = (timeStamp: number) => {
     start = [...(options.to as number[])].fill(timeStamp);
@@ -133,7 +137,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
   };
 
   const excute = (now: number) => {
-    // correct the timeStamp if the browser is pausing the animation.
+    // correct the timeStamp if the browser is paused the animation.
     if (diff) {
       const now = performance.now();
       const delta = now - diff;
@@ -143,7 +147,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
     }
 
     // to detect when the browser is pausing the animation.
-    // ! I'm not sure 60ms is gonna be enough for all browsers.
+    // ! I'm not sure 60ms is gonna be enough for all browsers on all devices.
     clearTimeout(timer);
     timer = setTimeout(() => {
       diff = now;
@@ -204,7 +208,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
       // wait for delay
       if (now - start[i] - delay < 0) {
         // put a value until animation starts to keep callbackParams at the same length as [to].
-        callbackParams.push(from);
+        callbackParams.push(lastKnownValue[i] ?? from);
         continue;
       }
 
@@ -339,8 +343,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
       if (resolveAsyncOnProgress) {
         const { at, resolve } = resolveAsyncOnProgress;
         // time of the progress.
-        if (progress >= at && !progressTimeSet.has(time)) {
-          progressTimeSet.add(time);
+        if (progress >= at) {
           resolve();
           resolveAsyncOnProgress = null;
         }
@@ -635,7 +638,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
   const onFinishAsync: returnedObject['onFinishAsync'] = () => {
     if (resolveAsyncOnFinish) return;
-    return new Promise(resolve => {
+    return new Promise<never>(resolve => {
       resolveAsyncOnFinish = resolve;
     });
   };
@@ -660,7 +663,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
 
     if (resolveAsyncOnProgress) return;
 
-    return new Promise(resolve => {
+    return new Promise<never>(resolve => {
       resolveAsyncOnProgress = { at, resolve };
     });
   };

@@ -1,7 +1,0 @@
-node_modules
-src
-.babelrc
-README.md
-tsconfig.json
-package-tmp.json
-publish.js
