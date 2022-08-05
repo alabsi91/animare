@@ -288,3 +288,5 @@ export interface Ilisteners {
   onFinish: { id: string; cb: Function }[];
   onProgress: { at: number | string; id: string; cb: Function }[];
 }
+
+export type animareOnUpdate = (values: number[], info: cbInfo) => void;

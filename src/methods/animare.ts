@@ -1,10 +1,10 @@
-import { animareOptions, cbInfo, DIRECTION, Ilisteners, returnedObject, TIMELINE_TYPE } from './types';
+import { animareOnUpdate, animareOptions, cbInfo, DIRECTION, Ilisteners, returnedObject, TIMELINE_TYPE } from './types';
 
-// todo fix value's default when waiting for delay
+///// todo fix value's default when waiting for delay
 // todo react useAnimare hook
 // todo play , reverse and stop at progress
 
-export function animare(options: animareOptions, callback: (values: number[], info: cbInfo) => void) {
+export function animare(options: animareOptions, callback: animareOnUpdate) {
   if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
   options.to = Array.isArray(options.to) ? options.to : [options.to];
   const userInput = { ...options };
@@ -104,7 +104,7 @@ export function animare(options: animareOptions, callback: (values: number[], in
   // finished animations indexes will be stored here.
   const finished = new Set<number>();
   // used to fill the animation value when it's finished and other animations still playing to keep the passed array of values at the same length
-  const lastKnownValue = [...options.to];
+  const lastKnownValue: number[] = [];
 
   const timeline = [
     {

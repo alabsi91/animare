@@ -6,6 +6,6 @@
 
 🔸Matches client's monitor refresh rate.
 
-🔸Contains most popular easing timing functions.
+🔸Contains the most popular easing timing functions.
 
-### 📖 [View the documentation site](https://alabsi91.github.io/animare/)
+### 📖 [View the documentation site](https://alabsi91.github.io/animare/) 📖
