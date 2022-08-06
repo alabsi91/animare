@@ -1,4 +1,4 @@
-import { DIRECTION } from "./types";
+import { DIRECTION } from './types';
 
 type organizeOptions = {
   from?: number;
@@ -26,14 +26,14 @@ export function organize<T extends { [key in keyof T]: organizeOptions }>(ob: T,
   defaults.ease ??= x => x;
 
   const ent = Object.entries<organizeOptions>(ob),
-    from = ent.map(e => e[1].from ?? defaults.from),
-    to = ent.map(e => e[1].to),
-    duration = ent.map(e => e[1].duration ?? defaults.duration),
-    delay = ent.map(e => e[1].delay ?? defaults.delay),
-    delayOnce = ent.map(e => e[1].delayOnce ?? defaults.delayOnce),
-    repeat = ent.map(e => e[1].repeat ?? defaults.repeat),
-    direction = ent.map(e => e[1].direction ?? defaults.direction),
-    ease = ent.map(e => e[1].ease ?? defaults.ease),
+    from = ent.map(e => e[1].from ?? defaults.from) as number[],
+    to = ent.map(e => e[1].to) as number[],
+    duration = ent.map(e => e[1].duration ?? defaults.duration) as number[],
+    delay = ent.map(e => e[1].delay ?? defaults.delay) as number[],
+    delayOnce = ent.map(e => e[1].delayOnce ?? defaults.delayOnce) as boolean[],
+    repeat = ent.map(e => e[1].repeat ?? defaults.repeat) as number[],
+    direction = ent.map(e => e[1].direction ?? defaults.direction) as (keyof typeof DIRECTION)[],
+    ease = ent.map(e => e[1].ease ?? defaults.ease) as ((x: number) => number)[],
     names = Object.keys(ob) as (keyof T)[];
 
   const get = (animareArray: number[]) => {
@@ -42,7 +42,7 @@ export function organize<T extends { [key in keyof T]: organizeOptions }>(ob: T,
     return res;
   };
 
-  const patch = (patchOb?: Partial<T>) => organize(Object.assign({}, ob, patchOb));
+  const patch = (patchOb?: Partial<{ [key in keyof T]: organizeOptions }>) => organize(Object.assign({}, ob, patchOb));
 
   return {
     from,
