@@ -1,8 +1,11 @@
+import { colorToArr } from './colorToRgbArray';
 import { DIRECTION } from './types';
 
-type organizeOptions = {
-  from?: number;
-  to: number;
+type organizeOptions<T extends number | string = number> = {
+  /** number or a color string. */
+  to: T;
+  /** number or a color string. */
+  from?: T;
   duration?: number;
   delay?: number;
   delayOnce?: boolean;
@@ -16,7 +19,10 @@ type organizeOptions = {
  * @param ob - options: `{name: {from: number, to: number, ...}, ...}`
  * @param defaults - changes the default values for each option.
  */
-export function organize<T extends { [key in keyof T]: organizeOptions }>(ob: T, defaults: Omit<organizeOptions, 'to'> = {}) {
+export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['to'] extends string ? string : number> }>(
+  ob: T,
+  defaults: Omit<organizeOptions, 'to'> = {}
+) {
   defaults.from ??= 0;
   defaults.duration ??= 350;
   defaults.delay ??= 0;
@@ -25,9 +31,22 @@ export function organize<T extends { [key in keyof T]: organizeOptions }>(ob: T,
   defaults.direction ??= 'normal';
   defaults.ease ??= x => x;
 
-  const ent = Object.entries<organizeOptions>(ob),
-    from = ent.map(e => e[1].from ?? defaults.from) as number[],
-    to = ent.map(e => e[1].to) as number[],
+  const typeColor: { [key in keyof T]: { from: number[]; to: number[] } } = Object.create(null);
+
+  const ent = Object.entries<organizeOptions<T[keyof T]['to'] extends string ? string : number>>(ob),
+    from = ent.map(e => (typeof e[1].from === 'string' ? 0 : e[1].from ?? defaults.from)) as number[],
+    to = ent.map(e => {
+      if (typeof e[1].to === 'string') {
+        if (typeof ob[e[0] as keyof T].from === 'number') throw new Error('[animare] `from` should match the type of `to`');
+
+        typeColor[e[0] as keyof T] = {
+          from: colorToArr((ob[e[0] as keyof T].from as string) ?? '#ffffff'),
+          to: colorToArr(ob[e[0] as keyof T].to as string),
+        };
+        return 1;
+      }
+      return e[1].to;
+    }) as number[],
     duration = ent.map(e => e[1].duration ?? defaults.duration) as number[],
     delay = ent.map(e => e[1].delay ?? defaults.delay) as number[],
     delayOnce = ent.map(e => e[1].delayOnce ?? defaults.delayOnce) as boolean[],
@@ -37,8 +56,16 @@ export function organize<T extends { [key in keyof T]: organizeOptions }>(ob: T,
     names = Object.keys(ob) as (keyof T)[];
 
   const get = (animareArray: number[]) => {
-    const res: Record<keyof T, number> = Object.create(null);
-    for (let i = 0; i < animareArray.length; i++) res[names[i]] = animareArray[i];
+    const res: { [key in keyof T]: T[key]['to'] } = Object.create(null);
+    for (let i = 0; i < animareArray.length; i++) {
+      // pass a color string as rgb
+      if (typeColor[names[i]]) {
+        res[names[i]] = animateColor(typeColor[names[i]].from, typeColor[names[i]].to, animareArray[i]) as any;
+        continue;
+      }
+
+      res[names[i]] = animareArray[i] as any; // pass a number value
+    }
     return res;
   };
 
@@ -61,4 +88,13 @@ export function organize<T extends { [key in keyof T]: organizeOptions }>(ob: T,
     /** - Creates a new copy with patched options.*/
     patch,
   };
+}
+
+function animateColor(fromColor: number[], toColor: number[], progress: number) {
+  const r = fromColor[0] + (toColor[0] - fromColor[0]) * progress,
+    g = fromColor[1] + (toColor[1] - fromColor[1]) * progress,
+    b = fromColor[2] + (toColor[2] - fromColor[2]) * progress,
+    a = (fromColor[3] ?? 1) + ((toColor[3] ?? 1) - (fromColor[3] ?? 1)) * progress;
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }

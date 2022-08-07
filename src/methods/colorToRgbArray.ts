@@ -1,4 +1,4 @@
-const colorsNames = {
+export const colorsNames = {
   aliceblue: '#f0f8ff',
   antiquewhite: '#faebd7',
   aqua: '#00ffff',
@@ -142,51 +142,90 @@ const colorsNames = {
   yellowgreen: '#9acd32',
 };
 
-const hexToRgbA = (hex: string): number[] => {
-  return hex
-    .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
-    .substring(1)
-    .match(/.{2}/g)!
-    .map((x, i) => (i === 3 ? +(parseInt(x, 16) / 255).toFixed(1) : parseInt(x, 16)));
-};
+function HEX_RGB(hex: string) {
+  const isValidHex = (h: string) => /^#([A-Fa-f0-9]{3,4}){1,2}$/.test(h),
+    getChunksFromString = (st: string, chunkSize: number) => st.match(new RegExp(`.{${chunkSize}}`, 'g')),
+    convertHexUnitTo256 = (hexStr: string) => parseInt(hexStr.repeat(2 / hexStr.length), 16);
 
-const hslToRgb = (h: number, s: number, l: number): number[] => {
+  if (!isValidHex(hex)) throw new Error('[animare] Invalid HEX');
+
+  const chunkSize = Math.floor((hex.length - 1) / 3),
+    hexArr = getChunksFromString(hex.slice(1), chunkSize) as string[],
+    [r, g, b, a] = hexArr.map(convertHexUnitTo256),
+    alpha = Math.round(a / 255);
+
+  return [r, g, b, !isNaN(alpha) ? alpha : 1];
+}
+
+function HSL_RGB(h: number, s: number, l: number) {
   s /= 100;
   l /= 100;
   const k = (n: number) => (n + h / 30) % 12;
   const a = s * Math.min(l, 1 - l);
   const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-  return [255 * f(0), 255 * f(8), 255 * f(4)];
-};
+  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
+}
 
 /**
  * - converts a color to array of RGB values.
  * - the color could be a string of a`hex`, `rgb`, `hsl` or a `named color`.
  * - **Examples:** `colorToRgb('#ff0000')` , `colorToRgb('rgb(255, 0, 0)')` , `colorToRgb('hsl(0, 100%, 50%)')` , `colorToRgb('red')`.
- * 
- * - **Note:** the function will return `[0, 0, 0]` if the color is not recognized.
-*/
-export const colorToArr = (color: keyof typeof colorsNames | (string & {})): number[] => {
-  const hexReg = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
-  const rgbReg =
-    /^(rgb)?\(?([01]?\d\d?|2[0-4]\d|25[0-5])(\W+)([01]?\d\d?|2[0-4]\d|25[0-5])\W+(([01]?\d\d?|2[0-4]\d|25[0-5])\)?)$/;
-  const isName = colorsNames.hasOwnProperty(color);
-  const isHex = hexReg.test(color);
-  const isRgb = rgbReg.test(color);
-  const isHsl = color.includes('hsl');
+ */
+export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): number[] {
+  colorStr = colorStr.toLowerCase().trim();
+  const isRgba = colorStr.startsWith('rgba'),
+    isRgb = colorStr.startsWith('rgb'),
+    isHex = colorStr.startsWith('#'),
+    isNamedColor = colorsNames.hasOwnProperty(colorStr),
+    isHsla = colorStr.startsWith('hsla'),
+    isHsl = colorStr.startsWith('hsl');
 
-  if (isName) return hexToRgbA(colorsNames[color as keyof typeof colorsNames]);
+  const regex = /\(([^)]+)/;
 
-  if (isHex) return hexToRgbA(color);
+  if (isRgba) {
+    const match = colorStr.match(regex)?.[1];
+    if (!match) throw new Error('[animare] Invalid RGBA value');
+    const colorValues = match.split(',');
+    if (colorValues.length !== 4) throw new Error('[animare] Invalid RGBA value');
+    const [r, g, b, a] = colorValues.map(v => +v);
+    if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) throw new Error('[animare] Invalid RGBA value');
+    return [r, g, b, a];
+  }
 
-  if (isRgb) return color.match(/([\d]*[.])?[\d]+/g)!.map(e => +e);
+  if (isRgb) {
+    const match = colorStr.match(regex)?.[1];
+    if (!match) throw new Error('[animare] Invalid RGB value');
+    const colorValues = match.split(',');
+    if (colorValues.length !== 3) throw new Error('[animare] Invalid RGB value');
+    const [r, g, b] = colorValues.map(v => +v);
+    if (isNaN(r) || isNaN(g) || isNaN(b)) throw new Error('[animare] Invalid RGB value');
+    return [r, g, b, 1];
+  }
+
+  if (isHex) return HEX_RGB(colorStr);
+
+  if (isNamedColor) return HEX_RGB(colorsNames[colorStr as keyof typeof colorsNames]);
+
+  if (isHsla) {
+    const match = colorStr.match(regex)?.[1];
+    if (!match) throw new Error('[animare] Invalid HSLA value');
+    const colorValues = match.split(',');
+    if (colorValues.length !== 4) throw new Error('[animare] Invalid HSLA value');
+    const [h, s, l, a] = colorValues.map(v => +v.replace('%', '').replace('deg', ''));
+    console.log('a :', a);
+    if (isNaN(h) || isNaN(s) || isNaN(l) || isNaN(a)) throw new Error('[animare] Invalid HSLA value');
+    return [...HSL_RGB(h, s, l), isNaN(a / 100) ? 0 : a / 100];
+  }
 
   if (isHsl) {
-    const match = color.match(/([\d]*[.])?[\d]+/g);
-    const [h, s, l] = match && match?.length >= 3 ? match.map(e => +e) : [0, 0, 0];
-    return hslToRgb(h, s, l);
+    const match = colorStr.match(regex)?.[1];
+    if (!match) throw new Error('[animare] Invalid HSL value');
+    const colorValues = match.split(',');
+    if (colorValues.length !== 3) throw new Error('[animare] Invalid HSL value');
+    const [h, s, l] = colorValues.map(v => +v.replace('%', '').replace('deg', ''));
+    if (isNaN(h) || isNaN(s) || isNaN(l)) throw new Error('[animare] Invalid HSL value');
+    return HSL_RGB(h, s, l);
   }
-  
-  console.error('Invalid color');
-  return [0, 0, 0];
-};
+
+  throw new Error('[animare] Invalid color');
+}
