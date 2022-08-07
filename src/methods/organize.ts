@@ -69,6 +69,10 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
     return res;
   };
 
+  const indexOf = (valueName: keyof T) => {
+    for (let i = 0; i < names.length; i++) if (names[i] === valueName) return i;
+  };
+
   const patch = (patchOb?: Partial<{ [key in keyof T]: organizeOptions }>) => organize(Object.assign({}, ob, patchOb));
 
   return {
@@ -80,6 +84,8 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
     repeat,
     direction,
     ease,
+    /** - Get the index of the value name. */
+    indexOf,
     /**
      * - Takes an array of numbers and retruns an object
      * - with the same keys as the original object, but with the values of the array.

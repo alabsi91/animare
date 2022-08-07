@@ -1,6 +1,6 @@
 {
   "name": "animare",
-  "version": "0.0.0-beta.6",
+  "version": "0.0.0-beta.7",
   "description": "Light animation library based on requestanimationframe ",
   "author": "Ahmed Alabsi <alabsi91@gmail.com",
   "license": "MIT",
