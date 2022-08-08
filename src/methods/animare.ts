@@ -5,7 +5,8 @@ import { animareOnUpdate, animareOptions, cbInfo, DIRECTION, Ilisteners, returne
 // todo play , reverse and stop at progress
 
 export function animare(options: animareOptions, callback: animareOnUpdate) {
-  if (typeof options !== 'object' || Array.isArray(options)) throw new Error('animare: expects an object as the first argument.');
+  if (typeof options !== 'object' || Array.isArray(options))
+    throw new Error('\n\n⛔ [animare] : expects an object as the first argument. \n\n');
   options.to = Array.isArray(options.to) ? options.to : [options.to];
   const userInput = { ...options };
   options.from ??= 0;
@@ -23,33 +24,37 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
       (typeof options.from !== 'number' && !Array.isArray(options.from)) ||
       (Array.isArray(options.from) && options.from.some(e => typeof e !== 'number'))
     )
-      throw new Error('animare: [from] must be a number or an array of numbers');
+      throw new Error('\n\n⛔ [animare] ➡️ [options] : `from` must be a number or an array of numbers. !!\n\n');
 
     if (
       (typeof options.to !== 'number' && !Array.isArray(options.to)) ||
       (Array.isArray(options.to) && options.to.some(e => typeof e !== 'number'))
     )
-      throw new Error('animare: [to] must be a number or an array of numbers');
+      throw new Error('\n\n⛔ [animare] ➡️ [options] : `to` must be a number or an array of numbers. !!\n\n');
 
     if (
       (typeof options.delay !== 'number' && !Array.isArray(options.delay)) ||
       (Array.isArray(options.delay) && options.delay.some(e => typeof e !== 'number' || e < 0)) ||
       (typeof options.delay === 'number' && options.delay < 0)
     )
-      throw new Error('animare: [delay] must be a number or an array of numbers greater than or equal to 0');
+      throw new Error(
+        '\n\n⛔ [animare] ➡️ [options] : `delay` must be a number or an array of numbers greater than or equal to `0`. !!\n\n'
+      );
 
     if (
       (typeof options.delayOnce !== 'boolean' && !Array.isArray(options.delayOnce)) ||
       (Array.isArray(options.delayOnce) && options.delayOnce.some(e => typeof e !== 'boolean'))
     )
-      throw new Error('animare: [delayOnce] must be a boolean or an array of booleans');
+      throw new Error('\n\n⛔ [animare] ➡️ [options] : `delayOnce` must be a boolean or an array of booleans. !!\n\n');
 
     if (
       (typeof options.duration !== 'number' && !Array.isArray(options.duration)) ||
       (Array.isArray(options.duration) && options.duration.some(e => typeof e !== 'number' || e < 0)) ||
       (typeof options.duration === 'number' && options.duration < 0)
     )
-      throw new Error('animare: [duration] must be a number or an array of numbers greater than or equal to 0');
+      throw new Error(
+        '\n\n⛔ [animare] ➡️ [options] : `duration` must be a number or an array of numbers greater than or equal to `0` !!\n\n'
+      );
 
     if (
       (typeof options.direction === 'string' && !Object.keys(DIRECTION).includes(options.direction)) ||
@@ -57,26 +62,27 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
         options.direction.some(e => typeof e !== 'string' && !Object.keys(DIRECTION).includes(e)))
     )
       throw new Error(
-        'animare: [direction] must be a string or an array of strings and one of the following: ' +
-          Object.values(DIRECTION).join(', ')
+        '\n\n⛔ [animare] ➡️ [options] : `direction` must be a string or an array of strings and one of the following: ' +
+          Object.values(DIRECTION).join(', ') +
+          ' !!\n\n'
       );
 
     if (
       (typeof options.repeat !== 'number' && !Array.isArray(options.repeat)) ||
       (Array.isArray(options.repeat) && options.repeat.some(e => typeof e !== 'number'))
     )
-      throw new Error('animare: [repeat] must be a number or an array of numbers');
+      throw new Error('\n\n⛔ [animare] ➡️ [options] : `repeat` must be a number or an array of numbers. !!\n\n');
 
     if (
       (typeof options.ease !== 'function' && !Array.isArray(options.ease)) ||
       (Array.isArray(options.ease) && options.ease.some(e => typeof e !== 'function'))
     )
-      throw new Error('animare: [ease] must be a function or an array of functions');
+      throw new Error('\n\n⛔ [animare] ➡️ [options] : `ease` must be a function or an array of functions. !!\n\n');
 
     if (typeof options.autoPlay !== 'undefined' && typeof options.autoPlay !== 'boolean')
-      throw new Error('animare: [autoPlay] must be a boolean');
+      throw new Error('\n\n⛔ [animare] ➡️ [options] : `autoPlay` must be a boolean. !!\n\n');
 
-    if (typeof callback !== 'function') throw new Error('animare: [callback] must be a function');
+    if (typeof callback !== 'function') throw new Error('\n\n⛔ [animare] ➡️ [callback] must be a function. !!\n\n');
   };
   checkInputs(options);
 
@@ -541,9 +547,10 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const next: returnedObject['next'] = op => {
-    if (typeof op !== 'object') throw new Error('animare: next() expects an object as the first argument.');
+    if (typeof op !== 'object')
+      throw new Error('\n\n⛔ [animare] ➡️ [next] ➡️ [options] : expects an object as the first argument. \n\n');
     if ((!Array.isArray(op.to) && typeof op.to !== 'number') || (Array.isArray(op.to) && op.to.some(t => typeof t !== 'number')))
-      throw new Error('animare: next() [to] must be a number or an array of numbers.');
+      throw new Error('\n\n⛔ [animare] ➡️ [next] ➡️ [options] : `to` must be a number or an array of numbers. !!\n\n');
 
     op.to = Array.isArray(op.to) ? op.to : [op.to];
 
@@ -552,7 +559,9 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     const previousTimeline = { ...timeline.at(-1)! };
 
     if ((previousTimeline.options.to as number[]).length !== op.to.length)
-      throw new Error('animare: next() [to] must have the same length as the previous animation.');
+      throw new Error(
+        '\n\n⛔ [animare] ➡️ [next] ➡️ [options] : `to` must have the same length as the previous animation. !!\n\n'
+      );
 
     // * inherit options from previous animation if not specified.
     // if from is not specified, use the last known value based on the direction from the previous animation.
@@ -605,15 +614,18 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const setTimelineOptions: returnedObject['setTimelineOptions'] = op => {
-    if (typeof op !== 'object') throw new Error('animare: setTimelineOptions() expects an object as the first argument.');
-    if (op.repeat && typeof op.repeat !== 'number') throw new Error('animare: setTimelineOptions() [repeat] must be a number.');
+    if (typeof op !== 'object')
+      throw new Error('\n\n⛔ [animare] ➡️ [setTimelineOptions] ➡️ [options] : expects an object as the first argument. !!\n\n');
+    if (op.repeat && typeof op.repeat !== 'number')
+      throw new Error('\n\n⛔ [animare] ➡️ [setTimelineOptions] ➡️ [options] : `repeat` must be a number. !!\n\n');
     tlOptions = { ...tlOptions, ...op };
     tlRepeatCount = [...(options.to as number[])].fill(tlOptions.repeat);
     if (reqId) excuteDuration = calculateTime();
   };
 
   const onStart: returnedObject['onStart'] = cb => {
-    if (typeof cb !== 'function') throw new Error('[onStart] param must be a callback function');
+    if (typeof cb !== 'function')
+      throw new Error('\n\n⛔ [animare] ➡️ [onStart] : first param must be a callback function. !!\n\n');
 
     const id = `onStart_${Math.random() * 100}`;
     listeners.onStart.push({ cb, id });
@@ -625,7 +637,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const onFinish: returnedObject['onFinish'] = cb => {
-    if (typeof cb !== 'function') throw new Error('animare: [onFinish] accept a callback function only');
+    if (typeof cb !== 'function') throw new Error('\n\n⛔ [animare] ➡️ [onFinish] : accepts a callback function only. !!\n\n');
 
     const id = `onFinish_${Math.random()}`;
     listeners.onFinish.push({ cb, id });
@@ -644,9 +656,11 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const onProgress: returnedObject['onProgress'] = (at, cb) => {
-    if (typeof at !== 'number') throw new Error('animare: [onProgress] accept a number as the first argument.');
-    if (at < 0 || at > 1) throw new Error('animare: [onProgress] [at] must be between 0 and 1');
-    if (typeof cb !== 'function') throw new Error('animare: [onFinish] accept a callback function only');
+    if (typeof at !== 'number')
+      throw new Error('\n\n⛔ [animare] ➡️ [onProgress] :  accepts a number as the first argument. !!\n\n');
+    if (at < 0 || at > 1)
+      throw new Error('\n\n⛔ [animare] ➡️ [onProgress] : first param must be a number between `0` and `1`. !!\n\n');
+    if (typeof cb !== 'function') throw new Error('\n\n⛔ [animare] ➡️ [onProgress] :  accepts a callback function only. !!\n\n');
 
     const id = `onProgress_${Math.random()}`;
     listeners.onProgress.push({ at, cb, id });
@@ -658,8 +672,10 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const onProgressAsync: returnedObject['onProgressAsync'] = at => {
-    if (typeof at !== 'number') throw new Error('animare: [onProgress] accept a number as the first argument.');
-    if (at < 0 || at > 1) throw new Error('animare: [onProgress] first argument must be a number between 0 and 1');
+    if (typeof at !== 'number')
+      throw new Error('\n\n⛔ [animare] ➡️ [onProgressAsync] : accepta a number as the first argument. !!\n\n');
+    if (at < 0 || at > 1)
+      throw new Error('\n\n⛔ [animare] ➡️ [onProgressAsync] :  first argument must be a number between `0` and `1`. !!\n\n');
 
     if (resolveAsyncOnProgress) return;
 
@@ -670,9 +686,11 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
   const setOptions: returnedObject['setOptions'] = (op, index = 0) => {
     if (typeof op !== 'object' || Array.isArray(op))
-      throw new Error('animare: setOptions() expects an object as the first argument.');
-    if (typeof index !== 'number') throw new Error('animare: setOptions() expects a number as the second argument.');
-    if (index < 0 || index >= timeline.length) throw new Error('animare: setOptions() [index] is out of range.');
+      throw new Error('\n\n⛔ [animare] ➡️ [setOptions] : expects an object as the first argument. !!\n\n');
+    if (typeof index !== 'number')
+      throw new Error('\n\n⛔ [animare] ➡️ [setOptions] : expects a number as the second argument. !!\n\n');
+    if (index < 0 || index >= timeline.length)
+      throw new Error('\n\n⛔ [animare] ➡️ [setOptions] : second argument `index` is out of range. !!\n\n');
 
     const isTo = op.to !== undefined; // is [to] entered.
     const isDuration = op.duration !== undefined; // is [duration] entered.
@@ -747,7 +765,8 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const getOptions: returnedObject['getOptions'] = (index = 0): animareOptions => {
-    if (index > timeline.length - 1) throw new Error('animare: getOptions() index out of range.');
+    if (index > timeline.length - 1)
+      throw new Error('\n\n⛔ [animare] ➡️ [getOptions] : first argument `index` is out of range. !!\n\n');
     return timeline[index].options;
   };
 

@@ -147,7 +147,7 @@ function HEX_RGB(hex: string) {
     getChunksFromString = (st: string, chunkSize: number) => st.match(new RegExp(`.{${chunkSize}}`, 'g')),
     convertHexUnitTo256 = (hexStr: string) => parseInt(hexStr.repeat(2 / hexStr.length), 16);
 
-  if (!isValidHex(hex)) throw new Error('[animare] Invalid HEX');
+  if (!isValidHex(hex)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HEX color format !!\n\n');
 
   const chunkSize = Math.floor((hex.length - 1) / 3),
     hexArr = getChunksFromString(hex.slice(1), chunkSize) as string[],
@@ -184,21 +184,21 @@ export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): 
 
   if (isRgba) {
     const match = colorStr.match(regex)?.[1];
-    if (!match) throw new Error('[animare] Invalid RGBA value');
+    if (!match) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGBA color format !!\n\n');
     const colorValues = match.split(',');
-    if (colorValues.length !== 4) throw new Error('[animare] Invalid RGBA value');
+    if (colorValues.length !== 4) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGBA color format !!\n\n');
     const [r, g, b, a] = colorValues.map(v => +v);
-    if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) throw new Error('[animare] Invalid RGBA value');
+    if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGBA color format !!\n\n');
     return [r, g, b, a];
   }
 
   if (isRgb) {
     const match = colorStr.match(regex)?.[1];
-    if (!match) throw new Error('[animare] Invalid RGB value');
+    if (!match) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGB color format !!\n\n');
     const colorValues = match.split(',');
-    if (colorValues.length !== 3) throw new Error('[animare] Invalid RGB value');
+    if (colorValues.length !== 3) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGB color format !!\n\n');
     const [r, g, b] = colorValues.map(v => +v);
-    if (isNaN(r) || isNaN(g) || isNaN(b)) throw new Error('[animare] Invalid RGB value');
+    if (isNaN(r) || isNaN(g) || isNaN(b)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGB color format !!\n\n');
     return [r, g, b, 1];
   }
 
@@ -208,24 +208,24 @@ export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): 
 
   if (isHsla) {
     const match = colorStr.match(regex)?.[1];
-    if (!match) throw new Error('[animare] Invalid HSLA value');
+    if (!match) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSLA color format !!\n\n');
     const colorValues = match.split(',');
-    if (colorValues.length !== 4) throw new Error('[animare] Invalid HSLA value');
+    if (colorValues.length !== 4) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSLA color format !!\n\n');
     const [h, s, l, a] = colorValues.map(v => +v.replace('%', '').replace('deg', ''));
     console.log('a :', a);
-    if (isNaN(h) || isNaN(s) || isNaN(l) || isNaN(a)) throw new Error('[animare] Invalid HSLA value');
+    if (isNaN(h) || isNaN(s) || isNaN(l) || isNaN(a)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSLA color format !!\n\n');
     return [...HSL_RGB(h, s, l), isNaN(a / 100) ? 0 : a / 100];
   }
 
   if (isHsl) {
     const match = colorStr.match(regex)?.[1];
-    if (!match) throw new Error('[animare] Invalid HSL value');
+    if (!match) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSL color format !!\n\n');
     const colorValues = match.split(',');
-    if (colorValues.length !== 3) throw new Error('[animare] Invalid HSL value');
+    if (colorValues.length !== 3) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSL color format !!\n\n');
     const [h, s, l] = colorValues.map(v => +v.replace('%', '').replace('deg', ''));
-    if (isNaN(h) || isNaN(s) || isNaN(l)) throw new Error('[animare] Invalid HSL value');
+    if (isNaN(h) || isNaN(s) || isNaN(l)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSL color format !!\n\n');
     return HSL_RGB(h, s, l);
   }
 
-  throw new Error('[animare] Invalid color');
+  throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid color format !!\n\n');
 }

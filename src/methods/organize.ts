@@ -16,11 +16,11 @@ type organizeOptions<T extends number | string = number> = {
 
 /**
  * - A helper function to organize the options for the animation.
- * @param ob - options: `{name: {from: number, to: number, ...}, ...}`
+ * @param animatedValuesOptions - options: `{name: {from: number, to: number, ...}, ...}`
  * @param defaults - changes the default values for each option.
  */
 export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['to'] extends string ? string : number> }>(
-  ob: T,
+  animatedValuesOptions: T,
   defaults: Omit<organizeOptions, 'to'> = {}
 ) {
   defaults.from ??= 0;
@@ -33,15 +33,23 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
 
   const typeColor: { [key in keyof T]: { from: number[]; to: number[] } } = Object.create(null);
 
-  const ent = Object.entries<organizeOptions<T[keyof T]['to'] extends string ? string : number>>(ob),
-    from = ent.map(e => (typeof e[1].from === 'string' ? 0 : e[1].from ?? defaults.from)) as number[],
+  const ent = Object.entries<organizeOptions<T[keyof T]['to'] extends string ? string : number>>(animatedValuesOptions),
+    from = ent.map(e => {
+      if (typeof e[1].from === 'string') {
+        if (typeof animatedValuesOptions[e[0] as keyof T].to === 'number')
+          throw new Error(`\n\n⛔ [animare] ➡️ [organize] ➡️ [${e[0]}] \`to\` should match the type of \`from\`\n\n`);
+        return 0;
+      }
+      return e[1].from ?? defaults.from;
+    }) as number[],
     to = ent.map(e => {
       if (typeof e[1].to === 'string') {
-        if (typeof ob[e[0] as keyof T].from === 'number') throw new Error('[animare] `from` should match the type of `to`');
+        if (typeof animatedValuesOptions[e[0] as keyof T].from === 'number')
+          throw new Error(`\n\n⛔ [animare] ➡️ [organize] ➡️ [${e[0]}] \`from\` should match the type of \`to\`\n\n`);
 
         typeColor[e[0] as keyof T] = {
-          from: colorToArr((ob[e[0] as keyof T].from as string) ?? '#ffffff'),
-          to: colorToArr(ob[e[0] as keyof T].to as string),
+          from: colorToArr((animatedValuesOptions[e[0] as keyof T].from as string) ?? '#ffffff'),
+          to: colorToArr(animatedValuesOptions[e[0] as keyof T].to as string),
         };
         return 1;
       }
@@ -53,18 +61,21 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
     repeat = ent.map(e => e[1].repeat ?? defaults.repeat) as number[],
     direction = ent.map(e => e[1].direction ?? defaults.direction) as (keyof typeof DIRECTION)[],
     ease = ent.map(e => e[1].ease ?? defaults.ease) as ((x: number) => number)[],
-    names = Object.keys(ob) as (keyof T)[];
+    names = Object.keys(animatedValuesOptions) as (keyof T)[];
 
-  const get = (animareArray: number[]) => {
+  const get = (valuesArray: number[]) => {
+    if (valuesArray.length !== names.length)
+      throw new Error('\n\n⛔ [animare] ➡️ [organize] ➡️ [get] : passed `valuesArray` length does not match !!\n\n');
+
     const res: { [key in keyof T]: T[key]['to'] } = Object.create(null);
-    for (let i = 0; i < animareArray.length; i++) {
+    for (let i = 0; i < valuesArray.length; i++) {
       // pass a color string as rgb
       if (typeColor[names[i]]) {
-        res[names[i]] = animateColor(typeColor[names[i]].from, typeColor[names[i]].to, animareArray[i]) as any;
+        res[names[i]] = animateColor(typeColor[names[i]].from, typeColor[names[i]].to, valuesArray[i]) as any;
         continue;
       }
 
-      res[names[i]] = animareArray[i] as any; // pass a number value
+      res[names[i]] = valuesArray[i] as any; // pass a number value
     }
     return res;
   };
@@ -73,7 +84,20 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
     for (let i = 0; i < names.length; i++) if (names[i] === valueName) return i;
   };
 
-  const patch = (patchOb?: Partial<{ [key in keyof T]: organizeOptions }>) => organize(Object.assign({}, ob, patchOb));
+  const copy = (patchValuesOptions?: Partial<{ [key in keyof T]: organizeOptions }>, patchDefaults?: typeof defaults) => {
+    if (!patchValuesOptions && !patchDefaults) return organize(animatedValuesOptions, defaults);
+
+    if (!patchValuesOptions) return organize(animatedValuesOptions, { ...defaults, ...patchDefaults });
+
+    const newOb = { ...animatedValuesOptions };
+    const patchKeys = Object.keys(patchValuesOptions) as (keyof T)[];
+    for (let i = 0; i < patchKeys.length; i++) {
+      const key = patchKeys[i];
+      if (key in newOb) newOb[key] = { ...newOb[key], ...patchValuesOptions[key] };
+    }
+
+    return organize(newOb, { ...defaults, ...patchDefaults });
+  };
 
   return {
     from,
@@ -92,7 +116,7 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
      */
     get,
     /** - Creates a new copy with patched options.*/
-    patch,
+    copy,
   };
 }
 
