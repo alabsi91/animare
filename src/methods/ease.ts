@@ -1,3 +1,5 @@
+import cubicBezier from './cubicBezier';
+
 export const ease = {
   /** - ease in functions */
   in: {
@@ -116,12 +118,15 @@ export const ease = {
 
   /** - default easing function. */
   linear: (x: number): number => x,
+
   /**
    * - defines a [cubic Bézier curve](https://developer.mozilla.org/en-US/docs/Glossary/Bezier_curve).
    * - similar to CSS's **cubic-bezier** easing  function.
-   * **Syntax:** `cubicBezier(x1, y1, x2, y2)`
+   * **Syntax:** `cubicBezier(X1: number, Y1: number, X2: number, Y2: number)`
    */
-  cubicBezier: (X1: number, Y1: number, X2: number, Y2: number) => ease.custom(`M 0 0 C ${X1} ${Y1} ${X2} ${Y2} 1 1`),
+  cubicBezier,
+  // cubicBezier: (X1: number, Y1: number, X2: number, Y2: number) => ease.custom(`M 0 0 C ${X1} ${Y1} ${X2} ${Y2} 1 1`),
+
   /**
    * - takes svg path d attribute as a string.
    * - **custom ease:** check out [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) to learn more.
@@ -130,17 +135,17 @@ export const ease = {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     const pathLength = path.getTotalLength();
-    return (x: number): number => {
+    return (progress: number): number => {
       let start = 0;
       let end = pathLength;
       let target = (start + end) / 2;
-      let result = x;
+      let result = progress;
       while (target >= start && target <= pathLength) {
         const pos = path.getPointAtLength(target);
-        if (Math.abs(pos.x - x) <= (x === 1 ? 0 : 0.001)) {
+        if (Math.abs(pos.x - progress) <= (progress === 1 ? 0 : 0.001)) {
           result = pos.y;
           return result;
-        } else if (pos.x >= x) {
+        } else if (pos.x >= progress) {
           end = target;
         } else {
           start = target;
@@ -148,6 +153,47 @@ export const ease = {
         target = (start + end) / 2;
       }
       return result;
+    };
+  },
+
+  /**
+   * - Create a staircase easing function.
+   * @param steps - The number of steps.
+   * @param start - Step at the beginning or at the end of each interval ?
+   */
+  steps(steps = 10, start = true) {
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+    const trunc = start ? Math.ceil : Math.floor;
+    return (progress: number) => trunc(clamp(progress, 0, 1) * steps) / steps;
+  },
+
+  /**
+   * - The spring easing function will only look smooth at certain durations, with certain parameters.
+   */
+  spring: ({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 } = {}) => {
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+    return (time: number) => {
+      if (time === 0 || time === 1) return time;
+
+      mass = clamp(mass, 0.1, 1000);
+      stiffness = clamp(stiffness, 0.1, 1000);
+      damping = clamp(damping, 0.1, 1000);
+      velocity = clamp(velocity, 0.1, 1000);
+
+      const w0 = Math.sqrt(stiffness / mass),
+        zeta = damping / (2 * Math.sqrt(stiffness * mass)),
+        wd = zeta < 1 ? w0 * Math.sqrt(1 - zeta * zeta) : 0,
+        a = 1,
+        b = zeta < 1 ? (zeta * w0 + -velocity) / wd : -velocity + w0;
+
+      let progress = duration ? (duration * time) / 1000 : time;
+
+      progress =
+        zeta < 1
+          ? Math.exp(-progress * zeta * w0) * (a * Math.cos(wd * progress) + b * Math.sin(wd * progress))
+          : (a + b * progress) * Math.exp(-progress * w0);
+
+      return 1 - progress;
     };
   },
 };
