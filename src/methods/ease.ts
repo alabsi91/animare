@@ -44,15 +44,10 @@ export const ease = {
     bounce: (x: number): number => {
       const n1 = 7.5625;
       const d1 = 2.75;
-      if (x < 1 / d1) {
-        return n1 * x * x;
-      } else if (x < 2 / d1) {
-        return n1 * (x -= 1.5 / d1) * x + 0.75;
-      } else if (x < 2.5 / d1) {
-        return n1 * (x -= 2.25 / d1) * x + 0.9375;
-      } else {
-        return n1 * (x -= 2.625 / d1) * x + 0.984375;
-      }
+      if (x < 1 / d1) return n1 * x * x;
+      if (x < 2 / d1) return n1 * (x -= 1.5 / d1) * x + 0.75;
+      if (x < 2.5 / d1) return n1 * (x -= 2.25 / d1) * x + 0.9375;
+      return n1 * (x -= 2.625 / d1) * x + 0.984375;
     },
     /** - **easeOutCric:** check out [easings.net](https://easings.net/#easeOutCric) to learn more.*/
     circ: (x: number): number => Math.sqrt(1 - Math.pow(x - 1, 2)),
@@ -123,18 +118,30 @@ export const ease = {
    * - defines a [cubic Bézier curve](https://developer.mozilla.org/en-US/docs/Glossary/Bezier_curve).
    * - similar to CSS's **cubic-bezier** easing  function.
    * **Syntax:** `cubicBezier(X1: number, Y1: number, X2: number, Y2: number)`
+   * @example
+   * ```js
+   * import animare, { ease } from 'animare';
+   *
+   * animare({ to: 100, ease: ease.cubicBezier(0.25, 0.1, 0.25, 1) }, onUpdate);
+   *
+   * // ...
+   * ```
    */
   cubicBezier,
   // cubicBezier: (X1: number, Y1: number, X2: number, Y2: number) => ease.custom(`M 0 0 C ${X1} ${Y1} ${X2} ${Y2} 1 1`),
 
   /**
-   * - takes svg path d attribute as a string.
-   * - **custom ease:** check out [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) to learn more.
+   * - takes SVG path d attribute as a string.
+   * - **Warning:** this may cause frames drops, if so try `ease.fromPoints(values: Float32List)` instead.
+   * - Use [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool to create easing function.
    */
   custom: (d: string): ((x: number) => number) => {
+    if (typeof d !== 'string') throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [custom] : first param must be a string. !!\n\n');
+
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     const pathLength = path.getTotalLength();
+
     return (progress: number): number => {
       let start = 0;
       let end = pathLength;
@@ -157,9 +164,42 @@ export const ease = {
   },
 
   /**
+   * - Custom easing function from array of points.
+   * - Use [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool to create easing function.
+   * - **Syntax:** `ease.fromPoints(values: Float32List)`
+   * @example
+   * ```js
+   * import animare, { ease } from 'animare';
+   * // custom easing function created by Animare Ease Visualizer
+   * import myEase from './myEase.js';
+   *
+   * animare({ to: 100, ease: ease.fromPoints(myEase) }, onUpdate);
+   *
+   * // ...
+   *```
+   */
+  fromPoints: (values: Float32List) => {
+    if (!(values instanceof Float32Array) && !Array.isArray(values))
+      throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [fromPoints] : first param must be an Array or Float32Array. !!\n\n');
+
+    const length = values.length;
+
+    return (t: number) => values[Math.floor(t * length)] ?? values[length - 1];
+  },
+
+  /**
    * - Create a staircase easing function.
    * @param steps - The number of steps.
    * @param start - Step at the beginning or at the end of each interval ?
+   * @example
+   * ```js
+   * import animare, { ease } from 'animare';
+   *
+   * animare({ to: 100, ease: ease.steps(5) }, onUpdate);
+   *
+   * // ...
+   *
+   * ```
    */
   steps(steps = 10, start = true) {
     const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
@@ -169,6 +209,17 @@ export const ease = {
 
   /**
    * - The spring easing function will only look smooth at certain durations, with certain parameters.
+   * @example
+   * ```js
+   * import animare, { ease } from 'animare';
+   *
+   * animare({
+   *  to: 100,
+   *  ease: ease.spring({ mass: 1, stiffness: 100, damping: 10, velocity: 0, duration: 1000 })
+   * }, onUpdate);
+   *
+   * // ...
+   * ```
    */
   spring: ({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 } = {}) => {
     const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);

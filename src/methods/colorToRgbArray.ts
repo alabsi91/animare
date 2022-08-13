@@ -169,7 +169,15 @@ function HSL_RGB(h: number, s: number, l: number) {
 /**
  * - converts a color to array of RGB values.
  * - the color could be a string of a`hex`, `rgb`, `hsl` or a `named color`.
- * - **Examples:** `colorToRgb('#ff0000')` , `colorToRgb('rgb(255, 0, 0)')` , `colorToRgb('hsl(0, 100%, 50%)')` , `colorToRgb('red')`.
+ *@example
+ * ```js
+ * import { colorToArr } from 'animare';
+ * 
+ * colorToArr('#ff0000');           // 👉 [255, 0, 0]
+ * colorToArr('rgb(255, 0, 0)');    // 👉 [255, 0, 0]
+ * colorToArr('hsl(0, 100%, 50%)'); // 👉 [255, 0, 0]
+ * colorToArr('red');               // 👉 [255, 0, 0]
+ * ```
  */
 export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): number[] {
   colorStr = colorStr.toLowerCase().trim();
@@ -188,7 +196,8 @@ export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): 
     const colorValues = match.split(',');
     if (colorValues.length !== 4) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGBA color format !!\n\n');
     const [r, g, b, a] = colorValues.map(v => +v);
-    if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGBA color format !!\n\n');
+    if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a))
+      throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid RGBA color format !!\n\n');
     return [r, g, b, a];
   }
 
@@ -213,7 +222,8 @@ export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): 
     if (colorValues.length !== 4) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSLA color format !!\n\n');
     const [h, s, l, a] = colorValues.map(v => +v.replace('%', '').replace('deg', ''));
     console.log('a :', a);
-    if (isNaN(h) || isNaN(s) || isNaN(l) || isNaN(a)) throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSLA color format !!\n\n');
+    if (isNaN(h) || isNaN(s) || isNaN(l) || isNaN(a))
+      throw new Error('\n\n⛔ [animare] ➡️ [colorToArr] : Invalid HSLA color format !!\n\n');
     return [...HSL_RGB(h, s, l), isNaN(a / 100) ? 0 : a / 100];
   }
 

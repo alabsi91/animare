@@ -21,103 +21,133 @@ export interface animareOptions extends nextOptions {
 export interface nextOptions {
   /**
    * - start from the current value/s.
-   * **Initial Value** `0 | [0, 0 , ...]`
+   * - **Initial Value** `0 | [0, ...]`
+   * @example
+   * from: 0          // a single value.
+   * from: [0, 0]     // an array of values should have the same length as `to`.
+   * from: i => i + 5 // map through `to` array.
    */
-  from?: number | number[];
+  from?: number | number[] | ((index: number) => number);
 
   /**
    * - end at the current value/s.
-   * **Required**
+   * - **Required**
+   * @example
+   * to: 1      // a single value.
+   * to: [1, 1] // an array of values.
    */
   to: number | number[];
 
   /**
-   * - playing behaviour of the next animation in the timeline.
-   * - `wait` - wait for the all animations in the previous animations to be completed.
-   * - `immediate` - play the next animation immediately after the previous animation completes.
-   * - **Initial Value** `immediate`
+   * - next animation playing behaviour in the timeline.
+   * - `'wait'` - wait for the all animations in the previous animations to be completed.
+   * - `'immediate'` - play the next animation immediately after the previous animation completes.
+   * - **Initial Value** `'immediate'`
    */
   type?: keyof typeof TIMELINE_TYPE;
 
   /**
-   * - the duration the animation/s will take to change the number/s (in milliseconds).
+   * - the duration the animation will take to change the value (in milliseconds).
    * - **Initial Value** `350`
+   * @example
+   * duration: 1000         // a single value applied to all values.
+   * duration: [1000, 1000] // an array of values should have the same length as `to`.
+   * duration: i => i * 100 // map through `to` array.
    */
-  duration?: number | number[];
+  duration?: number | number[] | ((index: number) => number);
 
   /**
-   * - Delay time before starting (in milliseconds).
+   * - delay time before starting (in milliseconds).
    * - **Initial Value** `0`
+   * @example
+   * delay: 1000         // a single value applied to all values.
+   * delay: [1000, 1000] // an array of values should have the same length as `to`.
+   * delay: i => i * 100 // map through `to` array.
    */
-  delay?: number | number[];
+  delay?: number | number[] | ((index: number) => number);
 
   /**
-   * - Apply delay once if there is a repeated animation (in milliseconds).
+   * - apply delay once if there is a repeated animation.
    * - **Initial Value** `false`
+   * @example
+   * delayOnce: true          // a single value applied to all values.
+   * delayOnce: [true, false] // an array of values should have the same length as `to`.
    */
   delayOnce?: boolean | boolean[];
 
   /**
-   * - Easing functions specify the rate of change of the number over time.
+   * - easing functions specify the rate of change of the number over time.
    * - Check [easings.net](https://easings.net/) to learn more.
-   * - **Initial Value** `(x: number) => number`
+   * - **Initial Value** `ease.linear`
+   * @example
+   * ease: ease.linear                // a single value applied to all values.
+   * ease: [ease.linear, ease.linear] // an array of values should have the same length as `to`.
+   * ease: (t) => t * t               // your own easing function.
    */
   ease?: ((x: number) => number) | ((x: number) => number)[];
 
   /**
-   * - Repeat count after the first play.
-   * - `-1` for infinite.
+   * - repeat count after the first play.
+   * - use `-1` for infinite repeats.
    * - **Initial Value** `0`
+   * @example
+   * repeat: 2          // a single value applied to all values.
+   * repeat: -1         // infinite repeats.
+   * repeat: [2, 1]     // an array of values should have the same length as `to`.
+   * repeat: i => i * 2 // map through `to` array.
    */
-  repeat?: number | number[];
+  repeat?: number | number[] | ((i: number) => number);
 
   /**
-   * - Animation direction.
-   * - **Initial Value** `normal`
+   * - animation direction.
+   * - **Initial Value** `'normal'`
+   * @example
+   * direction: 'normal'              // a single value applied to all values.
+   * direction: ['normal', 'reverse'] // an array of values should have the same length as `to`.
    */
   direction?: keyof typeof DIRECTION | (keyof typeof DIRECTION)[];
 }
 
-export type cbInfo = {
+export type animareCallbackOptions = {
   /**
-   * - True only at first frame of the animation.
+   * - true only at first the frame of the animation.
    */
   isFirstFrame: boolean;
 
   /**
-   * - True only when the animation is finished.
+   * - true only when the animation is finished.
    */
   isFinished: boolean;
 
   /**
-   * - Animations progresses an array of numbers between 0 and 1 representing the progress of the animation.
-   * - Reset on every repeat cycle.
+   * - animated values progress : an array of numbers between 0 and 1.
+   * - resets on every repeat cycle.
    */
   progress: number[];
 
   /**
-   * - overall animation progress a number between 0 and 1 including repeats , delays and timeline repeats.
+   * - overall animation's progress a number between 0 and 1 including repeats, delays, and timeline repeats.
    * - returns `-1` if the timeline infinitely repeats.
    */
   timelineProgress: number;
 
   /**
-   * - The current timeline index that the animations are playing on.
+   * - The current timeline index that the animated value are playing on.
    */
   timelineIndex: number[];
 
   /**
-   * - A descending numbers representing the current repeat cycle.
+   * - A descending numbers representing the current repeat cycle for each animated value.
    */
   repeatCount: number[];
 
   /**
-   * - A descending number representing the current repeat cycle.
+   * - A descending number representing the current repeat cycle for each animated value.
    */
   timelineRepeatCount: number[];
 
   /**
-   * - The current alternate cycle that the animations are playing on.
+   * - The current alternate cycle that the animated value is playing on.
    * - for direction type `alternate` or `alternate-reverse`
    */
   alternateCycle: number[];
@@ -134,21 +164,11 @@ export type cbInfo = {
 
   /**
    * - Play the animation forwards.
-   * - **Note**: `play` will match the `direction` property.
-   * - If the animation is already playing or paused, it will be restarted.
-   * - If `autoPlay` is set to `true` it will be started automatically.
-   * - If you want the animation to play backwards, use `.reverse()` method.
    */
   play: () => void;
 
   /**
    * - Play the animation backwards.
-   * - **Note**: `reverse` will reverse the `direction` property.
-   * - `normal` will become `reverse` and `reverse` will become `normal`.
-   * - `alternate` will become `alternate-reverse` and `alternate-reverse` will become `alternate`.
-   * - If the animation is already playing or paused, it will be restarted.
-   * - If `autoPlay` is set to `true` it will play forwards automatically.
-   * - If you want the animation to play forwards, use `.play()` method.
    */
   reverse: () => void;
 
@@ -158,7 +178,8 @@ export type cbInfo = {
   pause: () => void;
 
   /**
-   * - Stop the animation at the beginning or at the end.
+   * - Stop the animation at the beginning or at the end of the timeline.
+   * - **Initial Value** `true`
    */
   stop: (stopAtStart?: boolean) => void;
 
@@ -173,7 +194,7 @@ export type cbInfo = {
   getOptions: (animationIndex?: number) => animareOptions;
 };
 
-export interface timelineOptions {
+export interface animareTimelineOptions {
   /**
    * - Repeat count after the first timeLine play.
    * - infinite if replay is set to `-1` .
@@ -189,7 +210,7 @@ export interface timelineOptions {
   speed?: number;
 }
 
-export interface returnedObject {
+export interface animareReturnedObject {
   /**
    * - Play the animation forwards.
    * - **Note**: `play` will match the `direction` property.
@@ -262,7 +283,7 @@ export interface returnedObject {
    */
   onProgressAsync: (at: number) => Promise<unknown> | undefined;
 
-  setTimelineOptions: (options: timelineOptions) => void;
+  setTimelineOptions: (options: animareTimelineOptions) => void;
 
   /**
    * - Change the animation's initial options.
@@ -280,7 +301,7 @@ export interface returnedObject {
    * - [duration] , [ease] and [type] will be inherited from the previous animation in the timeline if not specified.
    * - [from] will be when the previous animation stoped if not specified.
    */
-  next: (options: nextOptions) => returnedObject;
+  next: (options: nextOptions) => animareReturnedObject;
 }
 
 export interface Ilisteners {
@@ -289,4 +310,4 @@ export interface Ilisteners {
   onProgress: { at: number | string; id: string; cb: Function }[];
 }
 
-export type animareOnUpdate = (values: number[], info: cbInfo) => void;
+export type animareOnUpdate = (values: number[], info: animareCallbackOptions) => void;

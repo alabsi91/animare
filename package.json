@@ -1,8 +1,8 @@
 {
   "name": "animare",
-  "version": "0.0.0-beta.10",
-  "description": "Light animation library based on requestanimationframe ",
-  "author": "Ahmed Alabsi <alabsi91@gmail.com",
+  "version": "0.0.0-beta.21",
+  "description": "Light animation library based on requestanimationframe",
+  "author": "Ahmed Alabsi <alabsi91@gmail.com>",
   "license": "MIT",
   "main": "lib/animare.js",
   "types": "lib/animare.d.ts",
@@ -13,6 +13,25 @@
   "files": [
     "lib"
   ],
+  "exports": {
+    "./react": {
+      "import": "./lib/react/useAnimare.js",
+      "default": "./lib/react/useAnimare.js",
+      "types": "./lib/react/useAnimare.d.ts"
+    },
+    ".": {
+      "import": "./lib/animare.js",
+      "default": "./lib/animare.js",
+      "types": "./lib/animare.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "react": [
+        "lib/react/useAnimare.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "prepublishOnly": "node scripts/pre-publish.js",
     "build": "npm run build-ts && npm run build-babel",
@@ -27,6 +46,7 @@
     "transition",
     "ease",
     "easing",
+    "react",
     "visual-timing-functions"
   ],
   "browserslist": "> 0.5%, not dead",
@@ -37,8 +57,15 @@
   "devDependencies": {
     "@babel/cli": "^7.17.6",
     "@babel/preset-env": "^7.16.11",
+    "@types/react": "^18.0.17",
     "babel-minify": "^0.5.1",
     "colors": "^1.4.0",
+    "react": "^18.2.0",
     "typescript": "^4.6.4"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

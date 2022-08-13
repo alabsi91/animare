@@ -18,6 +18,21 @@ type organizeOptions<T extends number | string = number> = {
  * - A helper function to organize the options for the animation.
  * @param animatedValuesOptions - options: `{name: {from: number, to: number, ...}, ...}`
  * @param defaults - changes the default values for each option.
+ * @example
+ * ```javascript
+ * import animare, { organize } from 'animare';
+ *
+ * const { from, to, duration, get } = organize({
+ *  opacity: { to: 1 },
+ *  width: { from: 50, to: 100, duration: 1000 },
+ *  color: { from: 'red', to: 'orange', duration: 1500 },
+ * });
+ *
+ * animare({ from, to, duration }, values => {
+ *  const { opacity, width, color } = get(values);
+ *  // ...
+ * });
+ * ```
  */
 export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['to'] extends string ? string : number> }>(
   animatedValuesOptions: T,
