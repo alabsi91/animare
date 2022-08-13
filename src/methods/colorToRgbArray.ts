@@ -172,19 +172,21 @@ function HSL_RGB(h: number, s: number, l: number) {
  *@example
  * ```js
  * import { colorToArr } from 'animare';
- * 
+ *
  * colorToArr('#ff0000');           // 👉 [255, 0, 0]
  * colorToArr('rgb(255, 0, 0)');    // 👉 [255, 0, 0]
  * colorToArr('hsl(0, 100%, 50%)'); // 👉 [255, 0, 0]
  * colorToArr('red');               // 👉 [255, 0, 0]
  * ```
  */
-export function colorToArr(colorStr: keyof typeof colorsNames | (string & {})): number[] {
+export function colorToArr(colorStr: keyof typeof colorsNames): number[];
+export function colorToArr(colorStr: string): number[];
+export function colorToArr(colorStr: string): number[] {
   colorStr = colorStr.toLowerCase().trim();
   const isRgba = colorStr.startsWith('rgba'),
     isRgb = colorStr.startsWith('rgb'),
     isHex = colorStr.startsWith('#'),
-    isNamedColor = colorsNames.hasOwnProperty(colorStr),
+    isNamedColor = Object.prototype.hasOwnProperty.call(colorsNames, 'colorStr'),
     isHsla = colorStr.startsWith('hsla'),
     isHsl = colorStr.startsWith('hsl');
 

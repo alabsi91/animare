@@ -1,11 +1,11 @@
 {
   "name": "animare",
-  "version": "0.0.0-beta.21",
+  "version": "1.1.0-beta.3",
   "description": "Light animation library based on requestanimationframe",
   "author": "Ahmed Alabsi <alabsi91@gmail.com>",
   "license": "MIT",
-  "main": "lib/animare.js",
-  "types": "lib/animare.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alabsi91/animare.git"
@@ -15,25 +15,25 @@
   ],
   "exports": {
     "./react": {
-      "import": "./lib/react/useAnimare.js",
-      "default": "./lib/react/useAnimare.js",
-      "types": "./lib/react/useAnimare.d.ts"
+      "import": "./lib/react/index.js",
+      "default": "./lib/react/index.js",
+      "types": "./lib/react/index.d.ts"
     },
     ".": {
-      "import": "./lib/animare.js",
-      "default": "./lib/animare.js",
-      "types": "./lib/animare.d.ts"
+      "import": "./lib/index.js",
+      "default": "./lib/index.js",
+      "types": "./lib/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "react": [
-        "lib/react/useAnimare.d.ts"
+        "lib/react/index.d.ts"
       ]
     }
   },
   "scripts": {
-    "prepublishOnly": "node scripts/pre-publish.js",
+    "prepublishOnly": "node scripts/pre-publish.mjs",
     "build": "npm run build-ts && npm run build-babel",
     "build-babel": "babel lib -d lib",
     "build-ts": "tsc"
@@ -58,10 +58,13 @@
     "@babel/cli": "^7.17.6",
     "@babel/preset-env": "^7.16.11",
     "@types/react": "^18.0.17",
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
     "babel-minify": "^0.5.1",
-    "colors": "^1.4.0",
+    "chalk": "^5.0.1",
+    "eslint": "^8.21.0",
     "react": "^18.2.0",
-    "typescript": "^4.6.4"
+    "typescript": "^4.7.4"
   },
   "peerDependenciesMeta": {
     "react": {

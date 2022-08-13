@@ -86,10 +86,12 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
     for (let i = 0; i < valuesArray.length; i++) {
       // pass a color string as rgb
       if (typeColor[names[i]]) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         res[names[i]] = animateColor(typeColor[names[i]].from, typeColor[names[i]].to, valuesArray[i]) as any;
         continue;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       res[names[i]] = valuesArray[i] as any; // pass a number value
     }
     return res;

@@ -253,14 +253,14 @@ export interface animareReturnedObject {
    * - A callback function will be called when the animation is started.
    * - Returns a function to stop listening to the start event.
    */
-  onStart: (callback: Function) => Function;
+  onStart: (callback: () => void) => () => void;
 
   /**
    * - Listen to the animation's finish event.
    * - A callback function will be called when the animation is finished.
    * - Returns a function to stop listening to the progress event.
    */
-  onFinish: (callback: Function) => Function;
+  onFinish: (callback: () => void) => () => void;
 
   /**
    * - Async function that resolves when the animation is finished.
@@ -274,7 +274,7 @@ export interface animareReturnedObject {
    * - 3rd argument is the repeat count that the event will be fired at. set to `0` by default.
    * - Returns a function to stop listening to the progress event.
    */
-  onProgress: (at: number, callback: Function) => Function;
+  onProgress: (at: number, callback: () => void) => () => void;
 
   /**
    * - Async function that resolves when the animation reaches the progress point.
@@ -305,9 +305,9 @@ export interface animareReturnedObject {
 }
 
 export interface Ilisteners {
-  onStart: { id: string; cb: Function }[];
-  onFinish: { id: string; cb: Function }[];
-  onProgress: { at: number | string; id: string; cb: Function }[];
+  onStart: { id: string; cb: () => void }[];
+  onFinish: { id: string; cb: () => void }[];
+  onProgress: { at: number | string; id: string; cb: () => void }[];
 }
 
 export type animareOnUpdate = (values: number[], info: animareCallbackOptions) => void;
