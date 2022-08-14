@@ -269,17 +269,15 @@ export interface animareReturnedObject {
 
   /**
    * - Listen to the animation's progress event.
-   * - 1st argument accepts a number as current time in milliseconds or a string representing the progress "e.g. `'50%'`".
+   * - 1st argument accepts a number as progress percentage between 0 and 1.
    * - 2nd argument is a callback function that will be called when the animation reaches the progress point.
-   * - 3rd argument is the repeat count that the event will be fired at. set to `0` by default.
    * - Returns a function to stop listening to the progress event.
    */
   onProgress: (at: number, callback: () => void) => () => void;
 
   /**
    * - Async function that resolves when the animation reaches the progress point.
-   * - 1st argument accepts a number as current time in milliseconds or a string representing the progress "e.g. `'50%'`".
-   * - 2nd argument is the repeat count that the event will be fired at. set to `0` by default.
+   * - 1st argument accepts a number as progress percentage between 0 and 1.
    */
   onProgressAsync: (at: number) => Promise<unknown> | undefined;
 
@@ -298,7 +296,7 @@ export interface animareReturnedObject {
   /**
    * - Play sequence of animations.
    * - Accepts same options as animare function.
-   * - [duration] , [ease] and [type] will be inherited from the previous animation in the timeline if not specified.
+   * - [duration], [ease], and [type] will be inherited from the previous animation in the timeline if not specified.
    * - [from] will be when the previous animation stoped if not specified.
    */
   next: (options: nextOptions) => animareReturnedObject;

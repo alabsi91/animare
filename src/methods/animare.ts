@@ -3,7 +3,9 @@ import { animareOnUpdate, animareOptions, DIRECTION, Ilisteners, animareReturned
 export function animare(options: animareOptions, callback: animareOnUpdate) {
   if (typeof options !== 'object' || Array.isArray(options))
     throw new Error('\n\n⛔ [animare] : expects an object as the first argument. \n\n');
+
   options.to = Array.isArray(options.to) ? options.to : [options.to];
+  /** - save user's inputs for later to determine default values. */
   const userInput = { ...options };
   options.from ??= 0;
   options.delay ??= 0;
@@ -88,54 +90,79 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
   checkInputs(options);
 
-  let start: number[] = [], // start time of each animation.
-    fpsTimeStamp: number, // used to calulate fps.
-    excuteTimeStamp: number, // start time used to calculate overall progress.
-    excuteDuration: number, // duration of the excute function.
-    isFirstFrame: boolean, // is the first frame of the animation
-    pausedAt: number | null, // time when the animation was paused.
-    isStoped: boolean, // to play one frame only for stop method.
-    isReversePlay = false, // is the animation playing backward?
-    resolveAsyncOnFinish: ((value: PromiseLike<never>) => void) | null, // to resolve the promise when the animation is finished.
-    resolveAsyncOnProgress: { at: number; resolve: (value: PromiseLike<never>) => void } | null, // to resolve the promise for onProgressAsync event.
-    reqId: number | null, // requestAnimationFrame id used to cancel the animation.
-    diff: number | null, //
-    timer: number; // timer to detect when the browser is pausing the animation.
+  /** - start time of each animation. */
+  let start: number[] = [],
+    /** - used to calulate fps. */
+    fpsTimeStamp: number,
+    /** - start time used to calculate overall progress. */
+    excuteTimeStamp: number,
+    /** - duration of the excute function. */
+    excuteDuration: number,
+    /** - is the first frame of the animation. */
+    isFirstFrame: boolean,
+    /** - time when the animation was paused. */
+    pausedAt: number | null,
+    /** - to play one frame only for stop method. */
+    isStoped: boolean,
+    /** - is the animation playing backward ? */
+    isReversePlay = false,
+    /** - to resolve the promise when the animation is finished for `onFinishAsync` . */
+    resolveAsyncOnFinish: ((value: PromiseLike<never>) => void) | null,
+    /** - to resolve the promise for `onProgressAsync` event. */
+    resolveAsyncOnProgress: { at: number; resolve: (value: PromiseLike<never>) => void } | null,
+    /** - requestAnimationFrame ID used to cancel the animation.*/
+    reqId: number | null,
+    /** - to correct start time when the browser pauses the animation. */
+    diff: number | null,
+    /** - initial repeat count used during animation's execution. */
+    repeatCount = Array.isArray(options.repeat) ? [...options.repeat] : [...options.to].fill(options.repeat as number),
+    /** - timeline options. */
+    tlOptions = { repeat: 0, speed: 1 }, // ? maybe add more options in the future? like timeline direction.
+    /** - the number of repeats is left in the timeline. */
+    tlRepeatCount = new Array<number>(options.to.length).fill(tlOptions.repeat);
 
-  const progresses = [...options.to].fill(0); // progress of each animation.
-
-  // create initial repeat count from [repeat]
-  // if [repeat] is not an array, create an array with the same length as [to]
-  let repeatCount = Array.isArray(options.repeat) ? [...options.repeat] : [...options.to].fill(options.repeat as number);
-
-  const alternateCycle = [...options.to].fill(1);
-
-  // finished animations indexes will be stored here.
-  const finished = new Set<number>();
-  // used to fill the animation value when it's finished and other animations still playing to keep the passed array of values at the same length
-  const lastKnownValue: number[] = [];
-
-  const timeline = [
-    {
-      options: { ...options },
-      userInput, // used to know how to set the default values when the user changes the options using setOptions method.
+  /** - the progress of each animated value. */
+  const progresses = new Array<number>(options.to.length).fill(0),
+    /** - the alternate cycle of each animated value. */
+    alternateCycle = new Array<1 | 2>(options.to.length).fill(1),
+    /** - finished animated values indexes will be stored here.*/
+    finished = new Set<number>(),
+    /** - if the animated value not changing (delayed or finished) last known value of it will be used as a placeholder. */
+    lastKnownValue: number[] = [],
+    /** - array of animations. */
+    timeline = [{ options: { ...options }, userInput }],
+    /** - in which timeline every animated value is at. */
+    timelineAt = new Array<number>(options.to.length).fill(0),
+    /** - to save animation's events listeners. */
+    listeners: Ilisteners = {
+      onProgress: [], // save progress listeners at, callback, repeatAt, and id.
+      onStart: [], // save start listeners callback and id.
+      onFinish: [], // save finish listeners callback and id.
     },
-  ];
+    /** - save progress listerners IDES or asyncsOnProgress times to prevent multiple calls.*/
+    progressTimeSet = new Set<string>();
 
-  const timelineAt = [...options.to].fill(0);
-
-  let tlOptions = { repeat: 0, speed: 1 }, // ? maybe add more options in the future? like timeline direction.
-    tlRepeatCount = [...options.to].fill(tlOptions.repeat); // number of repeats left on the timeline is not set yet.
-
-  const listeners: Ilisteners = {
-    onProgress: [], // save progress listeners at, callback, repeatAt, and id.
-    onStart: [], // save start listeners callback and id.
-    onFinish: [], // save finish listeners callback and id.
+  /** - to correct progress when the browser is pausing the animation.
+   * ! ⚠️ this may not work perfectly in all browsers especially `Safari`. */
+  const visibilitychange = {
+    isExist: false,
+    add: () => {
+      if (visibilitychange.isExist) return;
+      document.addEventListener('visibilitychange', visibilitychange.handle, false);
+      visibilitychange.isExist = true;
+    },
+    remove: () => {
+      document.removeEventListener('visibilitychange', visibilitychange.handle, false);
+      visibilitychange.isExist = false;
+    },
+    handle: () => {
+      if (document.visibilityState === 'hidden') diff = performance.now();
+    },
   };
 
-  const progressTimeSet = new Set<string>(); // save progress listerners id's or asyncsOnProgress times to prevent multiple calls.
-
   const startAnim = (timeStamp: number) => {
+    visibilitychange.add();
+
     start = [...(options.to as number[])].fill(timeStamp);
     excuteTimeStamp = fpsTimeStamp = timeStamp;
     // fire onStart event listeners.
@@ -155,13 +182,6 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
       diff = null;
     }
 
-    // to detect when the browser is pausing the animation.
-    // ! I'm not sure 60ms is gonna be enough for all browsers on all devices.
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      diff = now;
-    }, 60);
-
     const callbackParams: number[] = [];
 
     for (let i = 0; i < (options.to as number[]).length; i++) {
@@ -170,13 +190,11 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
         callbackParams.push(lastKnownValue[i]); // put a value until animation starts
         continue;
       }
-      // get animation options from the current timeline.
+      /** - store current animation's options from `timeline`. */
       const op = timeline[timelineAt[i]].options;
       // if [direction] is an array pick the value at the current index , if doesn't exist use `normal`.
       // if [direction] is a single value (string), use that value for all animations.
-      const direction = Array.isArray(op.direction)
-        ? op.direction[i] ?? DIRECTION.normal
-        : (op.direction as keyof typeof DIRECTION);
+      const direction = Array.isArray(op.direction) ? op.direction[i] ?? DIRECTION.normal : (op.direction as DIRECTION);
       // decide if the animation will play backward.
       // if the [direction] is `reversed`, `alternate-reverse` at the first cycle, or `alternate` at the second cycle.
       let isReversed =
@@ -302,7 +320,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
     // ! [calbackParams] and [to] should be the same length.
     if (callbackParams.length !== (options.to as number[]).length)
-      console.warn(`callbackParams length is not equal to to length.`);
+      console.warn(`\n\n⚠️ [animare] ➡️ callbackParams length is not equal to to length \n\n`);
 
     // * callback info
     // calculate frame per second.
@@ -369,7 +387,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     }
 
     // ! at this point [timelineAt] array elements should all have the same value.
-    if (new Set(timelineAt).size !== 1) console.warn('[timelineAt] array elements are not the same.');
+    if (new Set(timelineAt).size !== 1) console.warn('\n\n⚠️ [animare] ➡️ [timelineAt] array elements are not the same !!\n\n');
 
     // * play the next animation in the timeline type `WAIT` only.
     if ((isReversePlay && timelineAt[0] > 0) || (!isReversePlay && timelineAt[0] < timeline.length - 1)) {
@@ -392,7 +410,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
     // * repeat the timeline only timeline type `wait`
     if ((tlOptions.repeat > 0 && tlRepeatCount[0] > 0) || tlOptions.repeat === -1) {
-      const timelineType = (timeline.at(isReversePlay ? -1 : 0) as typeof timeline[number]).options.type
+      const timelineType = (timeline.at(isReversePlay ? -1 : 0) as typeof timeline[number]).options.type;
       if (timelineType !== TIMELINE_TYPE.wait) return;
       if (tlOptions.repeat !== -1) tlRepeatCount.fill(tlRepeatCount[0] - 1);
       if (tlRepeatCount[0] === -1) tlRepeatCount.fill(-2); // this to trigger delay once in infinite repeat.
@@ -420,10 +438,13 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
     reqId = null;
 
+    // remove visibility listener on finish.
+    visibilitychange.remove();
+
     finished.clear(); // reset finished animations.
   };
 
-  // caluculate the duration of overall animation with timeline and repeats.
+  /** - caluculate the duration of overall animation including timelines and repeats.*/
   const calculateTime = () => {
     // ! maybe doesn't work if frame rate drops. to be tested.
     let time = 0;
@@ -535,6 +556,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     if (!reqId || pausedAt) return; // exit if animation is not running or already paused.
     cancelAnimationFrame(reqId);
     pausedAt = performance.now();
+    visibilitychange.remove();
   };
 
   const resume: animareReturnedObject['resume'] = () => {
@@ -552,12 +574,16 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     diff = null;
     isStoped = false;
     reqId = requestAnimationFrame(excute);
+    visibilitychange.add();
   };
 
   const stop: animareReturnedObject['stop'] = (stopAtStart = true) => {
     stopAtStart ? play() : reverse();
     isStoped = true;
     reqId = null;
+
+    // remove visibility listener on stop.
+    visibilitychange.remove();
   };
 
   const next: animareReturnedObject['next'] = op => {
@@ -621,7 +647,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
     // check if the next animation in the timeline is reachable.
     if (timeline.some(t => (Array.isArray(t.options.repeat) ? t.options.repeat.some(r => r === -1) : t.options.repeat === -1)))
-      console.warn('animare: next() Some animations are blocked by infinite repeat.');
+      console.warn('\n\n⚠️ [animare] ➡️ [next] Some animations are blocked by infinite repeat !!\n\n');
 
     timeline.push({ options: op, userInput });
 

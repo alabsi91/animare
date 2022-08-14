@@ -3,15 +3,8 @@
     [
       "@babel/preset-env",
       {
-        "targets": "> 0.5%, not dead"
-      }
-    ],
-    [
-      "minify",
-      {
-        "builtIns": false,
-        "evaluate": false,
-        "mangle": false
+        "targets": "> 0.5%, not dead",
+        "modules": false
       }
     ]
   ],
