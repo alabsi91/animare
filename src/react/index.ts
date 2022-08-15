@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { animareReturnedObject } from '../methods/types';
 
 /**
- * - custom hook for animare.
+ * - `useAnimare` custom react hook.
  * @example
  * ```javascript
  * import animare, { ease } from 'animare';

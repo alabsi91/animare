@@ -161,14 +161,15 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
   };
 
   const startAnim = (timeStamp: number) => {
-    visibilitychange.add();
+    visibilitychange.add(); // add visibilitychange listener.
 
-    start = [...(options.to as number[])].fill(timeStamp);
+    start = new Array<number>((options.to as number[]).length).fill(timeStamp);
     excuteTimeStamp = fpsTimeStamp = timeStamp;
-    // fire onStart event listeners.
-    listeners.onStart.forEach(({ cb }) => cb());
+
+    listeners.onStart.forEach(({ cb }) => cb()); // fire onStart event listeners.
+
     isFirstFrame = true;
-    excute(timeStamp);
+    excute(timeStamp); // start the animation.
     isFirstFrame = false;
   };
 
@@ -190,49 +191,41 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
         callbackParams.push(lastKnownValue[i]); // put a value until animation starts
         continue;
       }
+
       /** - store current animation's options from `timeline`. */
-      const op = timeline[timelineAt[i]].options;
-      // if [direction] is an array pick the value at the current index , if doesn't exist use `normal`.
-      // if [direction] is a single value (string), use that value for all animations.
-      const direction = Array.isArray(op.direction) ? op.direction[i] ?? DIRECTION.normal : (op.direction as DIRECTION);
-      // decide if the animation will play backward.
-      // if the [direction] is `reversed`, `alternate-reverse` at the first cycle, or `alternate` at the second cycle.
+      const op = timeline[timelineAt[i]].options,
+        /** - current animated value direction. */
+        direction = Array.isArray(op.direction) ? op.direction[i] ?? DIRECTION.normal : (op.direction as DIRECTION),
+        /** - current animated value repeat. */
+        repeat = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : (op.repeat as number),
+        /** - is current animated value will be delayed only at the first play. */
+        delayOnce = Array.isArray(op.delayOnce) ? op.delayOnce[i] ?? false : (op.delayOnce as boolean),
+        /** - current animated value easing function. */
+        ease = Array.isArray(op.ease) ? op.ease[i] ?? ((x: number): number => x) : (op.ease as (x: number) => number),
+        /** - if `delayOnce` is true, apply the delay only aat the first repeat.*/
+        delay =
+          (alternateCycle[i] === 2 || (delayOnce && repeatCount[i] < repeat) || (delayOnce && tlRepeatCount[i] < tlOptions.repeat)
+            ? 0
+            : Array.isArray(op.delay)
+            ? op.delay[i] ?? 0
+            : (op.delay as number)) * tlOptions.speed;
+
+      /** if the `direction` is `reversed` or `alternate-reverse` at the first cycle, or `alternate` at the second cycle. */
       let isReversed =
         direction === DIRECTION.reverse ||
         (direction === DIRECTION['alternate-reverse'] && alternateCycle[i] === 1) ||
         (direction === DIRECTION.alternate && alternateCycle[i] === 2);
       // reverse timeline play.
       isReversed = isReversePlay ? (direction?.includes(DIRECTION.alternate) ? isReversed : !isReversed) : isReversed;
-      // if [repeat] is an array pick the value at the current index , if doesn't exist use 0.
-      // if [repeat] is a number, use that value for all animations.
-      const repeat = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : (op.repeat as number);
-      // if [delayOnce] is an array pick the value at the current index , if doesn't exist use false.
-      // if [delayOnce] is a single value (boolean), use that value for all animations.
-      const delayOnce = Array.isArray(op.delayOnce) ? op.delayOnce[i] ?? false : (op.delayOnce as boolean);
-      // if [delay] is an array pick the value at the current index , if doesn't exist use 0.
-      // if [delay] is a number, use that value for all animations.
-      // if [delayOnce] is true, apply the delay only in the first repeat.
-      const delay =
-        (alternateCycle[i] === 2 || (delayOnce && repeatCount[i] < repeat) || (delayOnce && tlRepeatCount[i] < tlOptions.repeat)
-          ? 0
-          : Array.isArray(op.delay)
-          ? op.delay[i] ?? 0
-          : (op.delay as number)) * tlOptions.speed;
 
-      // if [duration] is an array pick the value at the current index , if doesn't exist pick the last one.
-      // if [duration] is a number, use that value for all animations.
-      let duration = Array.isArray(op.duration) ? op.duration[i] ?? op.duration.at(-1) : (op.duration as number);
-      // if [direction] is type `alternate` the [duration] will be divided by 2 to match overall duration.
+      /** - if the `direction` is type `alternate` the `duration` will be divided by 2 to match overall duration. */
+      let duration = Array.isArray(op.duration) ? op.duration[i] ?? op.duration[op.duration.length - 1] : (op.duration as number);
       duration = (direction.includes(DIRECTION.alternate) ? duration / 2 : duration) * tlOptions.speed;
-      // if [ease] is an array, pick the value at the current index, if doesn't exist pick the last one.
-      // if [ease] a single value (function), use it for all animations.
-      const ease = Array.isArray(op.ease) ? op.ease[i] ?? ((x: number): number => x) : (op.ease as (x: number) => number);
-      // if [from] is an array pick the value at the current index , if doesn't exist use 0.
-      // if [from] is a number, use that value for all animations.
-      // if the animation is reversed then [from] will be replaced with [to].
-      const from = isReversed ? (op.to as number[])[i] : Array.isArray(op.from) ? op.from[i] ?? 0 : (op.from as number);
-      // if the animation is reversed then [to] will be replaced with [from]
-      const to = isReversed ? (Array.isArray(op.from) ? op.from[i] ?? 0 : (op.from as number)) : (op.to as number[])[i];
+
+      /** - if the animation is reversed then `from` will be replaced with `to`. */
+      const from = isReversed ? (op.to as number[])[i] : Array.isArray(op.from) ? op.from[i] ?? 0 : (op.from as number),
+        /** - if the animation is reversed then `to` will be replaced with `from` */
+        to = isReversed ? (Array.isArray(op.from) ? op.from[i] ?? 0 : (op.from as number)) : (op.to as number[])[i];
 
       // wait for delay
       if (now - start[i] - delay < 0) {
@@ -241,15 +234,16 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
         continue;
       }
 
-      // calculate progress and params
+      /** - `p` is the current animated value progress (0➡️1) */
       let p = (now - (start[i] + delay)) / duration;
       p = p >= 1 || Number.isNaN(p) ? 1 : p; // correct the progress if it is over 100 percent or the duration is 0.
-      const x = from + (to - from) * ease(p);
+      const x = from + (to - from) * ease(p); // calculate the animated value
       callbackParams.push(x);
       progresses[i] = p;
       if (p === 1) lastKnownValue[i] = x; // save the last known value for the next animation.
 
-      if (now - (start[i] + delay) < duration) continue; // wait for duration
+      // wait for duration
+      if (now - (start[i] + delay) < duration) continue;
 
       // * alternate
       if (direction?.includes(DIRECTION.alternate) && alternateCycle[i] === 1) {
@@ -277,11 +271,13 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
       // * play next timeline only timeline type `IMMEDIATE`
       if ((isReversePlay && timelineAt[i] > 0) || (!isReversePlay && timelineAt[i] < timeline.length - 1)) {
         const nextTimelineType = timeline[isReversePlay ? timelineAt[i] - 1 : timelineAt[i] + 1].options.type;
+
         if (nextTimelineType === TIMELINE_TYPE.immediate) {
           isReversePlay ? timelineAt[i]-- : timelineAt[i]++; // switch to next timeline.
-          // reset repeat count
-          let nextRepeat = timeline[timelineAt[i]].options.repeat;
-          nextRepeat = Array.isArray(nextRepeat) ? nextRepeat[i] ?? 0 : nextRepeat;
+
+          // reset repeat count.
+          const op = timeline[timelineAt[i]].options;
+          repeatCount[i] = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : (op.repeat as number);
 
           alternateCycle[i] = 1; // reset alternate cycle
           start[i] = now; // reset timer.
@@ -298,12 +294,12 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
         ((tlOptions.repeat > 0 && tlRepeatCount[i] > 0) || (tlOptions.repeat === -1 && isTimelineFinished))
       ) {
         // check next timeline type.
-        if (timeline?.at(isReversePlay ? -1 : 0)?.options.type === TIMELINE_TYPE.immediate) {
+        if (timeline?.[isReversePlay ? timeline.length - 1 : 0]?.options.type === TIMELINE_TYPE.immediate) {
           if (tlOptions.repeat !== -1) tlRepeatCount[i]--;
           if (tlRepeatCount[i] === -1) tlRepeatCount[i] = -2; // this to trigger [delayOnce] in infinite repeat.
 
           // reset repeat count.
-          const op = (timeline.at(isReversePlay ? -1 : 0) as typeof timeline[number]).options;
+          const op = timeline[isReversePlay ? timeline.length - 1 : 0].options;
           repeatCount[i] = Array.isArray(op.repeat) ? op.repeat[i] ?? 0 : (op.repeat as number);
 
           timelineAt[i] = isReversePlay ? timeline.length - 1 : 0;
@@ -326,15 +322,15 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     // calculate frame per second.
     const fps = isFinite(Math.round(1000 / (now - fpsTimeStamp))) ? Math.round(1000 / (now - fpsTimeStamp)) : 0;
     fpsTimeStamp = now;
-    // true only when all animations are finished.
+    /** - true only when all animations are finished. */
     const isFinished =
       finished.size === (options.to as number[]).length &&
       timelineAt.every(t => (isReversePlay ? t === 0 : t === timeline.length - 1)) &&
       repeatCount.every(x => x === 0) &&
       tlRepeatCount.every(x => x === 0);
-    // time passed since the animation started.
+    /** - time passed since the animation started. */
     const time = ~~(now - excuteTimeStamp);
-    // overall progress including timeline and repeats. -1 if infinite repeat detected.
+    /** - overall progress including timeline and repeats. -1 if infinite repeat detected. */
     const progress = excuteDuration === -1 ? -1 : +(time / excuteDuration > 1 ? 1 : time / excuteDuration).toFixed(3);
 
     // * callback
@@ -410,13 +406,13 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
     // * repeat the timeline only timeline type `wait`
     if ((tlOptions.repeat > 0 && tlRepeatCount[0] > 0) || tlOptions.repeat === -1) {
-      const timelineType = (timeline.at(isReversePlay ? -1 : 0) as typeof timeline[number]).options.type;
+      const timelineType = timeline[isReversePlay ? timeline.length - 1 : 0].options.type;
       if (timelineType !== TIMELINE_TYPE.wait) return;
       if (tlOptions.repeat !== -1) tlRepeatCount.fill(tlRepeatCount[0] - 1);
       if (tlRepeatCount[0] === -1) tlRepeatCount.fill(-2); // this to trigger delay once in infinite repeat.
 
       // reset repeat count.
-      const op = (timeline.at(isReversePlay ? -1 : 0) as typeof timeline[number]).options;
+      const op = timeline[isReversePlay ? timeline.length - 1 : 0].options;
       repeatCount = Array.isArray(op.repeat) ? [...op.repeat] : [...(op.to as number[])].fill(op.repeat as number);
 
       // reset timeline.
@@ -466,24 +462,24 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
       const groups = [];
       for (let r = 0; r < tlOptions.repeat + 1; r++) {
         for (let t = 0; t < tl.length; t++) {
-          const { options } = tl[t];
-          const isWait = options.type === TIMELINE_TYPE.wait;
-          const delay = Array.isArray(options.delay) ? options.delay[v] ?? 0 : (options.delay as number);
-          const duration = Array.isArray(options.duration)
-            ? options.duration[v] ?? options.duration.at(-1)
-            : (options.duration as number);
-          const repeat = (Array.isArray(options.repeat) ? options.repeat[v] ?? 0 : (options.repeat as number)) + 1;
-          const delayOnce = Array.isArray(options.delayOnce) ? options.delayOnce[v] ?? false : options.delayOnce;
-          const length =
-            (delayOnce && r === 0
-              ? duration * repeat + delay
-              : delayOnce && r > 0
-              ? duration * repeat
-              : (delay + duration) * repeat) * tlOptions.speed;
+          const { options } = tl[t],
+            isWait = options.type === TIMELINE_TYPE.wait,
+            delay = Array.isArray(options.delay) ? options.delay[v] ?? 0 : (options.delay as number),
+            duration = Array.isArray(options.duration)
+              ? options.duration[v] ?? options.duration[options.duration.length - 1]
+              : (options.duration as number),
+            repeat = (Array.isArray(options.repeat) ? options.repeat[v] ?? 0 : (options.repeat as number)) + 1,
+            delayOnce = Array.isArray(options.delayOnce) ? options.delayOnce[v] ?? false : options.delayOnce,
+            length =
+              (delayOnce && r === 0
+                ? duration * repeat + delay
+                : delayOnce && r > 0
+                ? duration * repeat
+                : (delay + duration) * repeat) * tlOptions.speed;
 
           if (isWait) {
             groups.push(length);
-          } else if (groups.at(-1) !== undefined) {
+          } else if (groups[groups.length - 1] !== undefined) {
             groups[groups.length - 1] += length;
           } else {
             groups.push(length);
@@ -510,7 +506,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     // cancel the animation if it is already running.
     if (reqId) cancelAnimationFrame(reqId);
     // reset repeat count.
-    const op = (timeline.at(reverse ? -1 : 0) as typeof timeline[number]).options;
+    const op = timeline[reverse ? timeline.length - 1 : 0].options;
     repeatCount = Array.isArray(op.repeat) ? [...op.repeat] : [...(op.to as number[])].fill(op.repeat as number);
 
     // reset last known position.
@@ -527,7 +523,9 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     fpsTimeStamp = 0;
     // reset isStoped vairable that is used in stop() method to play one frame at the end or at the start.
     isStoped = false;
+    // reset paused state.
     pausedAt = null;
+    // reset difference between start and now.
     diff = null;
   };
 
@@ -601,7 +599,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
     const userInput = { ...op };
 
-    const previousTimeline = { ...(timeline.at(-1) as typeof timeline[number]) };
+    const previousTimeline = { ...timeline[timeline.length - 1] };
 
     if ((previousTimeline.options.to as number[]).length !== op.to.length)
       throw new Error(
@@ -769,29 +767,31 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
     // adjust start time for current mounted animation or the animation that is affected by duration change.
     if (isDuration || isDelay) {
       for (let i = 0; i < timelineAt.length; i++) {
-        // check if the currently playing animation is affected by duration change.
+        /** - check if the currently playing animation is affected by duration change. */
         const isMounted = timelineAt[i] === index || tlDurationChanged.includes(timelineAt[i]);
         // if the timeline is not playing ignore it.
         if (!isMounted) continue;
-        // animation options before the change for targeted timeline.
-        const OldOp = timeline[index].options,
-          // the duration before the change.
-          oldDuration = Array.isArray(OldOp.duration) ? OldOp.duration[i] ?? OldOp.duration.at(-1) : (OldOp.duration as number),
-          // new entered duration.
+        /** - animation options before the change for targeted timeline. */
+        const oldOp = timeline[index].options,
+          /** - the duration before the change. */
+          oldDuration = Array.isArray(oldOp.duration)
+            ? oldOp.duration[i] ?? oldOp.duration[oldOp.duration.length - 1]
+            : (oldOp.duration as number),
+          /** - the new entered duration. */
           duration = isDuration
             ? Array.isArray(op.duration)
-              ? op.duration[i] ?? op.duration.at(-1)
+              ? op.duration[i] ?? op.duration[op.duration.length - 1]
               : (op.duration as number)
             : oldDuration,
-          // the delay before the change.
-          delayOnce = Array.isArray(OldOp.delayOnce) ? OldOp.delayOnce[i] ?? false : OldOp.delayOnce,
-          // repeat counts before the change.
-          repeat = Array.isArray(OldOp.repeat) ? OldOp.repeat[i] ?? 0 : (OldOp.repeat as number),
-          // get delay before the change.
+          /** - the delay before the change. */
+          delayOnce = Array.isArray(oldOp.delayOnce) ? oldOp.delayOnce[i] ?? false : oldOp.delayOnce,
+          /** - repeat counts before the change. */
+          repeat = Array.isArray(oldOp.repeat) ? oldOp.repeat[i] ?? 0 : (oldOp.repeat as number),
+          /** - the delay before the change as an array or a number */
           opDelay = timeline[timelineAt[i]].options.delay,
-          // the new entered delay.
+          /** - the new entered delay or the same one. */
           currentDelay = isDelay && timelineAt[i] === index ? op.delay : opDelay,
-          // calculate the delay before the change.
+          /** - the calculated delay before the change.*/
           oldDelay =
             alternateCycle[i] === 2 ||
             (delayOnce && repeatCount[i] < repeat) ||
@@ -800,7 +800,7 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
               : Array.isArray(opDelay)
               ? opDelay[i] ?? 0
               : (opDelay as number),
-          // calculate the new delay.
+          /** - the calculated new delay. */
           delay =
             alternateCycle[i] === 2 ||
             (delayOnce && repeatCount[i] < repeat) ||

@@ -2,9 +2,9 @@ import { colorToArr } from './colorToRgbArray';
 import { DIRECTION } from './types';
 
 type organizeOptions<T extends number | string = number> = {
-  /** number or a color string. */
+  /** - number or a color string. */
   to: T;
-  /** number or a color string. */
+  /** - number or a color string. */
   from?: T;
   duration?: number;
   delay?: number;
