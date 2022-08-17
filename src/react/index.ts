@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { animareReturnedObject } from '../methods/types';
+import { animareReturnedObject } from '../methods/types.js';
 
 /**
  * - `useAnimare` custom react hook.
@@ -38,14 +38,20 @@ import { animareReturnedObject } from '../methods/types';
  *
  * ```
  */
-export function useAnimare(callback: () => animareReturnedObject) {
-  const isLoaded = useRef(false);
+export function useAnimare(callback: () => animareReturnedObject | undefined) {
+  const count = useRef(0);
   const [animation, setAnimation] = useState<animareReturnedObject>();
 
   useEffect(() => {
-    if (isLoaded.current) return;
-    isLoaded.current = true;
-    setAnimation(callback());
+    if (count.current === 0) {
+      count.current = 1;
+
+      const anim = callback();
+      if (anim) setAnimation(anim);
+    }
+    return () => {
+      animation?.pause(); // pause animation on unmount.
+    };
   }, []);
 
   return animation;

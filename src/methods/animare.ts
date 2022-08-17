@@ -1,6 +1,6 @@
-import { animareOnUpdate, animareOptions, DIRECTION, Ilisteners, animareReturnedObject, TIMELINE_TYPE } from './types';
+import { animareOnUpdate, animareOptions, DIRECTION, Ilisteners, animareReturnedObject, TIMELINE_TYPE } from './types.js';
 
-export function animare(options: animareOptions, callback: animareOnUpdate) {
+export default function animare(options: animareOptions, callback: animareOnUpdate) {
   if (typeof options !== 'object' || Array.isArray(options))
     throw new Error('\n\n⛔ [animare] : expects an object as the first argument. \n\n');
 
@@ -854,5 +854,3 @@ export function animare(options: animareOptions, callback: animareOnUpdate) {
 
   return returned;
 }
-
-export default animare;

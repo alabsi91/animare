@@ -1,4 +1,4 @@
-import cubicBezier from './cubicBezier';
+import cubicBezier from './cubicBezier.js';
 
 export const ease = {
   /** - ease in functions */

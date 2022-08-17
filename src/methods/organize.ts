@@ -1,5 +1,5 @@
-import { colorToArr } from './colorToRgbArray';
-import { DIRECTION } from './types';
+import { colorToArr } from './colorToRgbArray.js';
+import { DIRECTION } from './types.js';
 
 type organizeOptions<T extends number | string = number> = {
   /** - number or a color string. */
