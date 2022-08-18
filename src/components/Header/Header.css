@@ -1,0 +1,51 @@
+header {
+  height: 4em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 2em;
+  margin-bottom: 6em;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo svg:first-child {
+  width: 30px;
+  height: 30px;
+  fill: var(--secondary);
+  cursor: pointer;
+}
+
+.logoTitle {
+  margin: 0;
+  margin-left: 10px;
+  font-size: 2em;
+  color: var(--text);
+  position: relative;
+  display: inline-block;
+}
+
+.logoTitle span {
+  transform-origin: 50% 100%;
+  display: inline-block;
+  margin: 0 1px;
+  line-height: 1em;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.buttons svg {
+  width: 30px;
+  height: 30px;
+  fill: var(--text);
+}

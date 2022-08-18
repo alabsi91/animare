@@ -1,0 +1,81 @@
+---
+title: Events
+order: 7
+---
+
+## Events
+
+`animare` provides some events out of the box.
+
+- ### onStart
+
+  Syntax `(callback: Function) => Function`\
+  Listen to the animation's start event.
+
+> Warning: `onStart` will not be fired for `autoPlay` animations.
+
+```js
+const scrollAnimation = animare({ to: 300, autoPlay: false }, ([scroll]) => {
+  window.scroll({ top: scroll });
+});
+
+// will be called every time the animation starts
+const unsubscribe = scrollAnimation.onStart(() => {
+  console.log('start scrolling');
+});
+
+// somewhere else in your code
+scrollAnimation.start(); // 🚀 start the animation
+
+unsubscribe(); // 🛑 stop listening
+```
+
+- ### onProgress
+
+  Syntax `(at: number, callback: Function) => Function`\
+  Will be fired every time the animation reaches specific progress.
+
+> Warning: `onProgress` will not be fired in case of ♾️ infinite repeats.
+
+```js
+const scrollAnimation = animare({ to: 300 }, ([scroll]) => {
+  window.scroll({ top: scroll });
+});
+
+// will be called every time the animation reaches half of the duration
+const unsubscribe = scrollAnimation.onProgress(0.5, () => {
+  console.log('half way');
+});
+
+unsubscribe(); // 🛑 stop listening
+```
+
+- ### asyncOnProgress
+
+  Syntax `(at: number) => Promise`\
+  Wait for the animation to reach specific progress.
+
+> Warning: `asyncOnProgress` will not be fired in case of ♾️ infinite repeats.
+
+```js
+// inside async function
+
+const scrollAnimation = animare({ to: 300 }, ([scroll]) => {
+  window.scroll({ top: scroll });
+});
+
+// wait for the animation to reach 50%
+await scrollAnimation.onProgress(0.5, () => {
+  console.log('half way');
+});
+```
+
+- ### onFinish
+
+  Syntax `(callback: Function) => Function`\
+  Listen to the animation's finish event.
+
+- ### asyncOnFinish
+
+  Syntax `() => Promise`\
+  Wait for the animation to finish.

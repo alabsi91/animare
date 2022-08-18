@@ -1,0 +1,22 @@
+footer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 6em;
+  border-top: 1px solid #ffffff26;
+}
+
+.copyright {
+  display: inline-block;
+  font-size: 0.8rem;
+  margin: 0 auto;
+  padding: 3em 2em;
+  text-align: center;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+footer a {
+  color: #8c57e3;
+}

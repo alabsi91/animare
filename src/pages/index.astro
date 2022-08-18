@@ -1,0 +1,40 @@
+---
+import Nav from '../components/Nav/Nav';
+import Header from '../components/Header/Header';
+import Hero from '../components/Hero/Hero';
+import Canvas from '../components/Canvas';
+import Footer from '../components/Footer/Footer';
+import '../components/App.css';
+
+const docs = (await Astro.glob('../docs/**/*.mdx')).sort((a, b) => (a.frontmatter.order > b.frontmatter.order ? 1 : -1));
+const titles = docs.map(doc => doc.frontmatter.title);
+---
+
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width' />
+    <meta name='generator' content={Astro.generator} />
+    <link rel='icon' type='image/svg+xml' href='/animare/animare.svg' />
+    <title>animare documentation</title>
+  </head>
+
+  <body>
+    <div class='App'>
+      <Header client:idle />
+      <Hero client:idle />
+      <div class='documentation'>
+        <Nav titles={titles} client:visible />
+        {
+          docs.map(doc => (
+            <section id={doc.frontmatter.title.toLowerCase().replace(/ /g, '-')}>
+              <doc.Content />
+            </section>
+          ))
+        }
+      </div>
+      <Footer />
+      <Canvas client:idle />
+    </div>
+  </body>
+</html>

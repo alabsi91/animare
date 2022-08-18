@@ -1,0 +1,39 @@
+---
+title: Usage
+order: 2
+---
+
+## Usage
+
+- Syntax `animare(animationOptions, (animatedValues, animationInfo) => void)`
+
+- animare is built to be a wrapper around `requestAnimationFrame` to make it easier to use.
+
+- With it, you can animate anything that has a number value (scroll position, color, text, etc).
+
+- Each animated value has its option (duration, delay, ease, etc)
+
+```javascript
+import animare, { ease } from 'animare';
+
+const element = document.getElementById('element');
+
+animare(
+  {
+    from: [0, 0.5], // start values as [opacity, scale]
+    to: [1, 1], // end values as [opacity, scale]
+    duration: [1000, 500], // duration in ms for each value
+    ease: ease.out.quart, // applies on all values
+  },
+
+  // values names can be anything
+  ([opacity, scale], { isFinished }) => {
+    element.style.opacity = opacity;
+    element.style.transform = `scale(${scale})`;
+
+    if (isFinished) {
+      // do something when the animation is finished
+    }
+  }
+);
+```

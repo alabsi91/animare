@@ -1,0 +1,49 @@
+---
+title: Methods
+order: 5
+---
+
+## Methods
+
+- ### `play()`
+
+  Start playing the animation in the `direction` direction.\
+   If the animation is already playing or paused, it will be restarted.
+
+> \*\*\*\*\*Note: `play()` will match the direction property.
+
+- ### `reverse()`
+
+  Start playing the animation in the reverse `direction` direction.\
+   If the animation is already playing or paused, it will be restarted.
+
+> \*\*\*\*\*Note:`reverse()` will reverse the direction property.
+
+- ### `pause()`
+
+  Pause the animation if it is playing at the moment.
+
+- ### `resume()`
+
+  Resume the animation if it is paused.\
+   If the animation is not paused, it will be played from the beginning.
+
+- ### `stop(stopAtStart = true)`
+
+  Stop the animation at the beginning or the end.
+
+> \*\*\*\*\*Warning: the animation will not be stopped immediately, it may take 1 or 2 frames to stop.
+
+- ### `setOptions(animationOptions, animationIndex?: number) => void`
+
+  Change the animation's initial options for a specific animation in the timeline.
+
+> \*\*\*\*\*Warning: setting new options while the animation is playing sometimes may cause unexpected results.
+
+- ### `getOptions(animationIndex?: number) => animationOptions`
+
+  Get the animation's current options object for a specific animation in the timeline.
+
+- ### `setTimelineOptions({ repeat?: number, speed?: number }) => void`
+
+  Set or change the timeline's initial options.

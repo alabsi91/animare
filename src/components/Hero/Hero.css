@@ -1,0 +1,159 @@
+#hero {
+  display: block;
+}
+
+@media (min-width: 70em) {
+  .hero-code-example {
+    flex-direction: row !important;
+  }
+  .intro {
+    margin-right: 2rem !important;
+  }
+}
+
+.hero-code-example {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 2.5em;
+  color: var(--text);
+  margin: 0 0 0.75em;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+
+.highlight {
+  font-size: inherit;
+  color: var(--primary);
+  background-image: linear-gradient(-45deg, var(--purple-blue), #a370f0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 1em;
+}
+
+.cssbuttons-io-button {
+  background: #a370f0;
+  color: var(--text);
+  font-family: inherit;
+  padding: 0.1em;
+  padding-left: 1.8em;
+  font-weight: 500;
+  border-radius: 0.9em;
+  border: none;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 1.6em -0.6em #714da6;
+  overflow: hidden;
+  position: relative;
+  height: 2.8em;
+  padding-right: 3.3em;
+  cursor: pointer;
+}
+
+.cssbuttons-io-button .icon {
+  background: white;
+  margin-left: 1em;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.2em;
+  width: 2.2em;
+  border-radius: 0.7em;
+  box-shadow: 0.1em 0.1em 0.6em 0.2em #7b52b9;
+  right: 0.3em;
+  transition: all 0.3s;
+}
+
+.cssbuttons-io-button:hover .icon {
+  width: calc(100% - 0.6em);
+}
+
+.cssbuttons-io-button .icon svg {
+  width: 1.1em;
+  transition: transform 0.3s;
+  color: #7b52b9;
+}
+
+.cssbuttons-io-button:hover .icon svg {
+  transform: translateX(0.1em);
+}
+
+.cssbuttons-io-button:active .icon {
+  transform: scale(0.95);
+}
+
+.button {
+  appearance: none;
+  background-color: #c6c4d0;
+  border: 2px solid #ddd;
+  color: #3d3943;
+  padding: 0.8em 2.5em;
+  border-radius: 0.9em;
+  box-shadow: 0 0 1em #5a29e480;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+  margin-left: 2rem;
+}
+
+.button svg {
+  width: 1em;
+  fill: currentColor;
+  display: block;
+  margin-left: 0.5em;
+}
+
+@media (max-width: 40em) {
+  .hero-buttons {
+    display: block;
+  }
+  .button {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+}
+
+.hero-example-container {
+  position: relative;
+  width: 90%;
+  height: 180px;
+  margin: 22px auto;
+  outline: 2px solid var(--purple-blue);
+  outline-offset: 10px;
+  border-radius: 1px;
+  background-color: #9976ea0f;
+  box-shadow: 0px 0px 0px 10px #9976ea0f;
+}
+
+.hero-example-ball {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-color: var(--secondary);
+}

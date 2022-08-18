@@ -1,0 +1,58 @@
+---
+title: Callback
+order: 4
+---
+
+## Animation's Callback
+
+A function will be fired on every frame update and contains the animation's logic.
+
+- Two parameters will be passed to the callback function:
+
+  `1st param:` Array of the animated values, the same length as to property.\
+  `2nd param:` An object of information about the animation.
+
+```js
+
+const onUpdate = ([v1, v2, v3 ...], { isFinished, fps, ... }) => {
+  // Animation logic here
+}
+
+```
+
+<br />
+
+### 2nd param
+
+- `isFirstFrame: boolean`\
+  True only at the first frame of the animation.
+
+- `isFinished: boolean`\
+  True only when the animation is finished.
+
+- `progress: number[]`\
+  The progress of each animated value is an array of numbers between `0` and `1`.\
+  Resets on every repeat cycle.
+
+- `timelineProgress: number`\
+  Overall animation's progress includes repeats, delays, and timeline repeats.\
+  Returns `-1` if the timeline ♾️ infinitely repeats.
+
+- `timelineIndex: number[]`\
+  The current timeline index of each animated value.
+
+- `repeatCount: number[]`\
+  A descending number represents the current repeat cycle of each animated value.
+
+- `timelineRepeatCount: number[]`\
+  A descending number represents the current timeline's repeat cycle of each animated value.
+
+- `alternateCycle: number[]`\
+  The current alternate cycle `(1 or 2)` of each animated value.\
+  For directions `'alternate'` or `'alternate-reverse'`
+
+- `fps: number`\
+  The current refresh rate.
+
+- `time: number`\
+  The progress time in milliseconds of the overall animation.

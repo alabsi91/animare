@@ -1,0 +1,181 @@
+@font-face {
+  font-family: silka;
+  src: local('silka'), url('fonts/silka-regular-webfont.woff') format('woff');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: silka;
+  src: local('silka'), url('fonts/silka-medium-webfont.woff') format('woff');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: silka;
+  src: local('silka'), url('fonts/silka-semibold-webfont.woff') format('woff');
+  font-weight: 500;
+}
+
+:root {
+  --secondary: #f46036;
+  --purple-blue: #a370f0;
+  --nav-color: #372248;
+  --text: #f5f5f5;
+  --code-background: #231c2c;
+  --system-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 0em;
+}
+
+body {
+  font-family: silka, sans-serif;
+  padding: 0;
+  margin: 0;
+  color: var(--text);
+  background-color: #171123;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='12' viewBox='0 0 20 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 12c0-.622-.095-1.221-.27-1.785A5.982 5.982 0 0 0 10 12c1.67 0 3.182-.683 4.27-1.785A5.998 5.998 0 0 0 14 12h2a4 4 0 0 1 4-4V6c-1.67 0-3.182.683-4.27 1.785C15.905 7.22 16 6.622 16 6c0-.622-.095-1.221-.27-1.785A5.982 5.982 0 0 0 20 6V4a4 4 0 0 1-4-4h-2c0 .622.095 1.221.27 1.785A5.982 5.982 0 0 0 10 0C8.33 0 6.818.683 5.73 1.785 5.905 1.22 6 .622 6 0H4a4 4 0 0 1-4 4v2c1.67 0 3.182.683 4.27 1.785A5.998 5.998 0 0 1 4 6c0-.622.095-1.221.27-1.785A5.982 5.982 0 0 1 0 6v2a4 4 0 0 1 4 4h2zm-4 0a2 2 0 0 0-2-2v2h2zm16 0a2 2 0 0 1 2-2v2h-2zM0 2a2 2 0 0 0 2-2H0v2zm20 0a2 2 0 0 1-2-2h2v2zm-10 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4z' fill='%23372248' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+p {
+  font-family: silka, sans-serif;
+  font-weight: 300;
+  line-height: 2;
+  color: var(--text);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 0.75em;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+h2 {
+  padding-top: 1em;
+}
+h3 {
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: revert !important;
+}
+
+ul {
+  padding-left: 25px;
+}
+
+section li {
+  line-height: 1.7;
+}
+
+section a {
+  padding: 0;
+  text-decoration: underline !important;
+  display: inline-block;
+}
+
+table {
+  display: block;
+  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-collapse: collapse;
+}
+thead {
+  background-color: #46464626;
+}
+
+tr {
+  background-color: #14141426;
+  border-top: 1px solid var(--color-border-muted);
+}
+
+tr:nth-child(2n) {
+  background-color: #46464626;
+}
+
+table th,
+table td {
+  padding: 6px 13px;
+  border: 1px solid #5d6670;
+}
+
+@media (min-width: 42em) {
+  h2 {
+    font-size: 2em;
+  }
+}
+@media (min-width: 20em) {
+  h2 {
+    font-size: 1.75em;
+  }
+}
+@media (min-width: 42em) {
+  h2 {
+    padding-top: 1.5em;
+  }
+}
+
+:not(pre) > code {
+  font-size: 1em;
+  color: #c6cdd9;
+  border: #ffffff1a solid 0.1px;
+  padding: 0.05em 0.3em;
+  background-color: #68558d33;
+  border-radius: 0.4em;
+  line-height: 1.7;
+  font-family: courier, monospace;
+}
+
+.App {
+  width: calc(100% - 2em);
+  max-width: 70em;
+  margin: 0 auto;
+}
+
+@media (min-width: 28em) {
+  .App {
+    width: calc(100% - 4em);
+  }
+}
+
+.documentation {
+  position: relative;
+  margin-top: 10em;
+  padding-left: 17em;
+}
+
+@media (min-width: 70em) {
+  .documentation {
+    padding-left: 18em;
+  }
+}
+@media (max-width: 50em) {
+  .documentation {
+    padding-left: 11em;
+  }
+}
+@media (max-width: 42em) {
+  .documentation {
+    padding-left: 0em;
+  }
+  section h2 {
+    padding-top: 3em;
+  }
+}
+
+#canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}

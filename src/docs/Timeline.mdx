@@ -1,0 +1,41 @@
+---
+title: Timeline
+order: 6
+---
+
+## Timeline
+
+Sometimes you need to do multi-step animation, you can do that using the `.next()` method.
+`.next()` uses the same callback with updated options.
+
+If from is not specified, it will pick up the value from the previous animation.
+
+> Note: `duration, ease, and type` properties are inherited from the previous animation.
+
+> Tip: If you have multiple values with different durations and delays some of them may finish before the others. you can customize the timeline playing behavior by using the type property.
+
+> Warning: using `repeat: -1` property in one of the animations in the timeline will block the next animation from playing.
+
+```js
+import animare, { ease } from 'animare';
+
+const ball = document.getElementById('ball');
+
+const myAnimation = animare(
+  {
+    to: [100, 100],
+    duration: 2000, // 🕐
+    ease: [ease.linear, ease.out.bounce], // 〽️
+  },
+  ([x, y]) => {
+    ball.style.left = x + '%';
+    ball.style.top = y + '%';
+  }
+);
+
+myAnimation.next({ to: [100, 0], delay: 500 }); // ⏭️ play this next
+myAnimation.next({ to: [0, 100], delay: 500 }); // ⏭️
+myAnimation.next({ to: [0, 0], delay: 500 }); // ⏭️
+
+myAnimation.setTimelineOptions({ repeat: -1 }); // ♾️ infinite timeline repeat
+```
