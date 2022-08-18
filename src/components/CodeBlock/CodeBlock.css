@@ -15,7 +15,7 @@
 
 .code-example > pre {
   background-color: var(--code-background);
-  color: rgb(171 178 191);
+  color: var(--code-color);
   font-size: 1rem;
   border-radius: 0.5rem;
   margin: 10px;
@@ -96,12 +96,12 @@
 }
 
 .clipboard-container:hover {
-  border: solid 1px #8b949e;
+  border: solid 1px var(--purple-blue);
 }
 
 .clipboard-container > svg {
   width: 16px;
   height: 16px;
-  fill: #8b949e;
+  fill: var(--code-color);
   padding-top: 2px;
 }

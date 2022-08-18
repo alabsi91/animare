@@ -13,8 +13,8 @@ function findQuote(tree) {
 
     const quotes = ['Note:', 'Tip:', 'Warning:', 'Danger:']; // available quote types
     const quoteText = node.children[0].children[0].value;
-    const margin = quoteText.match(/^(\**)/)?.[0]?.length || 0;
-    const isQuote = quotes.some(q => quoteText.trim().replace(/^\**/, '').startsWith(q)); // check if the quote is one of the available types
+    const margin = quoteText.match(/^(\d*)/)?.[0] || 0; // margin left.
+    const isQuote = quotes.some(q => quoteText.trim().replace(/^\d*/, '').startsWith(q)); // check if the quote is one of the available types
 
     if (!isQuote) continue;
 
@@ -31,8 +31,8 @@ function findQuote(tree) {
 
     tree.children[i] = {
       type: 'mdxJsxFlowElement',
-      name: selectedQuote.replace(/^\**/, '').replace(':', ''),
-      attributes: [{ type: 'mdxJsxAttribute', name: 'margin', value: margin * 5 }],
+      name: selectedQuote.replace(/^\d*/, '').replace(':', ''),
+      attributes: [{ type: 'mdxJsxAttribute', name: 'margin', value: margin }],
       children: node.children[0].children,
       position: node.position,
       data: {
@@ -49,6 +49,7 @@ function findCodeBlock(tree) {
 
     const { value: codeString, position, lang, meta } = node;
     const title = meta?.match(/title=['|"](?<title>[^'|"]+)/)?.groups?.title || '';
+    const margin = meta?.match(/margin=['|"](?<margin>[^'|"]+)/)?.groups?.margin || 0; // margin left.
 
     const importCode = JSON.parse(
       `{"type":"mdxjsEsm","value":"import Code from '../components/CodeBlock/Code.astro';","data":{"estree":{"type":"Program","body":[{"type":"ImportDeclaration","specifiers":[{"type":"ImportDefaultSpecifier","start":7,"end":11,"local":{"type":"Identifier","name":"Code"}}],"source":{"type":"Literal","value":"../components/CodeBlock/Code.astro","raw":"'../components/CodeBlock/Code.astro'"}}],"sourceType":"module"}}}`
@@ -64,6 +65,7 @@ function findCodeBlock(tree) {
         { type: 'mdxJsxAttribute', name: 'codeString', value: codeString },
         { type: 'mdxJsxAttribute', name: 'language', value: lang },
         { type: 'mdxJsxAttribute', name: 'title', value: title },
+        { type: 'mdxJsxAttribute', name: 'margin', value: margin },
       ],
       children: [],
       position,

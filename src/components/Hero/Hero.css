@@ -35,7 +35,7 @@
 .highlight {
   font-size: inherit;
   color: var(--primary);
-  background-image: linear-gradient(-45deg, var(--purple-blue), #a370f0);
+  background-image: linear-gradient(-45deg, var(--secondary), var(--purple-blue));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -50,7 +50,7 @@
 }
 
 .cssbuttons-io-button {
-  background: #a370f0;
+  background: var(--purple-blue);
   color: var(--text);
   font-family: inherit;
   padding: 0.1em;
@@ -61,7 +61,7 @@
   letter-spacing: 0.05em;
   display: flex;
   align-items: center;
-  box-shadow: inset 0 0 1.6em -0.6em #714da6;
+  box-shadow: inset 0 0 1.6em -0.6em var(--purple-blue);
   overflow: hidden;
   position: relative;
   height: 2.8em;
@@ -79,7 +79,7 @@
   height: 2.2em;
   width: 2.2em;
   border-radius: 0.7em;
-  box-shadow: 0.1em 0.1em 0.6em 0.2em #7b52b9;
+  box-shadow: 0.1em 0.1em 0.6em 0.2em var(--purple-blue);
   right: 0.3em;
   transition: all 0.3s;
 }
@@ -91,7 +91,7 @@
 .cssbuttons-io-button .icon svg {
   width: 1.1em;
   transition: transform 0.3s;
-  color: #7b52b9;
+  color: var(--purple-blue);
 }
 
 .cssbuttons-io-button:hover .icon svg {

@@ -12,9 +12,9 @@ order: 7
   Syntax `(callback: Function) => Function`\
   Listen to the animation's start event.
 
-> Warning: `onStart` will not be fired for `autoPlay` animations.
+> 25Warning: `onStart` will not be fired for `autoPlay` animations.
 
-```js
+```js margin="25"
 const scrollAnimation = animare({ to: 300, autoPlay: false }, ([scroll]) => {
   window.scroll({ top: scroll });
 });
@@ -35,9 +35,9 @@ unsubscribe(); // 🛑 stop listening
   Syntax `(at: number, callback: Function) => Function`\
   Will be fired every time the animation reaches specific progress.
 
-> Warning: `onProgress` will not be fired in case of ♾️ infinite repeats.
+> 25Warning: `onProgress` will not be fired in case of ♾️ infinite repeats.
 
-```js
+```js margin="25"
 const scrollAnimation = animare({ to: 300 }, ([scroll]) => {
   window.scroll({ top: scroll });
 });
@@ -55,9 +55,9 @@ unsubscribe(); // 🛑 stop listening
   Syntax `(at: number) => Promise`\
   Wait for the animation to reach specific progress.
 
-> Warning: `asyncOnProgress` will not be fired in case of ♾️ infinite repeats.
+> 25Warning: `asyncOnProgress` will not be fired in case of ♾️ infinite repeats.
 
-```js
+```js margin="25"
 // inside async function
 
 const scrollAnimation = animare({ to: 300 }, ([scroll]) => {

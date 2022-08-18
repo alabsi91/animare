@@ -5,17 +5,16 @@ order: 9
 
 ## Plugins
 
-### ease
+- ### ease
 
-- `animare` comes with a few predefined easing functions.
+  `animare` comes with a few predefined easing functions.\
+  Check out [`easings.net`](https://easings.net/) to learn more.
 
-- Check out [`easings.net`](https://easings.net/) to learn more.
+> 25Tip: Use the [`animare-ease-visualizer`](https://animare-ease-visualizer.netlify.app/) tool to create custom easing functions.
 
-> Tip: Use the [`animare-ease-visualizer`](https://animare-ease-visualizer.netlify.app/) tool to create custom easing functions.
+> 25Warning: custom easing functions may cause frame rate drops.
 
-> Warning: custom easing functions may cause frame rate drops.
-
-```typescript
+```typescript margin="25"
 
 import { ease } from 'animare'
 
@@ -50,11 +49,17 @@ ease.cubicBezier(X1: number, Y1: number, X2: number, Y2: number) // same as CSS
 ease.custom(d: string) // d is SVG's path attribute
 ```
 
-### organize
+- ### organize
 
-- The more you have animated values, the more it gets difficult to know what is what.
+  The more you have animated values, the more it gets difficult to know what is what.\
+  `organize` is a utility function that helps you to organize your animated values.\
+  `organize` also handles color animations.
 
-```js
+```js margin="25"
+// long-length animated values are hard to read and maintain.
+
+import animare from 'animare'
+
 animare(
   {
     from: [23, 25, 35, 34, 4, 45, 34, 45, 43, 45, 341, 34, 545],
@@ -68,10 +73,7 @@ animare(
 );
 ```
 
-- `organize` is a utility function that helps you to organize your animated values.
-- `organize` also handles color animations.
-
-```js
+```js margin="25"
 
 import animare, { organize } from 'animare'
 
@@ -99,17 +101,15 @@ animare({
 }))
 ```
 
-### colorToArr
+- ### colorToArr
 
-- Colors are made of numbers `rgb(255, 0, 0)` so you can animate them by animating each color's channel RGB.
+  Colors are made of numbers `rgb(255, 0, 0)` so you can animate them by animating each color's channel RGB.\
+  But sometimes you want to animate a hex color `#ff0000` or even a named color `red`.\
+  For that, you can use `colorToArr` plugin to convert a color to an array of numbers.
 
-- But sometimes you want to animate a hex color `#ff0000` or even a named color `red`.
+> 25Tip: `organize` plugin can handle color animations for you.
 
-- For that, you can use `colorToArr` plugin to convert a color to an array of numbers.
-
-> Tip: `organize` plugin can handle color animations for you.
-
-```js
+```js margin="25"
 import animare, { colorToArr } from 'animare';
 
 const element = document.getElementById('element');

@@ -2,16 +2,15 @@ import './CodeBlock.css';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css';
 
-export default function CodeBlock({ codeString = '', title = 'App.js', language = 'javascript' }) {
+export default function CodeBlock({ codeString = '', title = 'App.js', language = 'javascript', margin = 0 }) {
   title = title ? title : 'App.js';
 
   const copyToClipboard = () => {
-    console.log('copyToClipboard');
     navigator.clipboard.writeText(codeString);
   };
 
   return (
-    <div className='code-example'>
+    <div className='code-example' style={{ marginLeft: margin + 'px' }}>
       <div className='window-header'>
         <div className='control control--close'></div>
         <div className='control control--minimize'></div>

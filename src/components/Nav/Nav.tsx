@@ -52,7 +52,7 @@ export default function Nav({ titles }: { titles: string[] }) {
     const { from, to, get } = organize({
       opacity: { from: 1, to: 0 },
       height: { from: titles.length * 35, to: 1 },
-      padding: { from: 8 , to: 0 },
+      padding: { from: 8, to: 0 },
     });
 
     animare({ from, to, duration: 250, ease: ease.out.expo }, (values, { isFinished }) => {
@@ -68,7 +68,10 @@ export default function Nav({ titles }: { titles: string[] }) {
   const navAnimation = useAnimare(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement,
       ctx = canvas.getContext('2d')!,
-      nav = document.querySelector('nav') as HTMLElement;
+      nav = document.querySelector('nav') as HTMLElement,
+      secondary = window.getComputedStyle(document.documentElement).getPropertyValue('--secondary'),
+      purple = window.getComputedStyle(document.documentElement).getPropertyValue('--purple-blue'),
+      codeColor = window.getComputedStyle(document.documentElement).getPropertyValue('--code-background');
 
     const { from, to, get } = organize({
       opacity: { from: 255, to: 0 },
@@ -85,9 +88,9 @@ export default function Nav({ titles }: { titles: string[] }) {
         topRight = { x: left + width + lineShift, y: top - lineShift }, // top right corner
         bottomLeft = { x: left - lineShift, y: top + height + lineShift }, // bottom left corner
         bottomRight = { x: left + width + lineShift, y: top + height + lineShift }, // bottom right corner
-        color1 = '#f46036' + alpha, // gradient color position 1
-        color05 = '#a370f0' + alpha, // gradient color position 0.5
-        color0 = '#231c2c' + alpha; // gradient color position 0
+        color1 = secondary + alpha, // gradient color position 1
+        color05 = purple + alpha, // gradient color position 0.5
+        color0 = codeColor + alpha; // gradient color position 0
 
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
@@ -141,11 +144,13 @@ export default function Nav({ titles }: { titles: string[] }) {
   const titleAnimation = (id: string) => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement,
       ctx = canvas.getContext('2d')!,
-      title = document.querySelector(id + ' > *:first-child') as HTMLHeadingElement;
+      title = document.querySelector(id + ' > *:first-child') as HTMLHeadingElement,
+      secondary = window.getComputedStyle(document.documentElement).getPropertyValue('--secondary'),
+      codeColor = window.getComputedStyle(document.documentElement).getPropertyValue('--code-background');
 
     const { from, to, get } = organize({
-      color0: { from: '#f46036', to: '#f4603600' },
-      color1: { from: '#231c2c', to: '#231c2c00' },
+      color0: { from: secondary, to: secondary + '00' },
+      color1: { from: codeColor, to: codeColor + '00' },
       line: { from: 0, to: 1 },
     });
 

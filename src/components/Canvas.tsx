@@ -32,10 +32,13 @@ export default function App() {
       canvas.height = window.innerHeight;
     });
 
+    const secondary = window.getComputedStyle(document.documentElement).getPropertyValue('--secondary');
+    const purple = window.getComputedStyle(document.documentElement).getPropertyValue('--purple-blue');
+
     const { from, to, duration, delay, direction, get } = organize({
       angel: { to: 360, duration: 6000 },
       motionRadius: { from: 20, to: 40, duration: 10000, delay: 100, direction: 'alternate' },
-      color: { from: '#a370f0', to: '#f46036', duration: 5 * 1000, direction: 'alternate' },
+      color: { from: purple, to: secondary, duration: 5 * 1000, direction: 'alternate' },
     });
 
     return animare({ from, to, duration, delay, direction, repeat: -1 }, values => {
