@@ -1,7 +1,4 @@
-# build output
-docs/
 
-!src/docs
 
 # dependencies
 node_modules/
