@@ -18,7 +18,6 @@
   background-color: var(--code-background);
   color: var(--code-color);
   font-size: 1rem;
-  border-radius: 0.5rem;
   margin: 10px;
   overflow: auto;
 }
@@ -93,11 +92,14 @@
   box-shadow: 0 0 0.5em #0000004d;
   cursor: pointer;
   background-color: var(--code-background);
-  transition: all 0.1s ease-in-out;
+  transition: all 200ms ease-in-out;
 }
 
 .clipboard-container:hover {
   border: solid 1px var(--purple-blue);
+}
+.clipboard-container:active {
+  transform: translate(0.07em, 0.07em);
 }
 
 .clipboard-container > svg {
