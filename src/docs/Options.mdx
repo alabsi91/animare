@@ -5,72 +5,67 @@ order: 3
 
 ## Animation's Options
 
-- ### from
-
-  |         Type         | Default |
-  | :------------------: | :-----: |
-  | `number \| number[]` |   `0`   |
-
-  Start value\s of the animation.\
-   If a single `number` is passed, it will be used as the default for all animated values.\
-   If `number[]` is passed, make sure it has the same length as to.
-
 - ### to
 
-  |         Type         |  Default   |
-  | :------------------: | :--------: |
-  | `number \| number[]` | `required` |
+  |          Type          |  Default   |
+  | :--------------------: | :--------: |
+  | `number` \| `number[]` | `required` |
 
   End value\s of the animation.
 
+- ### from
+
+  |                       Type                       | Default |
+  | :----------------------------------------------: | :-----: |
+  | `number` \| `number[]` \| `(i:number) => number` |   `0`   |
+
+  Start value\s of the animation.\
+   If a single `number` is passed, it will be used as the default for all animated values.\
+   If `number[]` is passed, make sure it has the same length as to.\
+
 - ### delay
 
-  |         Type         | Default |
-  | :------------------: | :-----: |
-  | `number \| number[]` |   `0`   |
+  |                       Type                       | Default |
+  | :----------------------------------------------: | :-----: |
+  | `number` \| `number[]` \| `(i:number) => number` |   `0`   |
 
   Delay before the animation starts in milliseconds.\
    If a single `number` is passed, it will be used as the default for all animated values.
 
 - ### delayOnce
 
-  |          Type          | Default |
-  | :--------------------: | :-----: |
-  | `boolean \| boolean[]` | `false` |
+  |           Type           | Default |
+  | :----------------------: | :-----: |
+  | `boolean` \| `boolean[]` | `false` |
 
   Apply the delay only once, in case of repeating animations.\
    If a single `boolean` is passed, it will be used as the default for all animated values.
 
 - ### duration
 
-  |         Type         | Default |
-  | :------------------: | :-----: |
-  | `number \| number[]` |  `350`  |
+  |                       Type                       | Default |
+  | :----------------------------------------------: | :-----: |
+  | `number` \| `number[]` \| `(i:number) => number` |  `350`  |
 
   The duration of the animation's value/s is in milliseconds.\
    If a single `number` is passed, it will be used as the default for all animated values.
 
 - ### direction
 
-  |         Type         | Default  |
-  | :------------------: | :------: |
-  | `string \| string[]` | `normal` |
+  **directionType:** `'normal'` \| `'reverse'` \| `'alternate'` \| `'alternate-reverse'`
 
-  {' '}
-  <br />
-
-  |                            values                             |
-  | :-----------------------------------------------------------: |
-  | `'normal' \| 'reverse' \| 'alternate' \| 'alternate-reverse'` |
+  |                 Type                 | Default  |
+  | :----------------------------------: | :------: |
+  | `directionType` \| `directionType[]` | `'normal'` |
 
   Animation's direction for each value/s.\
    If a single `string` is passed, it will be used as the default for all animated values.
 
 - ### repeat
 
-  |         Type         | Default |
-  | :------------------: | :-----: |
-  | `number \| number[]` |   `0`   |
+  |                       Type                       | Default |
+  | :----------------------------------------------: | :-----: |
+  | `number` \| `number[]` \| `(i:number) => number` |   `0`   |
 
   Repeats count after the first play.\
    If a single `number` is passed, it will be used as the default for all animated values.\
@@ -83,7 +78,7 @@ order: 3
   | `(p: number) => number` \| `((p: number) => number)[]` | `p => p` |
 
   Easing functions specify the rate of change of the number over time.\
-   check out the [`easing`](#plugins) plugin.
+  > Info: check out the [`ease`](#plugins) plugin.
 
 - ### autoPlay
 
@@ -95,9 +90,9 @@ order: 3
 
 - ### type
 
-  |          Type           |    Default    |
-  | :---------------------: | :-----------: |
-  | `'wait' \| 'immediate'` | `'immediate'` |
+  |           Type            |    Default    |
+  | :-----------------------: | :-----------: |
+  | `'wait'` \| `'immediate'` | `'immediate'` |
 
   Playing behavior of the next animation in the timeline. when using `.next()`.\
    `wait` - wait for all animated values in the previous animations to be completed.\

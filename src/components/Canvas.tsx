@@ -59,8 +59,8 @@ export default function App() {
 
   useEffect(() => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    canvas.width = document.body.scrollWidth;
-    canvas.height = document.body.scrollHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }, []);
 
   return <canvas id='canvas' />;

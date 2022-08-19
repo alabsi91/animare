@@ -9,7 +9,7 @@ order: 7
 
 - ### onStart
 
-  Syntax `(callback: Function) => Function`\
+  **Syntax:** `(callback: Function) => Function`\
   Listen to the animation's start event.
 
   > Warning: `onStart` will not be fired for `autoPlay` animations.
@@ -32,7 +32,7 @@ order: 7
 
 - ### onProgress
 
-  Syntax `(at: number, callback: Function) => Function`\
+  **Syntax:** `(at: number, callback: Function) => Function`\
   Will be fired every time the animation reaches specific progress.
 
   > Warning: `onProgress` will not be fired in case of ♾️ infinite repeats.
@@ -52,7 +52,7 @@ order: 7
 
 - ### asyncOnProgress
 
-  Syntax `(at: number) => Promise`\
+  **Syntax:** `(at: number) => Promise`\
   Wait for the animation to reach specific progress.
 
   > Warning: `asyncOnProgress` will not be fired in case of ♾️ infinite repeats.
@@ -72,10 +72,10 @@ order: 7
 
 - ### onFinish
 
-  Syntax `(callback: Function) => Function`\
+  **Syntax:** `(callback: Function) => Function`\
   Listen to the animation's finish event.
 
 - ### asyncOnFinish
 
-  Syntax `() => Promise`\
+  **Syntax:** `() => Promise`\
   Wait for the animation to finish.

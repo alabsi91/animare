@@ -72,6 +72,7 @@ a:hover {
 
 ul {
   padding-left: 25px;
+  list-style-type: "🔸";
 }
 
 section li {
@@ -98,6 +99,7 @@ table {
   max-width: 100%;
   overflow: auto;
   border-collapse: collapse;
+  line-height: normal;
 }
 thead {
   background-color: #46464626;
