@@ -1,6 +1,6 @@
-type quoteType = { children: React.ReactNode; title?: string; margin?: number };
+type quoteType = { children: React.ReactNode; title?: string };
 
-export function Note({ children, title = 'Note', margin = 0 }: quoteType) {
+export function Note({ children, title = 'Note' }: quoteType) {
   return (
     <>
       <blockquote
@@ -8,7 +8,6 @@ export function Note({ children, title = 'Note', margin = 0 }: quoteType) {
           padding: '1px 1em',
           borderLeft: '.25em solid #5b85aa',
           margin: 0,
-          marginLeft: margin + 'px',
           backgroundColor: '#5b85aa0f',
         }}
       >
@@ -27,7 +26,33 @@ export function Note({ children, title = 'Note', margin = 0 }: quoteType) {
   );
 }
 
-export function Warning({ children, title = 'Warning', margin = 0 }: quoteType) {
+export function Info({ children, title = 'Info' }: quoteType) {
+  return (
+    <>
+      <blockquote
+        style={{
+          padding: '1px 1em',
+          borderLeft: '.25em solid #5b85aa',
+          margin: 0,
+          backgroundColor: '#5b85aa0f',
+        }}
+      >
+        <p>
+          <span style={{ color: '#58a6ff' }}>
+            <svg fill='#58a6ff' viewBox='2 2 20 20' width='16' height='16'>
+              <path d='M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z' />
+            </svg>{' '}
+            {title}{' '}
+          </span>
+          {children}
+        </p>
+      </blockquote>
+      <br />
+    </>
+  );
+}
+
+export function Warning({ children, title = 'Warning' }: quoteType) {
   return (
     <>
       <blockquote
@@ -35,7 +60,6 @@ export function Warning({ children, title = 'Warning', margin = 0 }: quoteType) 
           padding: '1px 1em',
           borderLeft: '.25em solid #d29922',
           margin: 0,
-          marginLeft: margin + 'px',
           backgroundColor: '#d299220f',
         }}
       >
@@ -54,7 +78,7 @@ export function Warning({ children, title = 'Warning', margin = 0 }: quoteType) 
   );
 }
 
-export function Danger({ children, title = 'Danger', margin = 0 }: quoteType) {
+export function Danger({ children, title = 'Danger' }: quoteType) {
   return (
     <>
       <blockquote
@@ -62,7 +86,6 @@ export function Danger({ children, title = 'Danger', margin = 0 }: quoteType) {
           padding: '1px 1em',
           borderLeft: '.25em solid #e13238',
           margin: 0,
-          marginLeft: margin + 'px',
           backgroundColor: '#e132380f',
         }}
       >
@@ -81,7 +104,7 @@ export function Danger({ children, title = 'Danger', margin = 0 }: quoteType) {
   );
 }
 
-export function Tip({ children, title = 'Tip', margin = 0 }: quoteType) {
+export function Tip({ children, title = 'Tip' }: quoteType) {
   return (
     <>
       <blockquote
@@ -89,7 +112,6 @@ export function Tip({ children, title = 'Tip', margin = 0 }: quoteType) {
           padding: '1px 1em',
           borderLeft: '.25em solid #5bc553',
           margin: 0,
-          marginLeft: margin + 'px',
           backgroundColor: '#0a8f000f',
         }}
       >

@@ -1,75 +1,151 @@
 export default function ReadMDX() {
   return function (tree) {
-    findQuote(tree);
-    findCodeBlock(tree);
+    replaceCodeBlock(tree);
+    replaceQuote(tree);
   };
 }
 
-function findQuote(tree) {
-  for (let i = 0; i < tree.children.length; i++) {
-    const node = tree.children[i];
+function replaceCodeBlock(tree) {
+  const CodeBlock = {
+    type: 'mdxjsEsm',
+    value: "import Code from '../components/CodeBlock/Code.astro';",
+    data: {
+      estree: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ImportDeclaration',
+            specifiers: [{ type: 'ImportDefaultSpecifier', local: { type: 'Identifier', name: 'Code' } }],
+            source: { type: 'Literal', value: '../components/CodeBlock/Code.astro', raw: "'../components/CodeBlock/Code.astro'" },
+          },
+        ],
+        sourceType: 'module',
+      },
+    },
+  };
 
-    if (node.type !== 'blockquote') continue;
+  let isImported = tree.children.findIndex(node => node.value === CodeBlock.value) !== -1;
 
-    const quotes = ['Note:', 'Tip:', 'Warning:', 'Danger:']; // available quote types
+  const newNode = node => {
+    // import CodeBlock component if not imported.
+    if (!isImported) {
+      tree.children.push(CodeBlock);
+      isImported = true;
+    }
+
+    const { value, position, lang, meta } = node,
+      title = meta?.match(/title=['|"](?<title>[^'|"]+)/)?.groups?.title || ''; // meta title
+
+    return {
+      type: 'mdxJsxFlowElement',
+      name: 'Code',
+      attributes: [
+        { type: 'mdxJsxAttribute', name: 'codeString', value },
+        { type: 'mdxJsxAttribute', name: 'language', value: lang },
+        { type: 'mdxJsxAttribute', name: 'title', value: title },
+      ],
+      children: [],
+      position,
+      data: { _mdxExplicitJsx: true },
+    };
+  };
+
+  const recursiveSearch = node => {
+    if (node.children)
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.type === 'code') node.children[i] = newNode(child);
+        recursiveSearch(child);
+      }
+  };
+
+  recursiveSearch(tree);
+}
+
+function replaceQuote(tree) {
+  const BlockQuote = {
+    type: 'mdxjsEsm',
+    value: "import { Note, Warning, Tip, Danger } from '../components/Blockquote'",
+    data: {
+      estree: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ImportDeclaration',
+            specifiers: [
+              {
+                type: 'ImportSpecifier',
+                imported: { type: 'Identifier', name: 'Note' },
+                local: { type: 'Identifier', name: 'Note' },
+              },
+              {
+                type: 'ImportSpecifier',
+                imported: { type: 'Identifier', name: 'Info' },
+                local: { type: 'Identifier', name: 'Info' },
+              },
+              {
+                type: 'ImportSpecifier',
+                imported: { type: 'Identifier', name: 'Warning' },
+                local: { type: 'Identifier', name: 'Warning' },
+              },
+              {
+                type: 'ImportSpecifier',
+                imported: { type: 'Identifier', name: 'Tip' },
+                local: { type: 'Identifier', name: 'Tip' },
+              },
+              {
+                type: 'ImportSpecifier',
+                imported: { type: 'Identifier', name: 'Danger' },
+                local: { type: 'Identifier', name: 'Danger' },
+              },
+            ],
+            source: { type: 'Literal', value: '../components/Blockquote', raw: "'../components/Blockquote'" },
+          },
+        ],
+        sourceType: 'module',
+      },
+    },
+  };
+
+  let isImported = tree.children.findIndex(node => node.value === BlockQuote.value) !== -1;
+
+  const quotes = ['Note:', 'Info:', 'Tip:', 'Warning:', 'Danger:']; // available quote types
+
+  const newNode = node => {
+    // import CodeBlock component if not imported.
+    if (!isImported) {
+      tree.children.push(BlockQuote);
+      isImported = true;
+    }
+
     const quoteText = node.children[0].children[0].value;
-    const margin = quoteText.match(/^(\d*)/)?.[0] || 0; // margin left.
-    const isQuote = quotes.some(q => quoteText.trim().replace(/^\d*/, '').startsWith(q)); // check if the quote is one of the available types
+    const isQuote = quotes.some(q => quoteText.trim().startsWith(q));
+    if (!isQuote) return node;
 
-    if (!isQuote) continue;
-
-    const importQuotes = JSON.parse(
-      `{"type":"mdxjsEsm","value":"import { Note, Warning, Tip, Danger } from '../components/Blockquote'","data":{"estree":{"type":"Program","body":[{"type":"ImportDeclaration","specifiers":[{"type":"ImportSpecifier","imported":{"type":"Identifier","name":"Note"},"local":{"type":"Identifier","name":"Note"}},{"type":"ImportSpecifier","imported":{"type":"Identifier","name":"Warning"},"local":{"type":"Identifier","name":"Warning"}},{"type":"ImportSpecifier","imported":{"type":"Identifier","name":"Tip"},"local":{"type":"Identifier","name":"Tip"}},{"type":"ImportSpecifier","imported":{"type":"Identifier","name":"Danger"},"local":{"type":"Identifier","name":"Danger"}}],"source":{"type":"Literal","value":"../components/Blockquote","raw":"'../components/Blockquote'"}}],"sourceType":"module"}}}`
-    );
     const selectedQuote = quoteText.trim().match(/.+:\s?/)[0]; // get the quote text
-
-    const isImported = tree.children.findIndex(node => node.value === importQuotes.value) !== -1;
-    if (!isImported) tree.children.push(importQuotes);
-
     // remove quote type from the original quote text
     node.children[0].children[0].value = quoteText.replace(selectedQuote, '');
 
-    tree.children[i] = {
+    return {
       type: 'mdxJsxFlowElement',
-      name: selectedQuote.replace(/^\d*/, '').replace(':', ''),
-      attributes: [{ type: 'mdxJsxAttribute', name: 'margin', value: margin }],
+      name: selectedQuote.replace(':', ''),
+      attributes: [],
       children: node.children[0].children,
       position: node.position,
       data: {
         _mdxExplicitJsx: true,
       },
     };
-  }
-}
+  };
 
-function findCodeBlock(tree) {
-  for (let i = 0; i < tree.children.length; i++) {
-    const node = tree.children[i];
-    if (node.type !== 'code') continue;
+  const recursiveSearch = node => {
+    if (node.children)
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.type === 'blockquote') node.children[i] = newNode(child);
+        recursiveSearch(child);
+      }
+  };
 
-    const { value: codeString, position, lang, meta } = node;
-    const title = meta?.match(/title=['|"](?<title>[^'|"]+)/)?.groups?.title || '';
-    const margin = meta?.match(/margin=['|"](?<margin>[^'|"]+)/)?.groups?.margin || 0; // margin left.
-
-    const importCode = JSON.parse(
-      `{"type":"mdxjsEsm","value":"import Code from '../components/CodeBlock/Code.astro';","data":{"estree":{"type":"Program","body":[{"type":"ImportDeclaration","specifiers":[{"type":"ImportDefaultSpecifier","start":7,"end":11,"local":{"type":"Identifier","name":"Code"}}],"source":{"type":"Literal","value":"../components/CodeBlock/Code.astro","raw":"'../components/CodeBlock/Code.astro'"}}],"sourceType":"module"}}}`
-    );
-
-    const isCodeImported = tree.children.findIndex(node => node.value === importCode.value) !== -1;
-    if (!isCodeImported) tree.children.push(importCode);
-
-    tree.children[i] = {
-      type: 'mdxJsxFlowElement',
-      name: 'Code',
-      attributes: [
-        { type: 'mdxJsxAttribute', name: 'codeString', value: codeString },
-        { type: 'mdxJsxAttribute', name: 'language', value: lang },
-        { type: 'mdxJsxAttribute', name: 'title', value: title },
-        { type: 'mdxJsxAttribute', name: 'margin', value: margin },
-      ],
-      children: [],
-      position,
-      data: { _mdxExplicitJsx: true },
-    };
-  }
+  recursiveSearch(tree);
 }

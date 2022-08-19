@@ -20,6 +20,7 @@
   border-radius: 0.5rem;
   margin: 10px;
   overflow: auto;
+  line-height: initial;
 }
 
 @media (hover: hover) and (pointer: fine) {

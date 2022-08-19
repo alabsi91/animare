@@ -4,8 +4,12 @@ import animare, { ease } from 'animare';
 import { useEffect } from 'react';
 
 let count = 0;
+
+const delay = 500;
+const Title = 'animare';
+
 export default function Header() {
-  const playButton = () => {
+  const logoAnimation = () => {
     const svg = document.querySelector('.logo svg') as SVGAElement;
     animare(
       { from: 1, to: 0.9, duration: 500, direction: 'alternate', ease: ease.out.quart },
@@ -13,13 +17,32 @@ export default function Header() {
     );
   };
 
-  const title1 = () => {
+  const titleAnimation_0 = () => {
+    const spans = document.querySelectorAll<HTMLSpanElement>('.logoTitle span');
+    animare(
+      {
+        to: new Array(spans.length).fill([0, 1]).flat(),
+        from: i => (i % 2 === 0 ? 40 : 0),
+        duration: 1200,
+        delay: i => delay + ~~(i / 2) * 50,
+        ease: new Array(spans.length).fill([ease.out.expo, ease.linear]).flat(),
+      },
+      values => {
+        for (let i = 0; i < values.length; i += 2) {
+          spans[i / 2].style.transform = `translateX(${values[i]}px)`;
+          spans[i / 2].style.opacity = values[i + 1] + '';
+        }
+      }
+    );
+  };
+
+  const titleAnimation_1 = () => {
     const spans = document.querySelectorAll<HTMLSpanElement>('.logoTitle span');
     animare(
       {
         to: new Array(spans.length).fill([0, 1, 0]).flat(),
         from: i => (i % 3 === 0 ? -40 : i % 3 === 1 ? 0 : 2),
-        delay: i => 200 + ~~(i / 3) * 50,
+        delay: i => delay + ~~(i / 3) * 50,
         duration: 800,
         ease: new Array(spans.length).fill([ease.out.expo, ease.out.expo, ease.linear]).flat(),
       },
@@ -33,20 +56,20 @@ export default function Header() {
     );
   };
 
-  const title2 = () => {
+  const titleAnimation_2 = () => {
     const spans = document.querySelectorAll<HTMLSpanElement>('.logoTitle span');
     animare(
       {
         to: new Array(spans.length).fill(1),
-        delay: i => 200 + i * 50,
         duration: i => 1000 + i * 50,
+        delay: i => delay + i * 50,
         ease: ease.spring({ mass: 2, damping: 12, stiffness: 70, velocity: 9, duration: 2500 }),
       },
       values => spans.forEach((span, i) => (span.style.transform = `scale(${values[i]})`))
     );
   };
 
-  const title3 = () => {
+  const titleAnimation_3 = () => {
     const spans = document.querySelectorAll<HTMLSpanElement>('.logoTitle span');
     const parent = spans[0].parentElement as HTMLHeadingElement;
     parent.style.overflow = 'hidden';
@@ -54,8 +77,8 @@ export default function Header() {
       {
         to: new Array(spans.length * 3).fill(0),
         from: i => (i % 3 === 0 ? 0.55 : i % 3 === 1 ? 1.1 : 180),
-        delay: i => 200 + ~~(i / 3) * 50,
         duration: 750,
+        delay: i => delay + ~~(i / 3) * 50,
         ease: ease.out.expo,
       },
       (values, { isFinished }) => {
@@ -66,30 +89,11 @@ export default function Header() {
     );
   };
 
-  const title0 = () => {
-    const spans = document.querySelectorAll<HTMLSpanElement>('.logoTitle span');
-    animare(
-      {
-        to: new Array(spans.length).fill([0, 1]).flat(),
-        from: i => (i % 2 === 0 ? 40 : 0),
-        delay: i => 200 + ~~(i / 2) * 50,
-        duration: 1200,
-        ease: new Array(spans.length).fill([ease.out.expo, ease.linear]).flat(),
-      },
-      values => {
-        for (let i = 0; i < values.length; i += 2) {
-          spans[i / 2].style.transform = `translateX(${values[i]}px)`;
-          spans[i / 2].style.opacity = values[i + 1] + '';
-        }
-      }
-    );
-  };
-
-  const animations = [title0, title1, title2, title3];
+  const animations = [titleAnimation_0, titleAnimation_1, titleAnimation_2, titleAnimation_3];
 
   useEffect(() => {
     animations[Math.floor(Math.random() * animations.length)]();
-    playButton();
+    logoAnimation();
   }, []);
 
   return (
@@ -98,7 +102,7 @@ export default function Header() {
         <svg
           onClick={() => {
             animations[count % animations.length]();
-            playButton();
+            logoAnimation();
             count++;
           }}
           xmlns='http://www.w3.org/2000/svg'
@@ -111,14 +115,11 @@ export default function Header() {
           <path d='M250-0.006C111.926-0.006,0,111.932,0,250.006c0,138.062,111.926,250,250,250   c138.062,0,250-111.938,250-250C500,111.932,388.062-0.006,250-0.006z M250,469.371c-120.961,0-219.365-98.404-219.365-219.365   S129.039,30.629,250,30.629c120.955,0,219.365,98.416,219.365,219.377S370.955,469.371,250,469.371z' />
           <polygon points='173.005,250.006 173.005,349.953 361.28,250.006 173.005,150.059  ' />
         </svg>
+
         <h1 className='logoTitle'>
-          <span>a</span>
-          <span>n</span>
-          <span>i</span>
-          <span>m</span>
-          <span>a</span>
-          <span>r</span>
-          <span>e</span>
+          {[...Title].map((c, i) => (
+            <span key={i}>{c}</span>
+          ))}
         </h1>
       </div>
 

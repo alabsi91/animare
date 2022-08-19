@@ -10,96 +10,96 @@ order: 9
   `animare` comes with a few predefined easing functions.\
   Check out [`easings.net`](https://easings.net/) to learn more.
 
-> 25Tip: Use the [`animare-ease-visualizer`](https://animare-ease-visualizer.netlify.app/) tool to create custom easing functions.
+  > Tip: Use the [`animare-ease-visualizer`](https://animare-ease-visualizer.netlify.app/) tool to create custom easing functions.
 
-> 25Warning: custom easing functions may cause frame rate drops.
+  > Warning: custom easing functions may cause frame rate drops.
 
-```typescript margin="25"
+  ```ts
+  import { ease } from 'animare'
 
-import { ease } from 'animare'
+  ease.linear // default
 
-ease.linear // default
+  // ease in        ease out           ease in-out
+  ease.in.back      ease.out.back      ease.inOut.back
+  ease.in.bounce    ease.out.bounce    ease.inOut.bounce
+  ease.in.circ      ease.out.circ      ease.inOut.circ
+  ease.in.cubic     ease.out.cubic     ease.inOut.cubic
+  ease.in.elastic   ease.out.elastic   ease.inOut.elastic
+  ease.in.expo      ease.out.expo      ease.inOut.expo
+  ease.in.sine      ease.out.sine      ease.inOut.sine
+  ease.in.quad      ease.out.quad      ease.inOut.quad
+  ease.in.quart     ease.out.quart     ease.inOut.quart
+  ease.in.quint     ease.out.quint     ease.inOut.quint
 
-// ease in        ease out           ease in-out
-ease.in.back      ease.out.back      ease.inOut.back
-ease.in.bounce    ease.out.bounce    ease.inOut.bounce
-ease.in.circ      ease.out.circ      ease.inOut.circ
-ease.in.cubic     ease.out.cubic     ease.inOut.cubic
-ease.in.elastic   ease.out.elastic   ease.inOut.elastic
-ease.in.expo      ease.out.expo      ease.inOut.expo
-ease.in.sine      ease.out.sine      ease.inOut.sine
-ease.in.quad      ease.out.quad      ease.inOut.quad
-ease.in.quart     ease.out.quart     ease.inOut.quart
-ease.in.quint     ease.out.quint     ease.inOut.quint
+  // The spring easing function will only look smooth at certain durations,
+  // with certain parameters.
+  ease.spring({
+    mass?: number,
+    stiffness?: number,
+    damping?: number,
+    velocity?: number,
+    duration?: number
+  })
 
-// The spring easing function will only look smooth at certain durations,
-// with certain parameters.
-ease.spring({
-  mass?: number,
-  stiffness?: number,
-  damping?: number,
-  velocity?: number,
-  duration?: number
-})
+  ease.steps(stepsNumber?: number, start?: true)
 
-ease.steps(stepsNumber?: number, start?: true)
+  ease.cubicBezier(X1: number, Y1: number, X2: number, Y2: number) // same as CSS
 
-ease.cubicBezier(X1: number, Y1: number, X2: number, Y2: number) // same as CSS
-
-ease.custom(d: string) // d is SVG's path attribute
-```
+  ease.custom(d: string) // d is SVG's path attribute
+  ```
 
 - ### organize
 
   The more you have animated values, the more it gets difficult to know what is what.\
+
+  ```js
+  // long-length animated values are hard to read and maintain.
+
+  import animare from 'animare';
+
+  animare(
+    {
+      from: [23, 25, 35, 34, 4, 45, 34, 45, 43, 45, 341, 34, 545],
+      to: [243, 22, 55, 226, 24, 61, 34, 45, 15, 45, 56, 13, 114],
+      duration: [500, 1000, 200, 2000, 1500, 500, 600, 700, 900, 1100, 360, 550, 400],
+      delay: [50, 100, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700],
+    },
+    ([a, b, c, d, e, f, g, h, i, j, k, l, m]) => {
+      // ...
+    }
+  );
+  ```
+
   `organize` is a utility function that helps you to organize your animated values.\
   `organize` also handles color animations.
 
-```js margin="25"
-// long-length animated values are hard to read and maintain.
+  ```js
 
-import animare from 'animare'
+  import animare, { organize } from 'animare'
 
-animare(
-  {
-    from: [23, 25, 35, 34, 4, 45, 34, 45, 43, 45, 341, 34, 545],
-    to: [243, 22, 55, 226, 24, 61, 34, 45, 15, 45, 56, 13, 114],
-    duration: [500, 1000, 200, 2000, 1500, 500, 600, 700, 900, 1100, 360, 550, 400],
-    delay: [50, 100, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700],
+  const options = organize({
+    x: { from: 20, to: 100, duration: 1500 },
+    y: { from: 10, to: 200, duration: 1000 },
+    width: { from: 200, to: 500, duration: 1000 },
+    height: { from: 150, to: 300, duration: 1000 },
+    color: { from: 'red', to: 'orange', duration: 1000 },
+    rotate: { to: 360, duration: 1000 },
+    scale: { from: 1, to: 2 },
+  })
+
+  animare({
+    from: options.from,
+    to: options.to,
+    duration: options.duration
   },
-  ([a, b, c, d, e, f, g, h, i, j, k, l, m]) => {
+
+  (values, { progress }) => {
+    const { x, y, width, height, color, rotate, scale } = options.get(values)
+    const rotateProgress = progress[options.indexOf('rotate')];
     // ...
-  }
-);
-```
 
-```js margin="25"
-
-import animare, { organize } from 'animare'
-
-const options = organize({
-  x: { from: 20, to: 100, duration: 1500 },
-  y: { from: 10, to: 200, duration: 1000 },
-  width: { from: 200, to: 500, duration: 1000 },
-  height: { from: 150, to: 300, duration: 1000 },
-  color: { from: 'red', to: 'orange', duration: 1000 },
-  rotate: { to: 360, duration: 1000 },
-  scale: { from: 1, to: 2 },
-})
-
-animare({
-  from: options.from,
-  to: options.to,
-  duration: options.duration
-},
-
-(values, { progress }) => {
-  const { x, y, width, height, color, rotate, scale } = options.get(values)
-  const rotateProgress = progress[options.indexOf('rotate')];
-  // ...
-
-}))
-```
+  }))
+  ```
 
 - ### colorToArr
 
@@ -107,22 +107,22 @@ animare({
   But sometimes you want to animate a hex color `#ff0000` or even a named color `red`.\
   For that, you can use `colorToArr` plugin to convert a color to an array of numbers.
 
-> 25Tip: `organize` plugin can handle color animations for you.
+  > Tip: `organize` plugin can handle color animations for you.
 
-```js margin="25"
-import animare, { colorToArr } from 'animare';
+  ```js
+  import animare, { colorToArr } from 'animare';
 
-const element = document.getElementById('element');
+  const element = document.getElementById('element');
 
-animare(
-  {
-    from: colorToArr('red'), // ➡️ [255, 0, 0]
-    to: colorToArr('#ff00ff'), // ➡️ [255, 0, 255]
-    duration: 1000,
-  },
+  animare(
+    {
+      from: colorToArr('red'), // ➡️ [255, 0, 0]
+      to: colorToArr('#ff00ff'), // ➡️ [255, 0, 255]
+      duration: 1000,
+    },
 
-  ([r, g, b]) => {
-    element.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-  }
-);
-```
+    ([r, g, b]) => {
+      element.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    }
+  );
+  ```
