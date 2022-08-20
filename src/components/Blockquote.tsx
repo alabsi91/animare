@@ -7,7 +7,6 @@ export function Note({ children, title = 'Note' }: quoteType) {
         style={{
           padding: '1px 1em',
           borderLeft: '.25em solid #5b85aa',
-          margin: 0,
           backgroundColor: '#5b85aa0f',
         }}
       >
@@ -21,7 +20,6 @@ export function Note({ children, title = 'Note' }: quoteType) {
           {children}
         </p>
       </blockquote>
-      <br />
     </>
   );
 }
@@ -33,7 +31,6 @@ export function Info({ children, title = 'Info' }: quoteType) {
         style={{
           padding: '1px 1em',
           borderLeft: '.25em solid #5b85aa',
-          margin: 0,
           backgroundColor: '#5b85aa0f',
         }}
       >
@@ -47,7 +44,6 @@ export function Info({ children, title = 'Info' }: quoteType) {
           {children}
         </p>
       </blockquote>
-      <br />
     </>
   );
 }
@@ -59,7 +55,6 @@ export function Warning({ children, title = 'Warning' }: quoteType) {
         style={{
           padding: '1px 1em',
           borderLeft: '.25em solid #d29922',
-          margin: 0,
           backgroundColor: '#d299220f',
         }}
       >
@@ -73,7 +68,6 @@ export function Warning({ children, title = 'Warning' }: quoteType) {
           {children}
         </p>
       </blockquote>
-      <br />
     </>
   );
 }
@@ -85,7 +79,6 @@ export function Danger({ children, title = 'Danger' }: quoteType) {
         style={{
           padding: '1px 1em',
           borderLeft: '.25em solid #e13238',
-          margin: 0,
           backgroundColor: '#e132380f',
         }}
       >
@@ -99,7 +92,6 @@ export function Danger({ children, title = 'Danger' }: quoteType) {
           {children}
         </p>
       </blockquote>
-      <br />
     </>
   );
 }
@@ -111,7 +103,6 @@ export function Tip({ children, title = 'Tip' }: quoteType) {
         style={{
           padding: '1px 1em',
           borderLeft: '.25em solid #5bc553',
-          margin: 0,
           backgroundColor: '#0a8f000f',
         }}
       >
@@ -125,7 +116,6 @@ export function Tip({ children, title = 'Tip' }: quoteType) {
           {children}
         </p>
       </blockquote>
-      <br />
     </>
   );
 }

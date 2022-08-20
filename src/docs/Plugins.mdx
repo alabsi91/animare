@@ -7,12 +7,13 @@ order: 9
 
 - ### ease
 
-  `animare` comes with a few predefined easing functions.\
-  Check out [`easings.net`](https://easings.net/) to learn more.
+  `animare` comes with a few predefined easing functions.
 
-  > Tip: Use the [`animare-ease-visualizer`](https://animare-ease-visualizer.netlify.app/) tool to create custom easing functions.
+  > Info: Check out [`easings.net`](https://easings.net/) to learn more about the available easing functions.
 
-  > Warning: custom easing functions may cause frame rate drops.
+  > Tip: Use [`animare-ease-visualizer`](https://animare-ease-visualizer.netlify.app/) tool to create custom easing functions.
+
+  > Warning:`ease.custom` may cause frame rate drops. instead use `ease.fromPoints`.
 
   ```ts
   import { ease } from 'animare'
@@ -31,26 +32,29 @@ order: 9
   ease.in.quart     ease.out.quart     ease.inOut.quart
   ease.in.quint     ease.out.quint     ease.inOut.quint
 
-  // The spring easing function will only look smooth at certain durations,
-  // with certain parameters.
+  // ⚠️ The spring easing function will only look smooth at certain parameters.
   ease.spring({
     mass?: number,
     stiffness?: number,
     damping?: number,
     velocity?: number,
     duration?: number
-  })
+  });
 
-  ease.steps(stepsNumber?: number, start?: true)
+  ease.steps(stepsNumber?: number, start?: true);
 
-  ease.cubicBezier(X1: number, Y1: number, X2: number, Y2: number) // same as CSS
+  ease.cubicBezier(X1: number, Y1: number, X2: number, Y2: number); // same as CSS
 
-  ease.custom(d: string) // d is SVG's path attribute
+  // ⚠️ custom easing functions from SVG paths may cause frame rate drops.
+  ease.custom(d: string); // d is SVG's path attribute
+
+  // custom easing functions from an array of generated points.
+  ease.fromPoints(array: Float32List);
   ```
 
 - ### organize
 
-  The more you have animated values, the more it gets difficult to know what is what.\
+  The more you have animated values, the more it gets difficult to know what is what.
 
   ```js
   // long-length animated values are hard to read and maintain.
@@ -74,8 +78,7 @@ order: 9
   `organize` also handles color animations.
 
   ```js
-
-  import animare, { organize } from 'animare'
+  import animare, { organize } from 'animare';
 
   const options = organize({
     x: { from: 20, to: 100, duration: 1500 },
@@ -85,20 +88,22 @@ order: 9
     color: { from: 'red', to: 'orange', duration: 1000 },
     rotate: { to: 360, duration: 1000 },
     scale: { from: 1, to: 2 },
-  })
+  });
 
-  animare({
-    from: options.from,
-    to: options.to,
-    duration: options.duration
-  },
+  animare(
+    {
+      from: options.from,
+      to: options.to,
+      duration: options.duration,
+    },
 
-  (values, { progress }) => {
-    const { x, y, width, height, color, rotate, scale } = options.get(values)
-    const rotateProgress = progress[options.indexOf('rotate')];
-    // ...
-
-  }))
+    (values, { progress }) => {
+      const { x, y, width, height, color, rotate, scale } = options.get(values);
+      // get the progress of rotate.
+      const rotateProgress = progress[options.indexOf('rotate')]; 
+      // ...
+    }
+  );
   ```
 
 - ### colorToArr
@@ -107,7 +112,7 @@ order: 9
   But sometimes you want to animate a hex color `#ff0000` or even a named color `red`.\
   For that, you can use `colorToArr` plugin to convert a color to an array of numbers.
 
-  > Tip: `organize` plugin can handle color animations for you.
+  > Tip: [`organize`](#organize) plugin can handle color animations for you.
 
   ```js
   import animare, { colorToArr } from 'animare';

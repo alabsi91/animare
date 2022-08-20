@@ -89,6 +89,7 @@ blockquote {
   padding: 1px 1em;
   border-left: 0.25em solid var(--purple-blue);
   margin: 0;
+  margin-bottom: 20px;
   background-color: #a370f00f;
 }
 
