@@ -1,0 +1,6 @@
+<div>
+  <div class='tabs-contents' hidden={!Astro.props.default}>
+    <slot />
+  </div>
+  <button class='tabs-buttons' onclick='toggleContents(event)'>{Astro.props.label}</button>
+</div>

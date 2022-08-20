@@ -10,31 +10,45 @@ const docs = (await Astro.glob('../docs/**/*.mdx')).sort((a, b) => (a.frontmatte
 const titles = docs.map(doc => doc.frontmatter.title);
 ---
 
-<html lang='en'>
-  <head>
-    <meta charset='utf-8' />
-    <meta name='viewport' content='width=device-width' />
-    <meta name='generator' content={Astro.generator} />
-    <link rel='icon' type='image/svg+xml' href='/animare/animare.svg' />
-    <title>animare documentation</title>
-  </head>
+<script is:global>
+  // eslint-disable-next-line no-unused-vars
+  function toggleContents(e) {
+    const contents = e.target.parentNode.parentNode.querySelectorAll('.tabs-contents');
+    contents.forEach(el => (el.hidden = true));
+    e.target.previousElementSibling.hidden = false;
+    e.target.parentNode.parentNode.style.height = e.target.previousElementSibling.clientHeight + 45 + 'px'
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.querySelectorAll('.tabs-wrapper');
+    for (let i = 0; i < el.length; i++) {
+      const height = Math.max(...[...el[i].querySelectorAll('.tabs-contents')].map(c => c.clientHeight));
+      el[i].style.height = height + 45 + 'px';
+    }
+  });
+</script>
 
-  <body>
-    <div class='App'>
-      <Header client:idle />
-      <Hero client:idle />
-      <div class='documentation'>
-        <Nav titles={titles} client:visible />
-        {
-          docs.map(doc => (
-            <section id={doc.frontmatter.title.toLowerCase().replace(/ /g, '-')}>
-              <doc.Content />
-            </section>
-          ))
-        }
-      </div>
-      <Footer />
-      <Canvas client:idle />
+<meta charset='utf-8' />
+<meta name='viewport' content='width=device-width' />
+<meta name='generator' content={Astro.generator} />
+<link rel='icon' type='image/svg+xml' href='/animare/animare.svg' />
+<title>animare documentation</title>
+
+
+<body>
+  <div class='App'>
+    <Header client:idle />
+    <Hero client:idle />
+    <div class='documentation'>
+      <Nav titles={titles} client:visible />
+      {
+        docs.map(doc => (
+          <section id={doc.frontmatter.title.toLowerCase().replace(/ /g, '-')}>
+            <doc.Content />
+          </section>
+        ))
+      }
     </div>
-  </body>
-</html>
+    <Footer />
+    <Canvas client:idle />
+  </div>
+</body>

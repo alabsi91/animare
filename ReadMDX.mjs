@@ -2,6 +2,7 @@ export default function ReadMDX() {
   return function (tree) {
     replaceCodeBlock(tree);
     replaceQuote(tree);
+    importTabs(tree);
   };
 }
 
@@ -143,6 +144,72 @@ function replaceQuote(tree) {
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
         if (child.type === 'blockquote') node.children[i] = newNode(child);
+        recursiveSearch(child);
+      }
+  };
+
+  recursiveSearch(tree);
+}
+
+function importTabs(tree) {
+  const Tabs = {
+    type: 'mdxjsEsm',
+    value: "import Tabs from '../components/Tabs/Tabs.astro';\r\nimport Item from '../components/Tabs/Item.astro';",
+    data: {
+      estree: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ImportDeclaration',
+            specifiers: [
+              {
+                type: 'ImportDefaultSpecifier',
+                local: {
+                  type: 'Identifier',
+                  name: 'Tabs',
+                },
+              },
+            ],
+            source: {
+              type: 'Literal',
+              value: '../components/Tabs/Tabs.astro',
+              raw: "'../components/Tabs/Tabs.astro'",
+            },
+          },
+          {
+            type: 'ImportDeclaration',
+            specifiers: [
+              {
+                type: 'ImportDefaultSpecifier',
+                local: {
+                  type: 'Identifier',
+                  name: 'Item',
+                },
+              },
+            ],
+            source: {
+              type: 'Literal',
+              value: '../components/Tabs/Item.astro',
+              raw: "'../components/Tabs/Item.astro'",
+            },
+          },
+        ],
+        sourceType: 'module',
+      },
+    },
+  };
+
+  const isImported = tree.children.findIndex(node => node.value === Tabs.value) !== -1;
+  if (isImported) return;
+
+  const recursiveSearch = node => {
+    if (node.children)
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.type === 'mdxJsxFlowElement' && child.name === 'Tabs') {
+          tree.children.push(Tabs);
+          return;
+        }
         recursiveSearch(child);
       }
   };

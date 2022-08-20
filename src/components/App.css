@@ -72,7 +72,10 @@ a:hover {
 
 ul {
   padding-left: 25px;
-  list-style-type: "🔸";
+  list-style-type: '🔸';
+}
+ol {
+  padding-left: 25px;
 }
 
 section li {
@@ -119,6 +122,47 @@ table th,
 table td {
   padding: 6px 13px;
   border: 1px solid #5d6670;
+}
+
+.tabs-wrapper {
+  position: relative;
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 0.75em;
+  border: solid 1px var(--purple-blue);
+  background-color: #34244730;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  transition: height 0.2s ease-out;
+}
+
+.tabs-contents {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  padding: 0px 20px;
+  width: calc(100% - 40px);
+  border-top: solid 2px rgba(0, 0, 0, 0.2);
+  z-index: -1;
+}
+
+.tabs-buttons {
+  all: unset;
+  cursor: pointer;
+  padding: 12px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--secondary);
+  box-sizing: border-box;
+  margin-left: 5px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.tabs-contents[hidden] ~ .tabs-buttons {
+  color: #9b9b9b;
+  border-bottom: 3px solid transparent;
 }
 
 @media (min-width: 42em) {
