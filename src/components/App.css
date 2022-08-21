@@ -165,6 +165,19 @@ table td {
   border-bottom: 3px solid transparent;
 }
 
+.tabs-contents:not([hidden]) *:not(.clipboard-container) {
+  animation: tabs-show 500ms;
+}
+
+@keyframes tabs-show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 details {
   border-radius: 0.75em;
   border: solid 1px var(--nav-color);
@@ -208,7 +221,7 @@ details[open] summary::before {
 details:not([open]) summary::before {
   animation: markerRotateReverse 0.2s ease-out both;
 }
-details[open] *:not(summary) {
+details[open] *:not(summary, .clipboard-container) {
   animation: details-show 300ms ease-out;
 }
 
