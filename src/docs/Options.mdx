@@ -10,7 +10,7 @@ order: 3
   <details>
     <summary>Type</summary>
     ```ts header='hide'
-    to: number | number[];
+    to: number | number[]; // required
     ```
   </details>
 
@@ -72,7 +72,7 @@ order: 3
     ```ts header='hide'
     type directionT = "normal" | "reverse" | "alternate" | "alternate-reverse";
 
-    direction?: directionT | directionT[] | ((index: number) => number);
+    direction?: directionT | directionT[];
     ```
   </details>
 

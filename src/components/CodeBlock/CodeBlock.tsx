@@ -2,8 +2,7 @@ import './CodeBlock.css';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css';
 
-export default function CodeBlock({ codeString = '', title = 'App.js', language = 'javascript', header = 'show' }) {
-  title = title ? title : 'App.js';
+export default function CodeBlock({ codeString = '', title = '', language = 'js', header = 'show' }) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(codeString);
