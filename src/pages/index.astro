@@ -36,8 +36,8 @@ const titles = docs.map(doc => doc.frontmatter.title);
 
 <body>
   <div class='App'>
-    <Header client:idle />
-    <Hero client:idle />
+    <Header client:visible />
+    <Hero client:visible />
     <div class='documentation'>
       <Nav titles={titles} client:visible />
       {
@@ -49,6 +49,6 @@ const titles = docs.map(doc => doc.frontmatter.title);
       }
     </div>
     <Footer />
-    <Canvas client:idle />
+    <Canvas client:visible />
   </div>
 </body>
