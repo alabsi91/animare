@@ -10,7 +10,7 @@ order: 7
 - ### onStart
 
   **Syntax:** `(callback: Function) => Function`\
-  Listen to the animation's start event.
+   Listen to the animation's start event.
 
   > Warning: `onStart` will not be fired for `autoPlay` animations.
 
@@ -30,10 +30,12 @@ order: 7
   unsubscribe(); // 🛑 stop listening
   ```
 
+  <br />
+
 - ### onProgress
 
   **Syntax:** `(at: number, callback: Function) => Function`\
-  Will be fired every time the animation reaches specific progress.
+   Will be fired every time the animation reaches specific progress.
 
   > Warning: `onProgress` will not be fired in case of ♾️ infinite repeats.
 
@@ -50,14 +52,16 @@ order: 7
   unsubscribe(); // 🛑 stop listening
   ```
 
+  <br />
+
 - ### asyncOnProgress
 
   **Syntax:** `(at: number) => Promise`\
-  Wait for the animation to reach specific progress.
+   Wait for the animation to reach specific progress.
 
   > Warning: `asyncOnProgress` will not be fired in case of ♾️ infinite repeats.
 
-  ```js 
+  ```js
   // inside async function
 
   const scrollAnimation = animare({ to: 300 }, ([scroll]) => {
@@ -69,6 +73,8 @@ order: 7
     console.log('half way');
   });
   ```
+
+  <br />
 
 - ### onFinish
 

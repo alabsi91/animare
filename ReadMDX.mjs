@@ -35,7 +35,8 @@ function replaceCodeBlock(tree) {
     }
 
     const { value, position, lang, meta } = node,
-      title = meta?.match(/title=['|"](?<title>[^'|"]+)/)?.groups?.title || ''; // meta title
+      title = meta?.match(/title=['|"](?<title>[^'|"]+)/)?.groups?.title || '', // meta title
+      header = meta?.match(/header=['|"](?<header>[^'|"]+)/)?.groups?.header || 'show' ; // meta header
 
     return {
       type: 'mdxJsxFlowElement',
@@ -44,6 +45,7 @@ function replaceCodeBlock(tree) {
         { type: 'mdxJsxAttribute', name: 'codeString', value },
         { type: 'mdxJsxAttribute', name: 'language', value: lang },
         { type: 'mdxJsxAttribute', name: 'title', value: title },
+        { type: 'mdxJsxAttribute', name: 'header', value: header  },
       ],
       children: [],
       position,

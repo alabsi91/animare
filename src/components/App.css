@@ -103,6 +103,7 @@ table {
   max-width: 100%;
   overflow: auto;
   border-collapse: collapse;
+  margin-bottom: 20px;
   line-height: normal;
 }
 thead {
@@ -140,12 +141,11 @@ table td {
 
 .tabs-contents {
   position: absolute;
-  top: 44px;
+  bottom: 0px;
   left: 0;
   padding: 0px 20px;
   width: calc(100% - 40px);
   border-top: solid 2px rgba(0, 0, 0, 0.2);
-  z-index: -1;
 }
 
 .tabs-buttons {
@@ -163,6 +163,87 @@ table td {
 .tabs-contents[hidden] ~ .tabs-buttons {
   color: #9b9b9b;
   border-bottom: 3px solid transparent;
+}
+
+details {
+  border-radius: 0.75em;
+  border: solid 1px var(--nav-color);
+  background-color: #34244730;
+  padding: 1em;
+  padding-top: 0.7em;
+}
+summary {
+  --summary-arrow-size: 6px;
+  position: relative;
+  list-style: none;
+  padding-left: calc(3 * var(--summary-arrow-size));
+  padding-bottom: 0.7em;
+  cursor: pointer;
+}
+summary::before {
+  position: absolute;
+  top: 0.45em;
+  left: 0em;
+  content: '';
+  width: 0;
+  height: 0;
+  transform-origin: calc(var(--summary-arrow-size) / 2) 50%;
+  border-top: var(--summary-arrow-size) solid transparent;
+  border-left: calc(1.2 * var(--summary-arrow-size)) solid var(--secondary);
+  border-bottom: var(--summary-arrow-size) solid transparent;
+}
+details[open] summary {
+  margin-bottom: 1em;
+  border-bottom: solid 2px rgba(0, 0, 0, 0.2);
+}
+details[open] {
+  animation: details-height-open 2s ease-out;
+}
+details:not([open]) {
+  padding-bottom: 0px;
+}
+details[open] summary::before {
+  animation: markerRotate 0.2s ease-out both;
+}
+details:not([open]) summary::before {
+  animation: markerRotateReverse 0.2s ease-out both;
+}
+details[open] *:not(summary) {
+  animation: details-show 300ms ease-out;
+}
+
+@keyframes details-height-open {
+  0% {
+    max-height: 50px;
+  }
+  100% {
+    max-height: 1000px;
+  }
+}
+
+@keyframes details-show {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes markerRotate {
+  to {
+    transform: rotate(90deg);
+  }
+}
+@keyframes markerRotateReverse {
+  from {
+    transform: rotate(90deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
 }
 
 @media (min-width: 42em) {

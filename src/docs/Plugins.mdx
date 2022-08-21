@@ -52,6 +52,8 @@ order: 9
   ease.fromPoints(array: Float32List);
   ```
 
+  <br />
+
 - ### organize
 
   The more you have animated values, the more it gets difficult to know what is what.
@@ -75,7 +77,7 @@ order: 9
   ```
 
   `organize` is a utility function that helps you to organize your animated values.\
-  `organize` also handles color animations.
+   `organize` also handles color animations.
 
   ```js
   import animare, { organize } from 'animare';
@@ -100,11 +102,13 @@ order: 9
     (values, { progress }) => {
       const { x, y, width, height, color, rotate, scale } = options.get(values);
       // get the progress of rotate.
-      const rotateProgress = progress[options.indexOf('rotate')]; 
+      const rotateProgress = progress[options.indexOf('rotate')];
       // ...
     }
   );
   ```
+
+  <br />
 
 - ### colorToArr
 

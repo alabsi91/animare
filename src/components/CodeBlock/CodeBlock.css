@@ -26,7 +26,7 @@
   .code-example > pre::-webkit-scrollbar {
     width: 9px;
     height: 9px;
-    margin: 10px;
+    margin: -10px;
   }
   .code-example > pre::-webkit-scrollbar-thumb {
     border-radius: 3px;

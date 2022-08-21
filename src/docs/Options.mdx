@@ -7,17 +7,23 @@ order: 3
 
 - ### to
 
-  |          Type          |  Default   |
-  | :--------------------: | :--------: |
-  | `number` \| `number[]` | `required` |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    to: number | number[];
+    ```
+  </details>
 
   End value\s of the animation.
 
 - ### from
 
-  |                       Type                       | Default |
-  | :----------------------------------------------: | :-----: |
-  | `number` \| `number[]` \| `(i:number) => number` |   `0`   |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    from?: number | number[] | ((index: number) => number);
+    ```
+  </details>
 
   Start value\s of the animation.\
    If a single `number` is passed, it will be used as the default for all animated values.\
@@ -25,47 +31,62 @@ order: 3
 
 - ### delay
 
-  |                       Type                       | Default |
-  | :----------------------------------------------: | :-----: |
-  | `number` \| `number[]` \| `(i:number) => number` |   `0`   |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    delay?: number | number[] | ((index: number) => number);
+    ```
+  </details>
 
   Delay before the animation starts in milliseconds.\
    If a single `number` is passed, it will be used as the default for all animated values.
 
 - ### delayOnce
 
-  |           Type           | Default |
-  | :----------------------: | :-----: |
-  | `boolean` \| `boolean[]` | `false` |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    delayOnce?: boolean | boolean[];
+    ```
+  </details>
 
   Apply the delay only once, in case of repeating animations.\
    If a single `boolean` is passed, it will be used as the default for all animated values.
 
 - ### duration
 
-  |                       Type                       | Default |
-  | :----------------------------------------------: | :-----: |
-  | `number` \| `number[]` \| `(i:number) => number` |  `350`  |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    duration?: number | number[] | ((index: number) => number);
+    ```
+  </details>
 
   The duration of the animation's value/s is in milliseconds.\
    If a single `number` is passed, it will be used as the default for all animated values.
 
 - ### direction
 
-  **directionType:** `'normal'` \| `'reverse'` \| `'alternate'` \| `'alternate-reverse'`
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    type directionT = "normal" | "reverse" | "alternate" | "alternate-reverse";
 
-  |                 Type                 | Default  |
-  | :----------------------------------: | :------: |
-  | `directionType` \| `directionType[]` | `'normal'` |
+    direction?: directionT | directionT[] | ((index: number) => number);
+    ```
+  </details>
 
   Animation's direction for each value/s.\
    If a single `string` is passed, it will be used as the default for all animated values.
 
 - ### repeat
 
-  |                       Type                       | Default |
-  | :----------------------------------------------: | :-----: |
-  | `number` \| `number[]` \| `(i:number) => number` |   `0`   |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    repeat?: number | number[] | ((i: number) => number);
+    ```
+  </details>
 
   Repeats count after the first play.\
    If a single `number` is passed, it will be used as the default for all animated values.\
@@ -73,26 +94,36 @@ order: 3
 
 - ### ease
 
-  |                          Type                          | Default  |
-  | :----------------------------------------------------: | :------: |
-  | `(p: number) => number` \| `((p: number) => number)[]` | `p => p` |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    ease?: ((x: number) => number) | ((x: number) => number)[];
+    ```
+  </details>
 
   Easing functions specify the rate of change of the number over time.\
+
   > Info: check out the [`ease`](#plugins) plugin.
 
 - ### autoPlay
 
-  |   Type    | Default |
-  | :-------: | :-----: |
-  | `boolean` | `true`  |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    autoPlay?: boolean;
+    ```
+  </details>
 
   Play the animation automatically on initialization.
 
 - ### type
 
-  |           Type            |    Default    |
-  | :-----------------------: | :-----------: |
-  | `'wait'` \| `'immediate'` | `'immediate'` |
+  <details>
+    <summary>Type</summary>
+    ```ts header='hide'
+    type?: "wait" | "immediate";
+    ```
+  </details>
 
   Playing behavior of the next animation in the timeline. when using `.next()`.\
    `wait` - wait for all animated values in the previous animations to be completed.\
