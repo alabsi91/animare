@@ -1,4 +1,5 @@
 import cubicBezier from './cubicBezier.js';
+import { customEase } from './customEase.js';
 
 export const ease = {
   /** - ease in functions */
@@ -132,36 +133,38 @@ export const ease = {
 
   /**
    * - takes SVG path d attribute as a string.
-   * - **Warning:** this may cause frames drops, if so try `ease.fromPoints(values: Float32List)` instead.
+   * - ⚠️ **Warning:** accepts strings only made with [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool.
    * - Use [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool to create easing function.
    */
-  custom: (d: string): ((x: number) => number) => {
-    if (typeof d !== 'string') throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [custom] : first param must be a string. !!\n\n');
+  custom: customEase,
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', d);
-    const pathLength = path.getTotalLength();
+  // custom: (d: string): ((x: number) => number) => {
+  //   if (typeof d !== 'string') throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [custom] : first param must be a string. !!\n\n');
 
-    return (progress: number): number => {
-      let start = 0;
-      let end = pathLength;
-      let target = (start + end) / 2;
-      let result = progress;
-      while (target >= start && target <= pathLength) {
-        const pos = path.getPointAtLength(target);
-        if (Math.abs(pos.x - progress) <= (progress === 1 ? 0 : 0.001)) {
-          result = pos.y;
-          return result;
-        } else if (pos.x >= progress) {
-          end = target;
-        } else {
-          start = target;
-        }
-        target = (start + end) / 2;
-      }
-      return result;
-    };
-  },
+  //   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  //   path.setAttribute('d', d);
+  //   const pathLength = path.getTotalLength();
+
+  //   return (progress: number): number => {
+  //     let start = 0;
+  //     let end = pathLength;
+  //     let target = (start + end) / 2;
+  //     let result = progress;
+  //     while (target >= start && target <= pathLength) {
+  //       const pos = path.getPointAtLength(target);
+  //       if (Math.abs(pos.x - progress) <= (progress === 1 ? 0 : 0.001)) {
+  //         result = pos.y;
+  //         return result;
+  //       } else if (pos.x >= progress) {
+  //         end = target;
+  //       } else {
+  //         start = target;
+  //       }
+  //       target = (start + end) / 2;
+  //     }
+  //     return result;
+  //   };
+  // },
 
   /**
    * - Custom easing function from array of points.
