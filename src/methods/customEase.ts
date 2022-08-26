@@ -74,16 +74,16 @@ function parsePath(path: string) {
 }
 
 export function customEase(d: string) {
-  const samples = 500;
+  const samples = 800;
   const points = parsePath(d);
-  const values = new Float32Array(samples + 1);
+  const values = new Float32Array(samples);
   let count = 0;
 
   for (let e = 0; e < points.length; e++) {
     const { p0, c0, c1, p1 } = points[e];
 
     for (let i = 0; i < samples; i++) {
-      const point = (i + 1) / samples;
+      const point = i / samples;
       const dist = (p1.x - 0) * samples;
 
       let start = 0,
@@ -97,7 +97,7 @@ export function customEase(d: string) {
 
         times++;
 
-        if (times > 10) {
+        if (times > 20) {
           result = null;
           break;
         }
@@ -119,6 +119,9 @@ export function customEase(d: string) {
       }
     }
   }
+
+  values[0] = points[0].p0.y;
+  values[samples - 1] = points[points.length - 1].p1.y;
 
   const length = values.length;
 
