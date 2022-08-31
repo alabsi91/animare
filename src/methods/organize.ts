@@ -82,7 +82,11 @@ export function organize<T extends { [key in keyof T]: organizeOptions<T[key]['t
     if (valuesArray.length !== names.length)
       throw new Error('\n\n⛔ [animare] ➡️ [organize] ➡️ [get] : passed `valuesArray` length does not match !!\n\n');
 
-    const res: { [key in keyof T]: T[key]['to'] } = Object.create(null);
+    type returnT = {
+      [key in keyof T]: T[key]['to'] extends string ? string : T[key]['to'] extends number ? number : T[key]['to'];
+    };
+
+    const res: returnT = Object.create(null);
     for (let i = 0; i < valuesArray.length; i++) {
       // pass a color string as rgb
       if (typeColor[names[i]]) {

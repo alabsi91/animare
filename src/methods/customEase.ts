@@ -17,9 +17,9 @@ function Bezier(p0: Point, c0: Point, c1: Point, p1: Point, t: number) {
 
 function parsePath(path: string) {
   const sReg =
-    'S[\\s|,|-]?(?<c1x>-?\\d\\.?\\d*)[\\s|,|-](?<c1y>-?\\d\\.?\\d*)[\\s|,|-](?<p1x>-?\\d\\.?\\d*)[\\s|,|-](?<p1y>-?\\d\\.?\\d*)';
+    'S[\\s|,]?(?<c1x>-?\\d\\.?\\d*)[\\s|,](?<c1y>-?\\d\\.?\\d*)[\\s|,](?<p1x>-?\\d\\.?\\d*)[\\s|,](?<p1y>-?\\d\\.?\\d*)';
   const cReg =
-    /M[\s|,|-]?((?<p0x>-?\d\.?\d*)[\s|,|-](?<p0y>-?\d\.?\d*))[\s|,|-]C[\s|,|-]?(?<c0x>-?\d\.?\d*)[\s|,|-](?<c0y>-?\d\.?\d*)[\s|,|-](?<c1x>-?\d\.?\d*)[\s|,|-](?<c1y>-?\d\.?\d*)[\s|,|-](?<p1x>-?\d\.?\d*)[\s|,|-](?<p1y>-?\d\.?\d*)/;
+    /M[\s|,]?((?<p0x>-?\d\.?\d*)[\s|,](?<p0y>-?\d\.?\d*))[\s|,]C[\s|,]?(?<c0x>-?\d\.?\d*)[\s|,](?<c0y>-?\d\.?\d*)[\s|,](?<c1x>-?\d\.?\d*)[\s|,](?<c1y>-?\d\.?\d*)[\s|,](?<p1x>-?\d\.?\d*)[\s|,](?<p1y>-?\d\.?\d*)/;
 
   const testC = cReg.test(path);
   const testS = new RegExp(sReg, 'g').test(path);
@@ -82,7 +82,7 @@ export function customEase(d: string) {
   for (let e = 0; e < points.length; e++) {
     const { p0, c0, c1, p1 } = points[e];
 
-    for (let i = 0; i < samples; i++) {
+    for (let i = p0.x * samples; i < p1.x * samples; i++) {
       const point = i / samples;
       const dist = (p1.x - 0) * samples;
 
@@ -97,7 +97,7 @@ export function customEase(d: string) {
 
         times++;
 
-        if (times > 20) {
+        if (times > 15) {
           result = null;
           break;
         }

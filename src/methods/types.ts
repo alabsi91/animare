@@ -186,7 +186,7 @@ export type animareCallbackOptions = {
   /**
    * - Change the animation's initial options.
    */
-  setOptions: (options: animareOptions, animationIndex?: number) => void;
+  setOptions: (options: Partial<animareOptions>, animationIndex?: number) => void;
 
   /**
    * - Get animation's current options object.
@@ -286,7 +286,7 @@ export interface animareReturnedObject {
   /**
    * - Change the animation's initial options.
    */
-  setOptions: (options: animareOptions, animationIndex?: number) => void;
+  setOptions: (options: Partial<animareOptions>, animationIndex?: number) => void;
 
   /**
    * - Get animation's current options object.

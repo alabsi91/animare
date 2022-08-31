@@ -741,7 +741,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       isRepeat = op.repeat !== undefined, // is [repeat] entered.
       nextTl = timeline?.[index + 1], // the next timeLine that come after index.
       tlDurationChanged = []; // timeline index that affected by duration change.
-    if (isTo) op.to = Array.isArray(op.to) ? op.to : [op.to];
+    if (isTo) op.to = Array.isArray(op.to) ? op.to : [op.to as number] ;
 
     const mapOver = (op.to ?? timeline[index].options.to) as number[];
     if (typeof op.from === 'function') op.from = mapOver.map((_, i) => (op.from as toMap)(i));
