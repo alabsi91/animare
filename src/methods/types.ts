@@ -120,6 +120,12 @@ export type animareCallbackOptions = {
   isFinished: boolean;
 
   /**
+   * - true when `.reverse()` method is used.
+   * - this has nothing to do with animation's `direction` property.
+   */
+  isReversePlay: boolean;
+
+  /**
    * - animated values progress : an array of numbers between 0 and 1.
    * - resets on every repeat cycle.
    */
@@ -218,7 +224,7 @@ export interface animareReturnedObject {
    * - If `autoPlay` is set to `true` it will be started automatically.
    * - If you want the animation to play backwards, use `.reverse()` method.
    */
-  play: () => void;
+  play: (options?: Partial<animareOptions>, animationIndex?: number) => void;
 
   /**
    * - Play the animation backwards.
@@ -229,7 +235,7 @@ export interface animareReturnedObject {
    * - If `autoPlay` is set to `true` it will play forwards automatically.
    * - If you want the animation to play forwards, use `.play()` method.
    */
-  reverse: () => void;
+  reverse: (options?: Partial<animareOptions>, animationIndex?: number) => void;
 
   /**
    * - Stop the animation at the beginning or at the end.

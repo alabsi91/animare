@@ -132,7 +132,7 @@ export const ease = {
   // cubicBezier: (X1: number, Y1: number, X2: number, Y2: number) => ease.custom(`M 0 0 C ${X1} ${Y1} ${X2} ${Y2} 1 1`),
 
   /**
-   * - takes SVG path d attribute as a string.
+   * - takes SVG path d attribute as a string and the samples number as a second param.
    * - ⚠️ **Warning:** accepts strings only made with [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool.
    * - Use [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool to create easing function.
    */

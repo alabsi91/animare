@@ -338,6 +338,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       fps,
       isFirstFrame,
       isFinished,
+      isReversePlay,
       time,
       timelineProgress: progress,
       progress: progresses,
@@ -529,8 +530,9 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     diff = null;
   };
 
-  const play: animareReturnedObject['play'] = () => {
+  const play: animareReturnedObject['play'] = (op, i = 0) => {
     reset(false);
+    if (op) setOptions(op, i);
     // play forward.
     isReversePlay = false;
     timelineAt.fill(0);
@@ -540,8 +542,9 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     reqId = requestAnimationFrame(startAnim);
   };
 
-  const reverse: animareReturnedObject['reverse'] = () => {
+  const reverse: animareReturnedObject['reverse'] = (op, i = 0) => {
     reset(true);
+    if (op) setOptions(op, i);
     // reverse the direction.
     isReversePlay = true;
     timelineAt.fill(timeline.length - 1);
@@ -741,7 +744,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       isRepeat = op.repeat !== undefined, // is [repeat] entered.
       nextTl = timeline?.[index + 1], // the next timeLine that come after index.
       tlDurationChanged = []; // timeline index that affected by duration change.
-    if (isTo) op.to = Array.isArray(op.to) ? op.to : [op.to as number] ;
+    if (isTo) op.to = Array.isArray(op.to) ? op.to : [op.to as number];
 
     const mapOver = (op.to ?? timeline[index].options.to) as number[];
     if (typeof op.from === 'function') op.from = mapOver.map((_, i) => (op.from as toMap)(i));
