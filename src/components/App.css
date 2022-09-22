@@ -280,7 +280,7 @@ details[open] *:not(summary, .clipboard-container) {
   font-size: 1em;
   color: var(--code-color);
   border: #ffffff1a solid 0.1px;
-  padding: 0.05em 0.3em;
+  padding: 0.2em 0.3em;
   background-color: #a370f01a;
   border-radius: 0.4em;
   line-height: 1.7;

@@ -20,17 +20,26 @@ order: 9
 
   ease.linear // default
 
-  // ease in        ease out           ease in-out
-  ease.in.back      ease.out.back      ease.inOut.back
-  ease.in.bounce    ease.out.bounce    ease.inOut.bounce
-  ease.in.circ      ease.out.circ      ease.inOut.circ
-  ease.in.cubic     ease.out.cubic     ease.inOut.cubic
-  ease.in.elastic   ease.out.elastic   ease.inOut.elastic
-  ease.in.expo      ease.out.expo      ease.inOut.expo
-  ease.in.sine      ease.out.sine      ease.inOut.sine
-  ease.in.quad      ease.out.quad      ease.inOut.quad
-  ease.in.quart     ease.out.quart     ease.inOut.quart
-  ease.in.quint     ease.out.quint     ease.inOut.quint
+  // ease in                  ease out                     ease in-out
+  ease.in.bounce              ease.out.bounce              ease.inOut.bounce
+  ease.in.circ                ease.out.circ                ease.inOut.circ
+  ease.in.cubic               ease.out.cubic               ease.inOut.cubic
+  ease.in.elastic             ease.out.elastic             ease.inOut.elastic
+  ease.in.expo                ease.out.expo                ease.inOut.expo
+  ease.in.sine                ease.out.sine                ease.inOut.sine
+  ease.in.quad                ease.out.quad                ease.inOut.quad
+  ease.in.quart               ease.out.quart               ease.inOut.quart
+  ease.in.quint               ease.out.quint               ease.inOut.quint
+  ease.in.back(c: number)     ease.out.back(c: number)     ease.inOut.back(c: number)
+  ease.in.poly(n: number)     ease.out.poly(n: number)     ease.inOut.poly(n: number)
+
+  /**
+   * - A simple elastic interaction, similar to a spring oscillating back and forth.
+   * - Default bounciness is `1`, which overshoots a little bit once.
+   *   `0` bounciness doesn't overshoot at all,
+   *   and bounciness of `N > 1` will overshoot about `N` times.
+  */
+  ease.wobble(bounciness = 1)
 
   // ⚠️ The spring easing function will only look smooth at certain parameters.
   ease.spring({

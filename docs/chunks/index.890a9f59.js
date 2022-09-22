@@ -1,1 +1,0 @@
-import{r as e}from"./index.e861befb.js";function i(o){const n=e.exports.useRef(0),[t,s]=e.exports.useState();return e.exports.useEffect(()=>{if(n.current===0){n.current=1;const r=o();r&&s(r)}return()=>{t?.pause()}},[]),t}export{i as u};
