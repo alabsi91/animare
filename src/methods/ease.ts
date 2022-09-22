@@ -1,119 +1,148 @@
 import cubicBezier from './cubicBezier.js';
 import { customEase } from './customEase.js';
+import { EasingFn } from './types.js';
 
 export const ease = {
   /** - ease in functions */
   in: {
     /** - **easeInBack:** check out [easings.net](https://easings.net/#easeInBack) to learn more.*/
-    back: (x: number): number => {
-      const c1 = 1.70158;
-      const c3 = c1 + 1;
-      return c3 * x * x * x - c1 * x * x;
+    back: (c1 = 1.70158): EasingFn => {
+      return (t: number): number => {
+        const c3 = c1 + 1;
+        return c3 * t * t * t - c1 * t * t;
+      };
     },
     /** - **easeInBounce:** check out [easings.net](https://easings.net/#easeInBounce) to learn more.*/
-    bounce: (x: number): number => 1 - ease.out.bounce(1 - x),
+    bounce: (t: number): number => 1 - ease.out.bounce(1 - t),
     /** - **easeInCric:** check out [easings.net](https://easings.net/#easeInCric) to learn more.*/
-    circ: (x: number): number => 1 - Math.sqrt(1 - Math.pow(x, 2)),
+    circ: (t: number): number => 1 - Math.sqrt(1 - Math.pow(t, 2)),
     /** - **easeInCubic:** check out [easings.net](https://easings.net/#easeInCubic) to learn more.*/
-    cubic: (x: number): number => x * x * x,
+    cubic: (t: number): number => t * t * t,
     /** - **easeInElastic:** check out [easings.net](https://easings.net/#easeInElastic) to learn more.*/
-    elastic: (x: number): number => {
+    elastic: (t: number): number => {
       const c4 = (2 * Math.PI) / 3;
-      return x === 0 ? 0 : x === 1 ? 1 : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * c4);
+      return t === 0 ? 0 : t === 1 ? 1 : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * c4);
     },
     /** - **easeInExpo:** check out [easings.net](https://easings.net/#easeInExpo) to learn more.*/
-    expo: (x: number): number => (x === 0 ? 0 : Math.pow(2, 10 * x - 10)),
+    expo: (t: number): number => (t === 0 ? 0 : Math.pow(2, 10 * t - 10)),
     /** - **easeInSine:** check out [easings.net](https://easings.net/#easeInSine) to learn more.*/
-    sine: (x: number): number => 1 - Math.cos((x * Math.PI) / 2),
+    sine: (t: number): number => 1 - Math.cos((t * Math.PI) / 2),
     /** - **easeInQuad:** check out [easings.net](https://easings.net/#easeInQuad) to learn more.*/
-    quad: (x: number): number => x * x,
+    quad: (t: number): number => t * t,
     /** - **easeInQuart:** check out [easings.net](https://easings.net/#easeInQuart) to learn more.*/
-    quart: (x: number): number => x * x * x * x,
+    quart: (t: number): number => t * t * t * t,
     /** - **easeInQuint:** check out [easings.net](https://easings.net/#easeInQuint) to learn more.*/
-    quint: (x: number): number => x * x * x * x * x,
+    quint: (t: number): number => t * t * t * t * t,
+    /** -  A power function. Position is equal to the Nth power of elapsed time. */
+    poly: (n: number): EasingFn => {
+      return (t: number) => Math.pow(t, n);
+    },
   },
 
   /** - ease out functions */
   out: {
     /** - **easeOutBack:** check out [easings.net](https://easings.net/#easeOutBack) to learn more.*/
-    back: (x: number): number => {
-      const c1 = 1.70158;
-      const c3 = c1 + 1;
-      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    back: (c1 = 1.70158): EasingFn => {
+      return (t: number): number => {
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+      };
     },
     /** - **easeOutBounce:** check out [easings.net](https://easings.net/#easeOutBounce) to learn more.*/
-    bounce: (x: number): number => {
+    bounce: (t: number): number => {
       const n1 = 7.5625;
       const d1 = 2.75;
-      if (x < 1 / d1) return n1 * x * x;
-      if (x < 2 / d1) return n1 * (x -= 1.5 / d1) * x + 0.75;
-      if (x < 2.5 / d1) return n1 * (x -= 2.25 / d1) * x + 0.9375;
-      return n1 * (x -= 2.625 / d1) * x + 0.984375;
+      if (t < 1 / d1) return n1 * t * t;
+      if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+      if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+      return n1 * (t -= 2.625 / d1) * t + 0.984375;
     },
     /** - **easeOutCric:** check out [easings.net](https://easings.net/#easeOutCric) to learn more.*/
-    circ: (x: number): number => Math.sqrt(1 - Math.pow(x - 1, 2)),
+    circ: (t: number): number => Math.sqrt(1 - Math.pow(t - 1, 2)),
     /** - **easeOutCubic:** check out [easings.net](https://easings.net/#easeOutCubic) to learn more.*/
-    cubic: (x: number): number => 1 - Math.pow(1 - x, 3),
+    cubic: (t: number): number => 1 - Math.pow(1 - t, 3),
     /** - **easeOutElastic:** check out [easings.net](https://easings.net/#easeOutElastic) to learn more.*/
-    elastic: (x: number): number => {
+    elastic: (t: number): number => {
       const c4 = (2 * Math.PI) / 3;
-      return x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+      return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
     },
     /** - **easeOutExpo:** check out [easings.net](https://easings.net/#easeOutExpo) to learn more.*/
-    expo: (x: number): number => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x)),
+    expo: (t: number): number => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
     /** - **easeOutSine:** check out [easings.net](https://easings.net/#easeOutSine) to learn more.*/
-    sine: (x: number): number => Math.sin((x * Math.PI) / 2),
+    sine: (t: number): number => Math.sin((t * Math.PI) / 2),
     /** - **easeOutQuad:** check out [easings.net](https://easings.net/#easeOutQuad) to learn more.*/
-    quad: (x: number): number => 1 - (1 - x) * (1 - x),
+    quad: (t: number): number => 1 - (1 - t) * (1 - t),
     /** - **easeOutQuart:** check out [easings.net](https://easings.net/#easeOutQuart) to learn more.*/
-    quart: (x: number): number => 1 - Math.pow(1 - x, 4),
+    quart: (t: number): number => 1 - Math.pow(1 - t, 4),
     /** - **easeOutQuint:** check out [easings.net](https://easings.net/#easeOutQuint) to learn more.*/
-    quint: (x: number): number => 1 - Math.pow(1 - x, 5),
+    quint: (t: number): number => 1 - Math.pow(1 - t, 5),
+    /** -  A power function. Position is equal to the Nth power of elapsed time. */
+    poly: (n: number): EasingFn => {
+      return (t: number) => 1 - Math.pow(1 - t, n);
+    },
   },
 
   /** - ease in out functions */
   inOut: {
     /** - **easeInOutBack:** check out [easings.net](https://easings.net/#easeInOutBack) to learn more.*/
-    back: (x: number): number => {
-      const c1 = 1.70158;
-      const c2 = c1 * 1.525;
-      return x < 0.5
-        ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
-        : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
+    back: (c1 = 1.70158): EasingFn => {
+      return (t: number): number => {
+        const c2 = c1 * 1.525;
+        return t < 0.5
+          ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+          : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2;
+      };
     },
     /** - **easeInOutBounce:** check out [easings.net](https://easings.net/#easeInOutBounce) to learn more.*/
-    bounce: (x: number): number => (x < 0.5 ? (1 - ease.out.bounce(1 - 2 * x)) / 2 : (1 + ease.out.bounce(2 * x - 1)) / 2),
+    bounce: (t: number): number => (t < 0.5 ? (1 - ease.out.bounce(1 - 2 * t)) / 2 : (1 + ease.out.bounce(2 * t - 1)) / 2),
     /** - **easeInOutCric:** check out [easings.net](https://easings.net/#easeInOutCric) to learn more.*/
-    circ: (x: number): number =>
-      x < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2,
+    circ: (t: number): number =>
+      t < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2,
     /** - **easeInOutCubic:** check out [easings.net](https://easings.net/#easeInOutCubic) to learn more.*/
-    cubic: (x: number): number => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+    cubic: (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
     /** - **easeInOutElastic:** check out [easings.net](https://easings.net/#easeInOutElastic) to learn more.*/
-    elastic: (x: number): number => {
+    elastic: (t: number): number => {
       const c5 = (2 * Math.PI) / 4.5;
-      return x === 0
+      return t === 0
         ? 0
-        : x === 1
+        : t === 1
         ? 1
-        : x < 0.5
-        ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2
-        : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
+        : t < 0.5
+        ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * c5)) / 2
+        : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * c5)) / 2 + 1;
     },
     /** - **easeInOutExpo:** check out [easings.net](https://easings.net/#easeInOutExpo) to learn more.*/
-    expo: (x: number): number =>
-      x === 0 ? 0 : x === 1 ? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2,
+    expo: (t: number): number =>
+      t === 0 ? 0 : t === 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2,
     /** - **easeInOutSine:** check out [easings.net](https://easings.net/#easeInOutSine) to learn more.*/
-    sine: (x: number): number => -(Math.cos(Math.PI * x) - 1) / 2,
+    sine: (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2,
     /** - **easeInOutQuad:** check out [easings.net](https://easings.net/#easeInOutQuad) to learn more.*/
-    quad: (x: number): number => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2),
+    quad: (t: number): number => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
     /** - **easeInOutQuart:** check out [easings.net](https://easings.net/#easeInOutQuart) to learn more.*/
-    quart: (x: number): number => (x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2),
+    quart: (t: number): number => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2),
     /** - **easeInOutQuint:** check out [easings.net](https://easings.net/#easeInOutQuint) to learn more.*/
-    quint: (x: number): number => (x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2),
+    quint: (t: number): number => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2),
+    /** -  A power function. Position is equal to the Nth power of elapsed time. */
+    poly: (n: number): EasingFn => {
+      return (t: number) => (t < 0.5 ? Math.pow(2, n - 1) * Math.pow(t, n) : 1 - Math.pow(-2 * t + 2, n) / 2);
+    },
+  },
+
+  /**
+   * A simple elastic interaction, similar to a spring oscillating back and forth.
+   *
+   * Default bounciness is `1`, which overshoots a little bit once.
+   * `0` bounciness doesn't overshoot at all,
+   * and bounciness of `N > 1` will overshoot about `N` times.
+   *
+   */
+  wobble(bounciness = 1): EasingFn {
+    const p = bounciness * Math.PI;
+    return (t: number): number => 1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * p);
   },
 
   /** - default easing function. */
-  linear: (x: number): number => x,
+  linear: (t: number): number => t,
 
   /**
    * - defines a [cubic Bézier curve](https://developer.mozilla.org/en-US/docs/Glossary/Bezier_curve).
@@ -138,34 +167,6 @@ export const ease = {
    */
   custom: customEase,
 
-  // custom: (d: string): ((x: number) => number) => {
-  //   if (typeof d !== 'string') throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [custom] : first param must be a string. !!\n\n');
-
-  //   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  //   path.setAttribute('d', d);
-  //   const pathLength = path.getTotalLength();
-
-  //   return (progress: number): number => {
-  //     let start = 0;
-  //     let end = pathLength;
-  //     let target = (start + end) / 2;
-  //     let result = progress;
-  //     while (target >= start && target <= pathLength) {
-  //       const pos = path.getPointAtLength(target);
-  //       if (Math.abs(pos.x - progress) <= (progress === 1 ? 0 : 0.001)) {
-  //         result = pos.y;
-  //         return result;
-  //       } else if (pos.x >= progress) {
-  //         end = target;
-  //       } else {
-  //         start = target;
-  //       }
-  //       target = (start + end) / 2;
-  //     }
-  //     return result;
-  //   };
-  // },
-
   /**
    * - Custom easing function from array of points.
    * - Use [Animare Ease Visualizer](https://animare-ease-visualizer.netlify.app/) tool to create easing function.
@@ -181,7 +182,7 @@ export const ease = {
    * // ...
    *```
    */
-  fromPoints: (values: Float32List) => {
+  fromPoints: (values: Float32List): EasingFn => {
     if (!(values instanceof Float32Array) && !Array.isArray(values))
       throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [fromPoints] : first param must be an Array or Float32Array. !!\n\n');
 
@@ -204,7 +205,7 @@ export const ease = {
    *
    * ```
    */
-  steps(steps = 10, start = true) {
+  steps(steps = 10, start = true): EasingFn {
     const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
     const trunc = start ? Math.ceil : Math.floor;
     return (progress: number) => trunc(clamp(progress, 0, 1) * steps) / steps;
@@ -224,7 +225,7 @@ export const ease = {
    * // ...
    * ```
    */
-  spring: ({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 } = {}) => {
+  spring: ({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 } = {}): EasingFn => {
     const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
     return (time: number) => {
       if (time === 0 || time === 1) return time;

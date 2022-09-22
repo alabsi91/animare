@@ -10,6 +10,8 @@ export enum TIMELINE_TYPE {
   immediate = 'immediate',
 }
 
+export type EasingFn = (time: number) => number;
+
 export interface animareOptions extends nextOptions {
   /**
    * - Auto start the animation if true.
@@ -84,7 +86,7 @@ export interface nextOptions {
    * ease: [ease.linear, ease.linear] // an array of values should have the same length as `to`.
    * ease: (t) => t * t               // your own easing function.
    */
-  ease?: ((x: number) => number) | ((x: number) => number)[];
+  ease?: EasingFn | EasingFn[];
 
   /**
    * - repeat count after the first play.

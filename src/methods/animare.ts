@@ -13,7 +13,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
   options.duration ??= 350;
   options.direction ??= DIRECTION.normal;
   options.repeat ??= 0;
-  options.ease ??= x => x;
+  options.ease ??= t => t;
   options.autoPlay ??= true;
   options.type ??= TIMELINE_TYPE.immediate;
 

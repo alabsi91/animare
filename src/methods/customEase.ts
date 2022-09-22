@@ -1,3 +1,5 @@
+import { EasingFn } from './types.js';
+
 type Point = {
   x: number;
   y: number;
@@ -17,7 +19,7 @@ function Bezier(p0: Point, c0: Point, c1: Point, p1: Point, t: number) {
   return point;
 }
 
-export function parsePath(path: string): C_Point[] {
+function parsePath(path: string): C_Point[] {
   const reg_s = /S[\s|,]?(?<c1x>-?\d\.?\d*)[\s|,](?<c1y>-?\d\.?\d*)[\s|,](?<p1x>-?\d\.?\d*)[\s|,](?<p1y>-?\d\.?\d*)/g;
   const reg_c =
     /M[\s|,]?((?<p0x>-?\d\.?\d*)[\s|,](?<p0y>-?\d\.?\d*))[\s|,]C[\s|,|-]?(?<c0x>-?\d\.?\d*)[\s|,](?<c0y>-?\d\.?\d*)[\s|,](?<c1x>-?\d\.?\d*)[\s|,](?<c1y>-?\d\.?\d*)[\s|,](?<p1x>-?\d\.?\d*)[\s|,](?<p1y>-?\d\.?\d*)/;
@@ -26,6 +28,9 @@ export function parsePath(path: string): C_Point[] {
   if (!reg_c.test(path) || (path.includes('S') && !reg_s.test(path))) {
     throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [custom] : invalid path string. !!\n\n');
   }
+
+  reg_s.lastIndex = 0;
+  reg_c.lastIndex = 0;
 
   const s_curves = [...path.matchAll(reg_s)].map(e =>
     e.groups ? { c1: { x: +e.groups.c1x, y: +e.groups.c1y }, p1: { x: +e.groups.p1x, y: +e.groups.p1y } } : e
@@ -57,7 +62,7 @@ export function parsePath(path: string): C_Point[] {
   return results as C_Point[];
 }
 
-export function customEase(d: string, samples = 800) {
+export function customEase(d: string, samples = 800): EasingFn {
   const points = parsePath(d);
   const values = new Float32Array(samples);
   let count = 0;

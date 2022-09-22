@@ -4,6 +4,8 @@
  * by Gaëtan Renaudeau 2014 - 2015 – MIT License
  */
 
+import { EasingFn } from './types.js';
+
 // These values are established by empiricism with tests (tradeoff: performance VS precision)
 const NEWTON_ITERATIONS = 4,
   NEWTON_MIN_SLOPE = 0.001,
@@ -54,7 +56,7 @@ function newtonRaphsonIterate(aX: number, aGuessT: number, mX1: number, mX2: num
 
 const LinearEasing = (x: number) => x;
 
-export default function cubicBezier(mX1: number, mY1: number, mX2: number, mY2: number) {
+export default function cubicBezier(mX1: number, mY1: number, mX2: number, mY2: number): EasingFn {
   if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1))
     throw new Error('/n/n⛔ [animare] ➡️ [ease] ➡️ [cubicBezier] : bezier x values must be in [0, 1] range. !!\n\n');
 
@@ -87,9 +89,10 @@ export default function cubicBezier(mX1: number, mY1: number, mX2: number, mY2: 
     return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
   }
 
-  return (x: number) => {
-    if (x === 0 || x === 1) return x; // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+  return (t: number) => {
+    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+    if (t === 0 || t === 1) return t;
 
-    return calcBezier(getTForX(x), mY1, mY2);
+    return calcBezier(getTForX(t), mY1, mY2);
   };
 }
