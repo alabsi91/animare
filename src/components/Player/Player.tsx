@@ -1,4 +1,4 @@
-import { animareReturnedObject } from 'animare/lib/methods/types';
+import type { animareReturnedObject } from 'animare/lib/methods/types';
 import { forwardRef } from 'react';
 import './Player.css';
 

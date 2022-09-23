@@ -24,7 +24,7 @@
     "remark-gfm": "^3.0.1"
   },
   "dependencies": {
-    "animare": "^1.1.0-beta.14",
+    "animare": "^1.1.0-beta.24",
     "highlight.js": "^11.6.0"
   }
 }
