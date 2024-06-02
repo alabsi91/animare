@@ -37,6 +37,18 @@ export const ease = {
     poly: (n: number): EasingFn => {
       return (t: number) => Math.pow(t, n);
     },
+    /**
+     * A simple elastic interaction, similar to a spring oscillating back and forth.
+     *
+     * Default bounciness is `1`, which overshoots a little bit once.
+     * `0` bounciness doesn't overshoot at all,
+     * and bounciness of `N > 1` will overshoot about `N` times.
+     *
+     */
+    wobble(bounciness = 1): EasingFn {
+      const p = bounciness * Math.PI;
+      return (t: number): number => 1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * p);
+    },
   },
 
   /** - ease out functions */
@@ -79,6 +91,17 @@ export const ease = {
     /** -  A power function. Position is equal to the Nth power of elapsed time. */
     poly: (n: number): EasingFn => {
       return (t: number) => 1 - Math.pow(1 - t, n);
+    },
+    /**
+     * A simple elastic interaction, similar to a spring oscillating back and forth.
+     *
+     * Default bounciness is `1`, which overshoots a little bit once.
+     * `0` bounciness doesn't overshoot at all,
+     * and bounciness of `N > 1` will overshoot about `N` times.
+     *
+     */
+    wobble(bounciness = 1): EasingFn {
+      return out(ease.in.wobble(bounciness));
     },
   },
 
@@ -126,19 +149,17 @@ export const ease = {
     poly: (n: number): EasingFn => {
       return (t: number) => (t < 0.5 ? Math.pow(2, n - 1) * Math.pow(t, n) : 1 - Math.pow(-2 * t + 2, n) / 2);
     },
-  },
-
-  /**
-   * A simple elastic interaction, similar to a spring oscillating back and forth.
-   *
-   * Default bounciness is `1`, which overshoots a little bit once.
-   * `0` bounciness doesn't overshoot at all,
-   * and bounciness of `N > 1` will overshoot about `N` times.
-   *
-   */
-  wobble(bounciness = 1): EasingFn {
-    const p = bounciness * Math.PI;
-    return (t: number): number => 1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * p);
+    /**
+     * A simple elastic interaction, similar to a spring oscillating back and forth.
+     *
+     * Default bounciness is `1`, which overshoots a little bit once.
+     * `0` bounciness doesn't overshoot at all,
+     * and bounciness of `N > 1` will overshoot about `N` times.
+     *
+     */
+    wobble(bounciness = 1): EasingFn {
+      return inOut(ease.in.wobble(bounciness));
+    },
   },
 
   /** - default easing function. */
@@ -252,3 +273,20 @@ export const ease = {
     };
   },
 };
+
+/** Runs an easing function backwards. */
+function out(easing: EasingFn): EasingFn {
+  return t => 1 - easing(1 - t);
+}
+
+/**
+ * Makes any easing function symmetrical. The easing function will run
+ * forwards for half of the duration, then backwards for the rest of the
+ * duration.
+ */
+function inOut(easing: EasingFn): EasingFn {
+  return t => {
+    if (t < 0.5) return easing(t * 2) / 2;
+    return 1 - easing((1 - t) * 2) / 2;
+  };
+}

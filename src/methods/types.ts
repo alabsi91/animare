@@ -2,7 +2,7 @@ export enum DIRECTION {
   normal = 'normal',
   reverse = 'reverse',
   alternate = 'alternate',
-  'alternate-reverse' = 'alternate-reverse',
+  alternateReverse = 'alternate-reverse',
 }
 
 export enum TIMELINE_TYPE {
@@ -12,7 +12,7 @@ export enum TIMELINE_TYPE {
 
 export type EasingFn = (time: number) => number;
 
-export interface animareOptions extends nextOptions {
+export interface AnimareOptions extends NextOptions {
   /**
    * - Auto start the animation if true.
    * - **Initial Value** `true`
@@ -20,7 +20,7 @@ export interface animareOptions extends nextOptions {
   autoPlay?: boolean;
 }
 
-export interface nextOptions {
+export interface NextOptions {
   /**
    * - start from the current value/s.
    * - **Initial Value** `0 | [0, ...]`
@@ -110,7 +110,7 @@ export interface nextOptions {
   direction?: keyof typeof DIRECTION | (keyof typeof DIRECTION)[];
 }
 
-export type animareCallbackOptions = {
+export type AnimareCallbackOptions = {
   /**
    * - true only at first the frame of the animation.
    */
@@ -194,15 +194,15 @@ export type animareCallbackOptions = {
   /**
    * - Change the animation's initial options.
    */
-  setOptions: (options: Partial<animareOptions>, animationIndex?: number) => void;
+  setOptions: (options: Partial<AnimareOptions>, animationIndex?: number) => void;
 
   /**
    * - Get animation's current options object.
    */
-  getOptions: (animationIndex?: number) => animareOptions;
+  getOptions: (animationIndex?: number) => AnimareOptions;
 };
 
-export interface animareTimelineOptions {
+export interface AnimareTimelineOptions {
   /**
    * - Repeat count after the first timeLine play.
    * - infinite if replay is set to `-1` .
@@ -218,7 +218,7 @@ export interface animareTimelineOptions {
   speed?: number;
 }
 
-export interface animareReturnedObject {
+export interface AnimareReturnedObject {
   /**
    * - Play the animation forwards.
    * - **Note**: `play` will match the `direction` property.
@@ -226,7 +226,7 @@ export interface animareReturnedObject {
    * - If `autoPlay` is set to `true` it will be started automatically.
    * - If you want the animation to play backwards, use `.reverse()` method.
    */
-  play: (options?: Partial<animareOptions>, animationIndex?: number) => void;
+  play: (options?: Partial<AnimareOptions>, animationIndex?: number) => void;
 
   /**
    * - Play the animation backwards.
@@ -237,7 +237,7 @@ export interface animareReturnedObject {
    * - If `autoPlay` is set to `true` it will play forwards automatically.
    * - If you want the animation to play forwards, use `.play()` method.
    */
-  reverse: (options?: Partial<animareOptions>, animationIndex?: number) => void;
+  reverse: (options?: Partial<AnimareOptions>, animationIndex?: number) => void;
 
   /**
    * - Stop the animation at the beginning or at the end.
@@ -289,17 +289,17 @@ export interface animareReturnedObject {
    */
   onProgressAsync: (at: number) => Promise<unknown> | undefined;
 
-  setTimelineOptions: (options: animareTimelineOptions) => void;
+  setTimelineOptions: (options: AnimareTimelineOptions) => void;
 
   /**
    * - Change the animation's initial options.
    */
-  setOptions: (options: Partial<animareOptions>, animationIndex?: number) => void;
+  setOptions: (options: Partial<AnimareOptions>, animationIndex?: number) => void;
 
   /**
    * - Get animation's current options object.
    */
-  getOptions: (animationIndex?: number) => animareOptions;
+  getOptions: (animationIndex?: number) => AnimareOptions;
 
   /**
    * - Play sequence of animations.
@@ -307,13 +307,19 @@ export interface animareReturnedObject {
    * - [duration], [ease], and [type] will be inherited from the previous animation in the timeline if not specified.
    * - [from] will be when the previous animation stoped if not specified.
    */
-  next: (options: nextOptions) => animareReturnedObject;
+  next: (options: NextOptions) => AnimareReturnedObject;
+
+  /**
+   * - Get a new copy of the current animation.
+   * - The cloned animation always has `autoPlay` set to `false`.
+   */
+  clone: () => AnimareReturnedObject;
 }
 
 export interface Ilisteners {
   onStart: { id: string; cb: () => void }[];
   onFinish: { id: string; cb: () => void }[];
-  onProgress: { at: number | string; id: string; cb: () => void }[];
+  onProgress: { at: number; id: string; cb: () => void }[];
 }
 
-export type animareOnUpdate = (values: number[], info: animareCallbackOptions) => void;
+export type AnimareOnUpdate = (values: number[], info: AnimareCallbackOptions) => void;

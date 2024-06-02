@@ -1,6 +1,6 @@
-import { animareOnUpdate, animareOptions, DIRECTION, Ilisteners, animareReturnedObject, TIMELINE_TYPE } from './types.js';
+import { AnimareOnUpdate, AnimareOptions, DIRECTION, Ilisteners, AnimareReturnedObject, TIMELINE_TYPE } from './types.js';
 
-export default function animare(options: animareOptions, callback: animareOnUpdate) {
+export default function animare(options: AnimareOptions, callback: AnimareOnUpdate) {
   if (typeof options !== 'object' || Array.isArray(options))
     throw new Error('\n\n⛔ [animare] : expects an object as the first argument. \n\n');
 
@@ -23,7 +23,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
   if (typeof options.duration === 'function') options.duration = options.to.map((_, i) => (options.duration as toMap)(i));
   if (typeof options.repeat === 'function') options.repeat = options.to.map((_, i) => (options.repeat as toMap)(i));
 
-  const checkInputs = (options: animareOptions) => {
+  const checkInputs = (options: AnimareOptions) => {
     if (
       (typeof options.from !== 'number' && !Array.isArray(options.from)) ||
       (Array.isArray(options.from) && options.from.some(e => typeof e !== 'number'))
@@ -92,18 +92,18 @@ export default function animare(options: animareOptions, callback: animareOnUpda
 
   /** - start time of each animation. */
   let start: number[] = [],
-    /** - used to calulate fps. */
+    /** - used to calculate fps. */
     fpsTimeStamp: number,
     /** - start time used to calculate overall progress. */
-    excuteTimeStamp: number,
-    /** - duration of the excute function. */
-    excuteDuration: number,
+    executeTimeStamp: number,
+    /** - duration of the execute function. */
+    executeDuration: number,
     /** - is the first frame of the animation. */
     isFirstFrame: boolean,
     /** - time when the animation was paused. */
     pausedAt: number | null,
     /** - to play one frame only for stop method. */
-    isStoped: boolean,
+    isStopped: boolean,
     /** - is the animation playing backward ? */
     isReversePlay = false,
     /** - to resolve the promise when the animation is finished for `onFinishAsync` . */
@@ -139,7 +139,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       onStart: [], // save start listeners callback and id.
       onFinish: [], // save finish listeners callback and id.
     },
-    /** - save progress listerners IDES or asyncsOnProgress times to prevent multiple calls.*/
+    /** - save progress listeners IDES or asyncOnProgress times to prevent multiple calls.*/
     progressTimeSet = new Set<string>();
 
   /** - to correct progress when the browser is pausing the animation.
@@ -164,22 +164,22 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     visibilitychange.add(); // add visibilitychange listener.
 
     start = new Array<number>((options.to as number[]).length).fill(timeStamp);
-    excuteTimeStamp = fpsTimeStamp = timeStamp;
+    executeTimeStamp = fpsTimeStamp = timeStamp;
 
     listeners.onStart.forEach(({ cb }) => cb()); // fire onStart event listeners.
 
     isFirstFrame = true;
-    excute(timeStamp); // start the animation.
+    execute(timeStamp); // start the animation.
     isFirstFrame = false;
   };
 
-  const excute = (now: number) => {
+  const execute = (now: number) => {
     // correct the timeStamp if the browser is paused the animation.
     if (diff) {
       const now = performance.now();
       const delta = now - diff;
       start = start.map(s => s + delta);
-      excuteTimeStamp = excuteTimeStamp + delta;
+      executeTimeStamp = executeTimeStamp + delta;
       diff = null;
     }
 
@@ -213,7 +213,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       /** if the `direction` is `reversed` or `alternate-reverse` at the first cycle, or `alternate` at the second cycle. */
       let isReversed =
         direction === DIRECTION.reverse ||
-        (direction === DIRECTION['alternate-reverse'] && alternateCycle[i] === 1) ||
+        (direction === DIRECTION['alternateReverse'] && alternateCycle[i] === 1) ||
         (direction === DIRECTION.alternate && alternateCycle[i] === 2);
       // reverse timeline play.
       isReversed = isReversePlay ? (direction?.includes(DIRECTION.alternate) ? isReversed : !isReversed) : isReversed;
@@ -314,7 +314,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       finished.add(i);
     }
 
-    // ! [calbackParams] and [to] should be the same length.
+    // ! [callbackParams] and [to] should be the same length.
     if (callbackParams.length !== (options.to as number[]).length)
       console.warn(`\n\n⚠️ [animare] ➡️ callbackParams length is not equal to to length \n\n`);
 
@@ -329,9 +329,9 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       repeatCount.every(x => x === 0) &&
       tlRepeatCount.every(x => x === 0);
     /** - time passed since the animation started. */
-    const time = ~~(now - excuteTimeStamp);
+    const time = ~~(now - executeTimeStamp);
     /** - overall progress including timeline and repeats. -1 if infinite repeat detected. */
-    const progress = excuteDuration === -1 ? -1 : +(time / excuteDuration > 1 ? 1 : time / excuteDuration).toFixed(3);
+    const progress = executeDuration === -1 ? -1 : +(time / executeDuration > 1 ? 1 : time / executeDuration).toFixed(3);
 
     // * callback
     callback(callbackParams, {
@@ -378,8 +378,8 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     }
 
     // * if not finished or not stopped keep going
-    if (finished.size !== (options.to as number[]).length && !isStoped) {
-      reqId = requestAnimationFrame(excute);
+    if (finished.size !== (options.to as number[]).length && !isStopped) {
+      reqId = requestAnimationFrame(execute);
       return;
     }
 
@@ -401,7 +401,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       alternateCycle.fill(1); // reset alternate cycle
       finished.clear(); // reset finished animations.
       start.fill(now); // reset timer.
-      reqId = requestAnimationFrame(excute); // start the timeline.
+      reqId = requestAnimationFrame(execute); // start the timeline.
       return;
     }
 
@@ -421,11 +421,11 @@ export default function animare(options: animareOptions, callback: animareOnUpda
       alternateCycle.fill(1); // reset alternate cycle
       finished.clear(); // reset finished animations.
       start.fill(now); // reset timer.
-      reqId = requestAnimationFrame(excute); // start the timeline.
+      reqId = requestAnimationFrame(execute); // start the timeline.
       return;
     }
 
-    // * fire onFinishe event listeners.
+    // * fire onFinish event listeners.
     listeners.onFinish.forEach(({ cb }) => cb());
     if (resolveAsyncOnFinish) {
       const sleep = new Promise<never>(resolve => setTimeout(resolve, 0));
@@ -441,7 +441,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     finished.clear(); // reset finished animations.
   };
 
-  /** - caluculate the duration of overall animation including timelines and repeats.*/
+  /** - calculate the duration of overall animation including timelines and repeats.*/
   const calculateTime = () => {
     // ! maybe doesn't work if frame rate drops. to be tested.
     let time = 0;
@@ -522,15 +522,15 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     progressTimeSet.clear();
     // reset atFrame counter.
     fpsTimeStamp = 0;
-    // reset isStoped vairable that is used in stop() method to play one frame at the end or at the start.
-    isStoped = false;
+    // reset isStoped variable that is used in stop() method to play one frame at the end or at the start.
+    isStopped = false;
     // reset paused state.
     pausedAt = null;
     // reset difference between start and now.
     diff = null;
   };
 
-  const play: animareReturnedObject['play'] = (op, i = 0) => {
+  const play: AnimareReturnedObject['play'] = (op, i = 0) => {
     reset(false);
     if (op) setOptions(op, i);
     // play forward.
@@ -538,29 +538,29 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     timelineAt.fill(0);
 
     // start the animation.
-    excuteDuration = calculateTime();
+    executeDuration = calculateTime();
     reqId = requestAnimationFrame(startAnim);
   };
 
-  const reverse: animareReturnedObject['reverse'] = (op, i = 0) => {
+  const reverse: AnimareReturnedObject['reverse'] = (op, i = 0) => {
     reset(true);
     if (op) setOptions(op, i);
     // reverse the direction.
     isReversePlay = true;
     timelineAt.fill(timeline.length - 1);
     // start the animation.
-    excuteDuration = calculateTime();
+    executeDuration = calculateTime();
     reqId = requestAnimationFrame(startAnim);
   };
 
-  const pause: animareReturnedObject['pause'] = () => {
+  const pause: AnimareReturnedObject['pause'] = () => {
     if (!reqId || pausedAt) return; // exit if animation is not running or already paused.
     cancelAnimationFrame(reqId);
     pausedAt = performance.now();
     visibilitychange.remove();
   };
 
-  const resume: animareReturnedObject['resume'] = () => {
+  const resume: AnimareReturnedObject['resume'] = () => {
     // if the animation is not paused, play it.
     if (!pausedAt) {
       play();
@@ -570,24 +570,24 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     const now = performance.now();
     const delta = now - pausedAt;
     start = start.map(s => s + delta);
-    excuteTimeStamp = excuteTimeStamp + delta;
+    executeTimeStamp = executeTimeStamp + delta;
     pausedAt = null;
     diff = null;
-    isStoped = false;
-    reqId = requestAnimationFrame(excute);
+    isStopped = false;
+    reqId = requestAnimationFrame(execute);
     visibilitychange.add();
   };
 
-  const stop: animareReturnedObject['stop'] = (stopAtStart = true) => {
+  const stop: AnimareReturnedObject['stop'] = (stopAtStart = true) => {
     stopAtStart ? play() : reverse();
-    isStoped = true;
+    isStopped = true;
     reqId = null;
 
     // remove visibility listener on stop.
     visibilitychange.remove();
   };
 
-  const next: animareReturnedObject['next'] = op => {
+  const next: AnimareReturnedObject['next'] = op => {
     if (typeof op !== 'object')
       throw new Error('\n\n⛔ [animare] ➡️ [next] ➡️ [options] : expects an object as the first argument. \n\n');
     if ((!Array.isArray(op.to) && typeof op.to !== 'number') || (Array.isArray(op.to) && op.to.some(t => typeof t !== 'number')))
@@ -654,22 +654,22 @@ export default function animare(options: animareOptions, callback: animareOnUpda
 
     // recalculate animation duration, if the animation is already running.
     // this is necessary if autoPlay is true.
-    if (reqId) excuteDuration = calculateTime();
+    if (reqId) executeDuration = calculateTime();
 
     return returned;
   };
 
-  const setTimelineOptions: animareReturnedObject['setTimelineOptions'] = op => {
+  const setTimelineOptions: AnimareReturnedObject['setTimelineOptions'] = op => {
     if (typeof op !== 'object')
       throw new Error('\n\n⛔ [animare] ➡️ [setTimelineOptions] ➡️ [options] : expects an object as the first argument. !!\n\n');
     if (op.repeat && typeof op.repeat !== 'number')
       throw new Error('\n\n⛔ [animare] ➡️ [setTimelineOptions] ➡️ [options] : `repeat` must be a number. !!\n\n');
     tlOptions = { ...tlOptions, ...op };
     tlRepeatCount = [...(options.to as number[])].fill(tlOptions.repeat);
-    if (reqId) excuteDuration = calculateTime();
+    if (reqId) executeDuration = calculateTime();
   };
 
-  const onStart: animareReturnedObject['onStart'] = cb => {
+  const onStart: AnimareReturnedObject['onStart'] = cb => {
     if (typeof cb !== 'function')
       throw new Error('\n\n⛔ [animare] ➡️ [onStart] : first param must be a callback function. !!\n\n');
 
@@ -682,7 +682,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     };
   };
 
-  const onFinish: animareReturnedObject['onFinish'] = cb => {
+  const onFinish: AnimareReturnedObject['onFinish'] = cb => {
     if (typeof cb !== 'function') throw new Error('\n\n⛔ [animare] ➡️ [onFinish] : accepts a callback function only. !!\n\n');
 
     const id = `onFinish_${Math.random()}`;
@@ -694,14 +694,14 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     };
   };
 
-  const onFinishAsync: animareReturnedObject['onFinishAsync'] = () => {
+  const onFinishAsync: AnimareReturnedObject['onFinishAsync'] = () => {
     if (resolveAsyncOnFinish) return;
     return new Promise<never>(resolve => {
       resolveAsyncOnFinish = resolve;
     });
   };
 
-  const onProgress: animareReturnedObject['onProgress'] = (at, cb) => {
+  const onProgress: AnimareReturnedObject['onProgress'] = (at, cb) => {
     if (typeof at !== 'number')
       throw new Error('\n\n⛔ [animare] ➡️ [onProgress] :  accepts a number as the first argument. !!\n\n');
     if (at < 0 || at > 1)
@@ -717,7 +717,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     };
   };
 
-  const onProgressAsync: animareReturnedObject['onProgressAsync'] = at => {
+  const onProgressAsync: AnimareReturnedObject['onProgressAsync'] = at => {
     if (typeof at !== 'number')
       throw new Error('\n\n⛔ [animare] ➡️ [onProgressAsync] : accepta a number as the first argument. !!\n\n');
     if (at < 0 || at > 1)
@@ -730,7 +730,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     });
   };
 
-  const setOptions: animareReturnedObject['setOptions'] = (op, index = 0) => {
+  const setOptions: AnimareReturnedObject['setOptions'] = (op, index = 0) => {
     if (typeof op !== 'object' || Array.isArray(op))
       throw new Error('\n\n⛔ [animare] ➡️ [setOptions] : expects an object as the first argument. !!\n\n');
     if (typeof index !== 'number')
@@ -825,18 +825,32 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     timeline[index].options = { ...timeline[index].options, ...op };
     timeline[index].userInput = { ...timeline[index].userInput, ...op };
     // recalculate the progress of the animation.
-    if (isDuration || isDelay || isRepeat) excuteDuration = calculateTime();
+    if (isDuration || isDelay || isRepeat) executeDuration = calculateTime();
     // check user input for errors.
     checkInputs(timeline[index].options);
   };
 
-  const getOptions: animareReturnedObject['getOptions'] = (index = 0): animareOptions => {
+  const getOptions: AnimareReturnedObject['getOptions'] = (index = 0): AnimareOptions => {
     if (index > timeline.length - 1)
       throw new Error('\n\n⛔ [animare] ➡️ [getOptions] : first argument `index` is out of range. !!\n\n');
     return timeline[index].options;
   };
 
-  const returned: animareReturnedObject = {
+  const clone: AnimareReturnedObject['clone'] = () => {
+    const cloned = animare({ ...options, autoPlay: false }, callback);
+
+    for (let i = 0; i < timeline.length; i++) {
+      if (i === 0) continue;
+      const op = timeline[i].userInput;
+      cloned.next(op);
+    }
+
+    cloned.setTimelineOptions(tlOptions)
+
+    return cloned;
+  };
+
+  const returned: AnimareReturnedObject = {
     play,
     reverse,
     pause,
@@ -851,6 +865,7 @@ export default function animare(options: animareOptions, callback: animareOnUpda
     onProgressAsync,
     setOptions,
     getOptions,
+    clone,
   };
 
   if (options.autoPlay) play();
