@@ -1,6 +1,9 @@
 # animare
 
-🔸Light animation library for modern JavaScript.
+> [!WARNING]
+> This library is still in development. The API may change in the future.
+
+🔸Advanced animation library for modern JavaScript.
 
 🔸Based on `requestAnimationFrame`.
 
