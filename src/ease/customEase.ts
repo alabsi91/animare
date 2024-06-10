@@ -1,4 +1,4 @@
-import { EasingFn } from './types.js';
+import type { EaseFn } from '../types';
 
 type Point = {
   x: number;
@@ -8,19 +8,18 @@ type S_Point = { c1: Point; p1: Point }; // for S (Several Bezier curves) points
 type C_Point = { p0: Point; c0: Point; c1: Point; p1: Point }; // for C (Cubic Bezier curves) points
 
 /**
- * Given a cubic bezier curve with four points, return the point on the curve at a given time.
+ * Calculates the point on a cubic Bezier curve at a given time.
  *
- * The four points are:
- * - p0: The starting point of the curve
- * - c0: The first control point
- * - c1: The second control point
- * - p1: The ending point of the curve
- *
- * The time is a number between 0 and 1.
- *
- * Returns a point on the curve.
+ * The cubic Bezier curve is defined by four points:
+ * @param p0 - The starting point of the curve.
+ * @param c0 - The first control point.
+ * @param c1 - The second control point.
+ * @param p1 - The ending point of the curve.
+ * @param t - A number between 0 and 1 representing the position on the curve.
+ * @returns The point on the curve at the given time.
  */
-function Bezier(p0: Point, c0: Point, c1: Point, p1: Point, t: number) {
+
+function Bezier(p0: Point, c0: Point, c1: Point, p1: Point, t: number): Point {
   const point = { x: 0, y: 0 },
     mt = 1 - t,
     mt2 = mt * mt,
@@ -33,8 +32,13 @@ function Bezier(p0: Point, c0: Point, c1: Point, p1: Point, t: number) {
 }
 
 /**
- * This function converts a string representation of a path into an array of objects, each representing a Cubic Béziers with a set of points.
+ * Converts a string representation of a path into an array of objects,
+ * each representing a cubic Bézier curve with a set of points.
+ *
+ * @param path - The string representation of the path.
+ * @returns An array of objects, each containing the points of a cubic Bézier curve.
  */
+
 function parsePath(path: string): C_Point[] {
   const reg_s = /S[\s|,]?(?<c1x>-?\d\.?\d*)[\s|,](?<c1y>-?\d\.?\d*)[\s|,](?<p1x>-?\d\.?\d*)[\s|,](?<p1y>-?\d\.?\d*)/g;
   const reg_c =
@@ -51,7 +55,7 @@ function parsePath(path: string): C_Point[] {
 
   // parse S curves
   const s_curves = [...path.matchAll(reg_s)].map(e =>
-    e.groups ? { c1: { x: +e.groups.c1x, y: +e.groups.c1y }, p1: { x: +e.groups.p1x, y: +e.groups.p1y } } : e
+    e.groups ? { c1: { x: +e.groups.c1x, y: +e.groups.c1y }, p1: { x: +e.groups.p1x, y: +e.groups.p1y } } : e,
   ) as S_Point[];
 
   // get first point c curve.
@@ -81,7 +85,7 @@ function parsePath(path: string): C_Point[] {
   return results as C_Point[];
 }
 
-export function customEase(d: string, samples = 800): EasingFn {
+export function customEase(d: string, samples = 800): EaseFn {
   const curvesPoints = parsePath(d);
   const values = new Float32Array(samples); // in this array the results will be saved.
   let count = 0; // To accurately save the results, we need to track the index of the `values` array.

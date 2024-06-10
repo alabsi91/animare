@@ -1,11 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "moduleResolution": "node",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "declaration": true,
-    "outDir": "./lib",
-    "strict": true
+    "declarationDir": "lib/typescript",
+    "declarationMap": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictPropertyInitialization": false,
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src"]
 }

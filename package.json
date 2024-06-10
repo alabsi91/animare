@@ -1,44 +1,32 @@
 {
   "name": "animare",
-  "version": "1.1.0-beta.25",
-  "description": "Light animation library for modern JavaScript.",
-  "author": "Ahmed Alabsi <alabsi91@gmail.com>",
+  "version": "2.0.0-beta.0",
+  "description": "Advanced animation library for modern JavaScript.",
+  "author": "Ahmed ALAbsi <alabsi91@gmail.com>",
   "license": "MIT",
-  "type": "module",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alabsi91/animare.git"
-  },
-  "files": [
-    "lib"
-  ],
   "exports": {
     "./react": {
-      "import": "./lib/react/index.js",
-      "default": "./lib/react/index.js",
-      "types": "./lib/react/index.d.ts"
+      "default": "./lib/module/react/index.js",
+      "import": "./lib/module/react/index.js",
+      "require": "./lib/commonjs/react/index.js",
+      "types": "./lib/typescript/react/index.d.ts"
     },
     ".": {
-      "import": "./lib/index.js",
-      "default": "./lib/index.js",
-      "types": "./lib/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "react": [
-        "lib/react/index.d.ts"
-      ]
+      "default": "./lib/module/index",
+      "import": "./lib/module/index",
+      "require": "./lib/commonjs/index.js",
+      "types": "./lib/typescript/index.d.ts"
     }
   },
   "scripts": {
-    "prepublishOnly": "node scripts/pre-publish.mjs",
-    "build": "npm run build-ts && npm run build-babel",
-    "build-babel": "babel lib -d lib",
-    "build-ts": "tsc"
+    "build": "node scripts/build.mjs",
+    "test": "tsc --noEmit && eslint src --ext .ts,.tsx",
+    "prepare": "npm run test && npm run build"
   },
+  "files": [
+    "lib",
+    "src"
+  ],
   "keywords": [
     "animation",
     "keyframe",
@@ -50,25 +38,25 @@
     "react",
     "visual-timing-functions"
   ],
-  "browserslist": "> 0.5%, not dead",
-  "bugs": {
-    "url": "https://github.com/alabsi91/animare/issues"
-  },
-  "homepage": "https://github.com/alabsi91/animare#readme",
-  "devDependencies": {
-    "@babel/cli": "^7.18.10",
-    "@babel/preset-env": "^7.18.10",
-    "@types/react": "^18.0.17",
-    "@typescript-eslint/eslint-plugin": "^5.33.0",
-    "@typescript-eslint/parser": "^5.33.0",
-    "chalk": "^5.0.1",
-    "eslint": "^8.21.0",
-    "react": "^18.2.0",
-    "typescript": "^4.7.4"
-  },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.6",
+    "@babel/core": "^7.24.6",
+    "@babel/preset-env": "^7.24.6",
+    "@babel/preset-typescript": "^7.24.6",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "glob": "^10.4.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   }
 }
