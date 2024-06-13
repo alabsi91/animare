@@ -11,6 +11,12 @@
       "require": "./lib/commonjs/react/index.js",
       "types": "./lib/typescript/react/index.d.ts"
     },
+    "./plugins": {
+      "default": "./lib/module/plugins/index.js",
+      "import": "./lib/module/plugins/index.js",
+      "require": "./lib/commonjs/plugins/index.js",
+      "types": "./lib/typescript/plugins/index.d.ts"
+    },
     ".": {
       "default": "./lib/module/index",
       "import": "./lib/module/index",
@@ -21,7 +27,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "tsc --noEmit && eslint src --ext .ts,.tsx",
-    "prepare": "npm run test && npm run build"
+    "deploy-docs": "git push origin :docs && git subtree push --prefix docs/dist origin docs",
+    "prepare": "npm run build"
   },
   "files": [
     "lib",

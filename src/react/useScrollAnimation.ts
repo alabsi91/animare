@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import scrollAnimation from '../plugins/scrollAnimation';
+import { scrollAnimation } from '../plugins/index';
 
 import type { ScrollAnimationOptions } from '../types';
 

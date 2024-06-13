@@ -22,7 +22,7 @@ import type { ScrollAnimationOptions } from '../types';
  *
  * unsubscribe(); // Removes the scroll event listener
  */
-export default function scrollAnimation<Name extends string>(options: ScrollAnimationOptions<Name>) {
+export function scrollAnimation<Name extends string>(options: ScrollAnimationOptions<Name>) {
   const element = options.root ?? document;
   const handler = () => onScroll(options);
 

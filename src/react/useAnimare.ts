@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { ReturnObj, SingleReturnObj } from '../types';
+import type { TimelineObject, SingleObject } from '../types';
 
 /**
  * `useAnimare` custom React hook.
@@ -16,9 +16,12 @@ import type { ReturnObj, SingleReturnObj } from '../types';
  * }, []);
  *
  */
-export function useAnimare<Name extends string>(callback: () => ReturnObj<Name>, deps: React.DependencyList): ReturnObj<Name>;
-export function useAnimare(callback: () => SingleReturnObj, deps: React.DependencyList): SingleReturnObj;
-export function useAnimare<Name extends string, R extends ReturnObj<Name> | SingleReturnObj>(
+export function useAnimare<Name extends string>(
+  callback: () => TimelineObject<Name>,
+  deps?: React.DependencyList,
+): TimelineObject<Name>;
+export function useAnimare(callback: () => SingleObject, deps?: React.DependencyList): SingleObject;
+export function useAnimare<Name extends string, R extends TimelineObject<Name> | SingleObject>(
   callback: () => R,
   deps: React.DependencyList = [],
 ): R {

@@ -1,7 +1,14 @@
-import { animare } from '../animare';
+import timeline from './timeline';
 import { AnimationTiming } from '../types';
 
-import type { AnimationGroupValues, AnimationValues, AnimationValuesParam, CallbackInfo, TimelineInfo } from '../types';
+import type {
+  AnimationGroupOptions,
+  AnimationOptions,
+  AnimationOptionsParam,
+  Direction,
+  EaseFn,
+  GroupOnUpdateCallback,
+} from '../types';
 
 /**
  * Allows for a different input method where you can use an object with arrays of values for each property instead of an array of animation values.
@@ -21,56 +28,49 @@ import type { AnimationGroupValues, AnimationValues, AnimationValuesParam, Callb
  *  console.log(info[0].value);
  * });
  */
-export default function group(
-  animation: AnimationGroupValues,
-  callback: (info: CallbackInfo<`${number}`>, timelineInfo: TimelineInfo) => void,
-) {
+export default function group(animation: AnimationGroupOptions, callback: GroupOnUpdateCallback) {
   if (typeof animation.to === 'undefined') throw new Error('[group] The `to` value is required');
 
   animation.to = typeof animation.to === 'number' ? [animation.to] : animation.to;
   const length = animation.to.length;
 
-  const fill = <V>(value: V[] | V | undefined): V[] | undefined => {
-    if (typeof value === 'undefined') return value as undefined;
+  const isNumber = (value: unknown): value is number => typeof value === 'number';
+  const isDirection = (value: unknown): value is Direction => typeof value === 'object' && !Array.isArray(value);
+  const isTiming = (value: unknown): value is AnimationTiming => typeof value === 'object' && !Array.isArray(value);
+  const isEase = (value: unknown): value is EaseFn => typeof value === 'function';
 
-    if (Array.isArray(value)) {
-      if (value.length !== length) throw new Error('[group] All values should have the same length as the `to` value.');
-      return value;
-    }
-
-    return new Array(length).fill(value);
-  };
+  const fill = <T>(value: T) => new Array<T>(length).fill(value);
 
   const prepared = {
     to: animation.to,
-    from: fill(animation.from),
-    delay: fill(animation.delay),
-    delayCount: fill(animation.delayCount),
-    playCount: fill(animation.playCount),
-    direction: fill(animation.direction),
-    timing: fill(animation.timing),
-    duration: fill(animation.duration),
-    ease: fill(animation.ease),
+    from: isNumber(animation.from) ? fill(animation.from) : animation.from,
+    delay: isNumber(animation.delay) ? fill(animation.delay) : animation.delay,
+    delayCount: isNumber(animation.delayCount) ? fill(animation.delayCount) : animation.delayCount,
+    playCount: isNumber(animation.playCount) ? fill(animation.playCount) : animation.playCount,
+    direction: isDirection(animation.direction) ? fill(animation.direction) : animation.direction,
+    timing: isTiming(animation.timing) ? fill(animation.timing) : animation.timing,
+    duration: isNumber(animation.duration) ? fill(animation.duration) : animation.duration,
+    ease: isEase(animation.ease) ? fill(animation.ease) : animation.ease,
   };
 
-  const animationOptions: AnimationValues[] = new Array(length);
+  const animationOptions: AnimationOptions[] = new Array(length);
 
   for (let i = 0; i < length; i++) {
     animationOptions[i] = {
       name: i.toString(),
       to: prepared.to[i],
-      from: prepared.from ? prepared.from[i] : undefined,
-      delay: prepared.delay ? prepared.delay[i] : undefined,
-      delayCount: prepared.delayCount ? prepared.delayCount[i] : undefined,
-      playCount: prepared.playCount ? prepared.playCount[i] : undefined,
-      direction: prepared.direction ? prepared.direction[i] : undefined,
-      timing: i === 0 ? AnimationTiming.FromStart : prepared.timing?.[i],
-      duration: prepared.duration ? prepared.duration[i] : undefined,
-      ease: prepared.ease ? prepared.ease[i] : undefined,
+      from: Array.isArray(prepared.from) ? prepared.from[i] : prepared.from,
+      delay: Array.isArray(prepared.delay) ? prepared.delay[i] : prepared.delay,
+      delayCount: Array.isArray(prepared.delayCount) ? prepared.delayCount[i] : prepared.delayCount,
+      playCount: Array.isArray(prepared.playCount) ? prepared.playCount[i] : prepared.playCount,
+      direction: Array.isArray(prepared.direction) ? prepared.direction[i] : prepared.direction,
+      timing: i === 0 ? AnimationTiming.FromStart : Array.isArray(prepared.timing) ? prepared.timing[i] : prepared.timing,
+      duration: Array.isArray(prepared.duration) ? prepared.duration[i] : prepared.duration,
+      ease: Array.isArray(prepared.ease) ? prepared.ease[i] : prepared.ease,
     };
   }
 
-  return animare(animationOptions as AnimationValuesParam<`${number}`>, callback, {
+  return timeline(animationOptions as AnimationOptionsParam<`${number}`>, callback, {
     autoPlay: animation.autoPlay,
     timelinePlayCount: animation.timelinePlayCount,
   });

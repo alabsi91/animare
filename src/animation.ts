@@ -2,7 +2,7 @@ import { isAlternateDirection, isReverseDirection, validateAnimationValues } fro
 import { AnimationTiming, Direction } from './types';
 import { clamp, extendObject, normalizePercentage } from './utils/utils';
 
-import type { AnimationInfo, AnimationPreparedValues } from './types';
+import type { AnimationInfo, AnimationPreparedOptions } from './types';
 
 export default class Animation {
   /** The index of the animation. */
@@ -60,7 +60,7 @@ export default class Animation {
   #isAlternate: boolean;
 
   /** The reference to the prepared animation values. */
-  animationRef: AnimationPreparedValues;
+  animationRef: AnimationPreparedOptions;
 
   #previousTimelineRef: Animation | undefined;
 
@@ -89,7 +89,7 @@ export default class Animation {
     };
   }
 
-  constructor(animation: AnimationPreparedValues, previousTimeline: Animation | undefined, index: number) {
+  constructor(animation: AnimationPreparedOptions, previousTimeline: Animation | undefined, index: number) {
     this.#index = index;
     this.animationRef = animation;
     this.#previousTimelineRef = previousTimeline;
@@ -191,7 +191,7 @@ export default class Animation {
    *
    * ⚠️ **Warning** ⚠️ This method will throw an error if the animation values are invalid.
    */
-  public Set(animation: Partial<AnimationPreparedValues>) {
+  public Set(animation: Partial<AnimationPreparedOptions>) {
     extendObject(this.animationRef, animation);
     validateAnimationValues(this.animationRef);
   }

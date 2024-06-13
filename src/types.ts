@@ -46,7 +46,10 @@ export enum Event {
 }
 
 export enum ScrollAxis {
+  /** Track the element scroll vertically on the `y` axis. */
   Vertical = 'y',
+
+  /** Track the element scroll horizontally on the `x` axis. */
   Horizontal = 'x',
 }
 
@@ -57,6 +60,33 @@ export enum ScrollElementEdge {
   Right = 'right',
 }
 
+/**
+ * **Note:** This function does nothing, used only for type checking.
+ */
+export function createAnimations<Name extends string>(animations: AnimationOptionsParam<Name>) {
+  return animations;
+}
+
+// utils
+export type RemoveFunction<T> = T extends (index: number) => unknown ? never : T;
+
+type RemoveFunctionType<T> = {
+  [K in keyof T]: K extends 'ease'
+    ? Extract<T[K], unknown[]> extends never
+      ? T[K]
+      : Exclude<T[K], (index: number) => unknown>
+    : T[K] extends undefined
+      ? T[K]
+      : RemoveFunction<T[K]>;
+};
+
+/** Extends the types of properties in the given type `T` to allow arrays and functions, except for the 'to' property which only allows arrays. */
+type AllowArray<T> = {
+  [K in keyof T]: K extends 'ease' ? T[K] : T[K] | Exclude<T[K], undefined | ((i: number) => unknown)>[];
+};
+
+// ...
+
 export type EventCallback = () => void;
 
 export type EventUnsubscribe = () => boolean;
@@ -65,18 +95,12 @@ export type EaseFn = (t: number) => number;
 
 export type PercentageString = `${number}%`;
 
-export type AnimationValues<Name extends string = string> = {
+export type AnimationOptions<Name extends string = string> = {
   /**
    * The name of the animation, used to identify the animation in the timeline.
    * **Required**
    */
   readonly name: Name;
-
-  /**
-   * The starting value of the animation.
-   * @default 0
-   */
-  from?: number;
 
   /**
    * The ending value of the animation.
@@ -85,47 +109,52 @@ export type AnimationValues<Name extends string = string> = {
   to: number;
 
   /**
+   * The starting value of the animation.
+   * @default 0
+   */
+  from?: number | ((index: number) => number);
+
+  /**
    * The duration of the animation in milliseconds.
    * @default 350
    */
-  duration?: number;
+  duration?: number | ((index: number) => number);
 
   /**
-   * The delay before the animation starts, in milliseconds.
-   * Can be a number or a percentage string, and can accept negative values.
-   * When the value is a percentage string, it is relative to the duration of the previous animation.
+   * This property specifies the delay before the animation starts, in milliseconds, and can accept negative values.
+   * It acts as an animation offset within the timeline, allowing you to delay the animation or make it start earlier by using negative values.
    * @default 0
    */
-  delay?: number;
+  delay?: number | ((index: number) => number);
 
   /**
-   * The number of times the delay should be applied on each animation repeat.
+   * The number of times the delay should be applied on each animation play.
    *
-   * For example, with `delayCount: 1` and `playCount: 4`, the delay will be applied only once on the first repeat.
+   * For example, with `delayCount: 1` and `playCount: 4`, the delay will be applied only once on the first play.
    *
    * A value higher than `playCount` will be ignored.
-   * @default {@link AnimationValues.playCount}
+   * @default playCount
    */
-  delayCount?: number;
+  delayCount?: number | ((index: number) => number);
 
   /**
    * The number of times the animation should play.
    * A value of `0` means this animation will be ignored.
    * @default 1
    */
-  playCount?: number;
+  playCount?: number | ((index: number) => number);
 
   /**
    * The direction in which the animation should play.
    * @default Direction.Forward
    */
-  direction?: Direction;
+  direction?: Direction | ((index: number) => Direction);
 
   /**
    * The position of the animation in the timeline, determining when it should start relative to the timeline.
    * @default AnimationTiming.AfterPrevious
    */
-  timing?: AnimationTiming;
+  timing?: AnimationTiming | ((index: number) => AnimationTiming);
 
   /**
    * The easing function for the animation, defining the rate of change of the animated value over time.
@@ -134,15 +163,17 @@ export type AnimationValues<Name extends string = string> = {
   ease?: EaseFn;
 };
 
-export type FirstAnimationValues<Name extends string = string> = Omit<AnimationValues<Name>, 'timing'>;
+export type AnimationOptionsWithoutFn<Name extends string = string> = RemoveFunctionType<AnimationOptions<Name>>;
 
-export type AnimationValuesParam<Name extends string = string> = [FirstAnimationValues<Name>, ...AnimationValues<Name>[]];
+export type FirstAnimationOptions<Name extends string = string> = Omit<AnimationOptions<Name>, 'timing'>;
+
+export type AnimationOptionsParam<Name extends string = string> = [FirstAnimationOptions<Name>, ...AnimationOptions<Name>[]];
 
 export type TimelineOptions = {
   /**
    * The number of times the timeline should play.
    *
-   * Use `-1` for infinite repeats.
+   * Use `-1` for infinite plays.
    */
   timelinePlayCount?: number;
 
@@ -150,9 +181,9 @@ export type TimelineOptions = {
   autoPlay?: boolean;
 };
 
-export type AnimationGlobalValues = Omit<AnimationValues, 'name' | 'to'> & TimelineOptions;
+export type TimelineGlobalOptions = Omit<AnimationOptionsWithoutFn, 'name' | 'to'> & TimelineOptions;
 
-export type AnimationPreparedValues = Required<AnimationValues>;
+export type AnimationPreparedOptions = Required<AnimationOptionsWithoutFn>;
 
 export type AnimationInfo<Name extends string = string> = {
   /** The name of the animation. */
@@ -163,9 +194,6 @@ export type AnimationInfo<Name extends string = string> = {
 
   /** The animated value over time. */
   value: number;
-
-  /** Indicates whether the animation has finished. */
-  isFinished: boolean;
 
   /** The progress of the animation, excluding any delays. */
   progress: number;
@@ -181,6 +209,9 @@ export type AnimationInfo<Name extends string = string> = {
 
   /** The current play count, starting from `0` (not started) up to the specified play count. */
   playCount: number;
+
+  /** Indicates whether the animation has finished. */
+  isFinished: boolean;
 
   /** Indicates whether the animation is currently playing, not considering any delays. */
   isPlaying: boolean;
@@ -207,13 +238,6 @@ export type CallbackInfo<Name extends string = string> = {
   length: number;
 } & { [key in Name]: AnimationInfo<Name> };
 
-/**
- * **Note:** This function does nothing, used only for type checking.
- */
-export function createAnimations<Name extends string>(animations: AnimationValuesParam<Name>) {
-  return animations;
-}
-
 export type TimelineInfo = {
   /** The current elapsed time in milliseconds. */
   elapsedTime: number;
@@ -227,7 +251,7 @@ export type TimelineInfo = {
   /** Indicates whether the timeline is currently paused. */
   isPaused: boolean;
 
-  /** Indicates whether the timeline has finished. */
+  /** Indicates whether the timeline is currently playing. */
   isPlaying: boolean;
 
   /** Indicates whether the timeline has finished. */
@@ -283,12 +307,12 @@ export type PrivateTimelineInfo = {
   __pauseTime: number;
 };
 
-export type OnUpdateCallback<T extends AnimationValues[]> = (
+export type OnUpdateCallback<T extends AnimationOptions[]> = (
   info: CallbackInfo<T[number]['name']>,
   timelineInfo: TimelineInfo,
 ) => void;
 
-export type ReturnObj<Name extends string = string> = {
+export type TimelineObject<Name extends string = string> = {
   /**
    * Retrieves information about the timeline.
    *
@@ -331,7 +355,7 @@ export type ReturnObj<Name extends string = string> = {
    *   duration: 500
    * }]);
    */
-  updateValues: (newValues: Partial<AnimationValues<Name>>[]) => void;
+  updateValues: (newValues: Partial<AnimationOptionsWithoutFn<Name>>[]) => void;
 
   /**
    * Plays the timeline.
@@ -482,13 +506,14 @@ export type ReturnObj<Name extends string = string> = {
    */
   onRepeatAsync: () => Promise<unknown> | undefined;
 
-  /** Removes all event listeners. */
+  /** Removes all attached event listeners. */
   clearEvents: () => void;
 };
 
-export type SingleAnimationValue = Omit<AnimationValues, 'name' | 'timing'> & { autoPlay?: boolean };
+export type SingleAnimationOptions = Omit<AnimationOptionsWithoutFn, 'name' | 'timing'> & { autoPlay?: boolean };
+export type SingleAnimationOptionsWithoutFn = RemoveFunctionType<SingleAnimationOptions>;
 export type SingleOnUpdateCallback = (info: Omit<AnimationInfo, 'name' | 'index'>) => void;
-export type SingleReturnObj = Omit<ReturnObj, 'updateValues' | 'animationsInfo'> & {
+export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo'> & {
   /**
    * Updates the animation values.
    *
@@ -501,7 +526,7 @@ export type SingleReturnObj = Omit<ReturnObj, 'updateValues' | 'animationsInfo'>
    * @example
    * updateValues({ duration: 500 });
    */
-  updateValues: (newValues: Partial<SingleAnimationValue>) => void;
+  updateValues: (newValues: Partial<AnimationOptionsWithoutFn>) => void;
   /**
    * Retrieves information about the animation.
    *
@@ -516,10 +541,8 @@ export type SingleReturnObj = Omit<ReturnObj, 'updateValues' | 'animationsInfo'>
   animationsInfo: AnimationInfo;
 };
 
-type AllowArray<T> = {
-  [K in keyof T]: T[K] extends undefined ? T[K] : T[K] | Array<Exclude<T[K], undefined>>;
-};
-export type AnimationGroupValues = AllowArray<Omit<AnimationValues, 'name'>> & TimelineOptions;
+export type AnimationGroupOptions = Omit<AllowArray<AnimationOptions>, 'name'> & TimelineOptions;
+export type GroupOnUpdateCallback = (info: CallbackInfo<`${number}`>, timelineInfo: TimelineInfo) => void;
 
 export type ScrollAnimationOptions<Name extends string = string> = {
   /**
@@ -527,7 +550,7 @@ export type ScrollAnimationOptions<Name extends string = string> = {
    *
    * **Required**
    */
-  timeline: ReturnObj<Name> | SingleReturnObj;
+  timeline: TimelineObject<Name> | SingleObject;
 
   /**
    * The HTML element to track when entering and exiting the viewport.
@@ -610,3 +633,4 @@ export type Vec1 = Vec1Array | Vec1Object | number;
 export type Vec2 = Vec2Array | Vec2Object;
 export type Vec3 = Vec3Array | Vec3Object;
 export type Vec4 = Vec4Array | Vec4Object;
+export type Vec = Vec1 | Vec2 | Vec3 | Vec4;
