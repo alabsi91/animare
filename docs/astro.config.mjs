@@ -5,8 +5,9 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://alabsi91.github.io/animare',
-  // base: 'animare',
+  site: 'https://alabsi91.github.io',
+  base: 'animare',
+  outDir: 'docs',
   integrations: [
     starlight({
       title: 'animare',
