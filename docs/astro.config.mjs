@@ -6,7 +6,7 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://alabsi91.github.io',
-  base: 'animare',
+  base: '/animare/',
   integrations: [
     starlight({
       title: 'animare',
@@ -39,7 +39,7 @@ export default defineConfig({
         themes: ['dracula'],
       },
       social: {
-        'github': 'https://github.com/withastro/starlight',
+        'github': 'https://github.com/alabsi91/animare',
         'x.com': 'https://x.com/alabsi91',
       },
     }),
