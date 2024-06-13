@@ -10,7 +10,7 @@ hero:
     file: ../../assets/houston.webp
   actions:
     - text: Example Guide
-      link: /installation/
+      link: ./installation/
       icon: right-arrow
       variant: primary
     - text: Read the Starlight docs
@@ -24,7 +24,7 @@ import Ease from '../../components/Ease/Ease';
 
 ## Next steps
 
-<Ease client:visible />
+<Ease client:visible easing={'ease.in.back(0)'} />
 
 <CardGrid stagger>
   <Card title='Update content' icon='pencil'>

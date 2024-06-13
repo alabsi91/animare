@@ -5,12 +5,16 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://alabsi91.github.io/animare',
+  site: 'https://alabsi91.github.io',
+  base: '/animare',
   integrations: [
     starlight({
       title: 'animare',
       logo: {
         src: './src/assets/logo.svg',
+      },
+      editLink: {
+        baseUrl: 'https://alabsi91.github.io/animare/',
       },
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       components: {
