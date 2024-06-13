@@ -7,7 +7,6 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://alabsi91.github.io',
   base: 'animare',
-  outDir: 'docs',
   integrations: [
     starlight({
       title: 'animare',
