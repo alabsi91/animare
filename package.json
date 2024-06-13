@@ -27,7 +27,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "tsc --noEmit && eslint src --ext .ts,.tsx",
-    "deploy-docs": "git push origin :docs && git subtree push --prefix docs/dist origin docs",
+    "deploy-docs": "git push origin :gh-pages && git subtree push --prefix docs/dist origin gh-pages",
     "prepare": "npm run build"
   },
   "files": [
