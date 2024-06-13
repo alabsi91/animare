@@ -1,0 +1,77 @@
+---
+title: TimelineInfo
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+### progress
+
+`progress: number`
+
+The current progress of the timeline, typically a value between `0` and `1`.
+
+### elapsedTime
+
+`elapsedTime: number`
+
+The elapsed time of the timeline in milliseconds.
+
+### duration
+
+`duration: number`
+
+The total duration of the timeline in milliseconds.
+
+### playCount
+
+`playCount: number`
+
+The current play count of the timeline.
+
+### fps
+
+`fps: number`
+
+The frames per second.
+
+### isPlaying
+
+`isPlaying: boolean`
+
+Indicates whether the timeline is currently playing.
+
+### isPaused
+
+`isPaused: boolean`
+
+Indicates whether the timeline is currently paused.
+
+### isFinished
+
+`isFinished: boolean`
+
+Indicates whether the timeline has finished.
+
+### isFirstFrame
+
+`isFirstFrame: boolean`
+
+Indicates if this is the first update callback call.<br />
+It does not indicate if the animation is started from `0` progress.<br />
+Useful for initialization purposes.
+
+### isProgressAt()
+
+`isProgressAt(progress: number, tolerance?: number): boolean`
+
+Checks if a given progress value is within the current progress.<br />
+`progress:` The progress value to check, between `0` and `1`.<br />
+`tolerance:` The allowable tolerance for the check. Default is `0.001`.
+
+### isTimeAt()
+
+`isTimeAt(time: number, tolerance?: number): boolean`
+
+Checks if a given time value is within the current elapsed time.<br />
+`time:` The time value to check, in milliseconds.<br />
+`tolerance:` The allowable tolerance for the check, in milliseconds. Default is `5` ms.

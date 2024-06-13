@@ -1,0 +1,90 @@
+---
+title: scrollAnimation
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+Makes the scroll progress control the timeline.
+
+```ts wrap title="syntax"
+function scrollAnimation(options: ScrollAnimationOptions): () => void;
+```
+
+## Usage
+
+To use with React see: [useScrollAnimation](../../react/usescrollanimation)
+
+```ts title="example" frame="terminal"
+import animare from 'animare';
+import { scrollAnimation } from 'animare/plugins';
+
+const timeline = animare(...params);
+
+// The element to track when entering and exiting the viewport
+const element = document.getElementById('element');
+
+const unsubscribe = scrollAnimation({
+  timeline: timeline,
+  element: element,
+});
+
+unsubscribe(); // Removes the scroll event listener
+```
+
+## Options
+
+`options: ScrollAnimationOptions` <Badge text="Required" variant="note" size="small" />
+
+### timeline
+
+`timeline: TimelineObject` <Badge text="Required" variant="note" size="small" />
+
+The returned animation object.
+
+### element
+
+`element: HTMLElement` <Badge text="Required" variant="note" size="small" />
+
+The HTML element to track when entering and exiting the viewport.
+
+### root
+
+`root?: HTMLElement` <Badge text="Default: document.documentElement" variant="tip" size="small" />
+
+The root element that has the scrollable area.
+
+### axis
+
+`axis?: ScrollAxis` <Badge text="Default: ScrollAxis.Vertical" variant="tip" size="small" />
+
+The axis to track.
+
+See: [ScrollAxis](../../enums/scrollaxis/)
+
+### start
+
+`start?: ScrollElementEdge` <Badge text="Default: ScrollElementEdge.Top" variant="tip" size="small" />
+
+Start the animation when the element edge enters the scroll area.
+
+See: [ScrollElementEdge](../../enums/scrollelementedge/)
+
+### end
+
+`end?: ScrollElementEdge` <Badge text="Default: ScrollElementEdge.Bottom" variant="tip" size="small" />
+
+End the animation when the element edge exits the scroll area.
+
+See: [ScrollElementEdge](../../enums/scrollelementedge/)
+
+### startOffset
+
+`startOffset?: number` <Badge text="Default: 0" variant="tip" size="small" />
+
+The offset from the element edge where the animation should start.
+
+### endOffset
+
+`endOffset?: number` <Badge text="Default: 0" variant="tip" size="small" />
+
+The offset from the element edge where the animation should end.

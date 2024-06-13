@@ -1,0 +1,225 @@
+---
+title: TimelineObject
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+The return object when creating a new timeline.
+
+### timelineInfo
+
+`timelineInfo: TimelineInfo`
+
+Retrieves information about the timeline.
+Returns the same object that is passed to the update callback.
+
+:::note
+This object values will be updated on every frame update if the timeline is playing.
+:::
+
+See: [TimelineInfo](../timelineinfo/)
+
+### animationsInfo
+
+`animationsInfo: CallbackInfo`
+
+Retrieves information about all animations.
+Returns the same object that is passed to the the update callback.
+
+:::note
+This object values will be updated on every frame update if the timeline is playing.
+:::
+
+See: [AnimationInfo](../animationinfo/)
+
+### play()
+
+`(startFrom?: number | PercentageString, playCount?: number) => void`
+
+Plays the timeline.
+Accepts an optional `startFrom` parameter that can be a time in milliseconds or a percentage value.
+Optionally, you can specify a `playCount` to seek to a specific repeat count.
+
+`startFrom` The point to start from, specified as a time in milliseconds or a percentage value.<br/>
+`playCount` The repeat count to seek to before playing.
+
+```ts title="Play" frame="terminal"
+timeline.play(); // Play from the start
+timeline.play(500); // Play from 500 milliseconds
+timeline.play('50%'); // Play from 50% of the timeline duration
+timeline.play('50%', 2); // Play from 50% of the timeline duration on the second repeat
+```
+
+### playOneFrame()
+
+`playOneFrame: () => void`
+
+Plays only one frame of the timeline.
+If the timeline is already playing, this method does nothing.
+
+:::caution
+This method will not trigger `play` events.
+:::
+
+```ts title="Play One Frame" frame="terminal"
+timeline.seek('50%');
+timeline.playOneFrame();
+```
+
+### pause()
+
+`pause: () => void`
+
+Pauses the timeline.
+If the timeline is already paused, it remains paused.
+If the timeline is not playing, it will not be paused.
+
+### resume()
+
+`resume: () => void`
+
+Resumes the timeline from a paused state.
+If the timeline is not paused, it will start playing from the beginning.
+If the timeline is already playing, this method does nothing.
+
+### stop()
+
+`(stopAt?: number | PercentageString, playCount?: number) => void`
+
+Stops the timeline from playing.
+If no parameters are passed, the animation will skip to the end and stop.
+You can pass parameters to stop at a specific point in the timeline.
+If the timeline is not currently playing, it plays only one frame at the specified stop point.
+
+`stopAt` The point to stop at, specified as a time in milliseconds or a percentage string. <br/>
+`playCount` The repeat count to stop at.
+
+```ts title="Stop" frame="terminal"
+timeline.stop(); // Skip to the end and stop
+timeline.stop('50%'); // Skip to 50% of the timeline and stop
+```
+
+### seek()
+
+`(seekTo: number | PercentageString, playCount?: number) => void`
+
+Seeks the timeline to a specified time or percentage value.
+If the timeline is not playing, it will seek without playing.
+
+`seekTo` The point to seek to, specified as a `time` in milliseconds or a percentage value. <br/>
+`playCount` The repeat count to seek to before playing.
+
+```ts title="Seek" frame="terminal"
+timeline.seek(500); // Seek to 500 milliseconds
+timeline.seek('50%'); // Seek to 50% of the timeline duration
+timeline.seek('50%', 2); // Seek to 50% of the timeline duration on the second repeat
+```
+
+### updateValues()
+
+`(newValues: AnimationOptions[]) => void` <Badge text="Throws" variant="danger" size="small" />
+
+Updates animations values. <br/>
+The `name` property is **required** to target a specific animation for updating.
+
+:::caution
+Updating the animation values while the timeline is playing might result in flickering.
+:::
+
+```ts title="Change animation values" frame="terminal"
+timeline.updateValues([{ name: 'myAnimation', duration: 500 }]);
+```
+
+See: [AnimationOptions](../animationoptions/)
+
+### on()
+
+`on: (event: Event, callback: EventCallback) => EventUnsubscribe`
+
+Attaches an event listener to the timeline.
+returns A function to unsubscribe the event listener.
+
+```ts title="Attach an event listener" frame="terminal"
+const unsubscribe = on(Event.Play, () => {
+  // do something
+});
+
+unsubscribe(); // To remove the event listener
+```
+
+See: [Event](../enums/event/)
+
+### once()
+
+`once: (event: Event, callback: EventCallback) => EventUnsubscribe`
+
+Attaches an event listener to the timeline that will be triggered only once.
+returns A function to unsubscribe the event listener.
+
+See: [Event](../enums/event/)
+
+### clearEvents()
+
+`clearEvents: () => void`
+
+Removes all attached event listeners.
+
+### onCompleteAsync()
+
+`onCompleteAsync: () => Promise<void>`
+
+Waits until the timeline completes.
+
+```ts
+await timeline.onCompleteAsync();
+```
+
+### onPlayAsync()
+
+`onPlayAsync: () => Promise<void>`
+
+Waits until the timeline starts playing.
+
+```ts
+await timeline.onPlayAsync();
+```
+
+### onResumeAsync()
+
+`onResumeAsync: () => Promise<void>`
+
+Waits until the timeline resumes.
+
+```ts
+await timeline.onResumeAsync();
+```
+
+### onPauseAsync()
+
+`onPauseAsync: () => Promise<void>`
+
+Waits until the timeline pauses.
+
+```ts
+await timeline.onPauseAsync();
+```
+
+### onStopAsync()
+
+`onStopAsync: () => Promise<void>`
+
+Waits until the timeline stops.
+
+```ts
+await timeline.onStopAsync();
+```
+
+### onRepeatAsync()
+
+`onRepeatAsync: () => Promise<void>`
+
+Waits until the timeline repeats.
+
+```ts
+await timeline.onRepeatAsync();
+```

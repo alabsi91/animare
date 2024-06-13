@@ -1,0 +1,21 @@
+---
+title: useLoop
+---
+
+A custom react hook to make it easy to create game loops in React.
+
+```ts wrap title="syntax"
+function useLoop(onUpdateCallback: (delta: number) => void, deps: React.DependencyList = []): void;
+```
+
+## Usage
+
+```ts title="example" frame="terminal"
+import { useLoop } from 'animare/react';
+
+function MyComponent() {
+  useLoop(delta => {
+    // do something
+  }, []);
+}
+```

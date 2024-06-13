@@ -1,0 +1,29 @@
+.wrapper {
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+.container {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
+
+.frame {
+  grid-area: 1 / 1;
+  width: 90%;
+  height: 90%;
+  border: solid var(--code-border-color) 1px;
+  border-radius: 0.5rem;
+  background-color: #00000021;
+}
+
+.canvas {
+  grid-area: 1 / 1;
+}
+
+.title {
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+}

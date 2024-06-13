@@ -1,0 +1,79 @@
+---
+title: AnimationInfo
+---
+
+### name
+
+`name: string`
+
+The name of the animation.
+
+### index
+
+`index: number`
+
+The index of the animation in the timeline.
+
+### value
+
+`value: number`
+
+The animated value over time.
+
+### progress
+
+`progress: number`
+
+The progress of the animation, excluding any delays.
+
+### overallProgress
+
+`overallProgress: number`
+
+The overall progress of the animation, including delays and repeats.
+
+### elapsedTime
+
+`elapsedTime: number`
+
+The elapsed time of the animation in milliseconds.
+
+### playCount
+
+`playCount: number`
+
+The current play count, starting from `0` (not started) up to the specified play count.
+
+### delayCount
+
+`delayCount: number`
+
+The current delay count, starting from `0` (not started) up to the specified delay count.
+
+### isFinished
+
+`isFinished: boolean`
+
+Indicates whether the animation has finished.
+
+### isPlaying
+
+`isPlaying: boolean`
+
+Indicates whether the animation is currently playing, not considering any delays.
+
+### isProgressAt()
+
+`isProgressAt(progress: number, tolerance?: number): boolean`
+
+Checks if a given progress value is within the current progress.<br />
+`progress:` The progress value to check, between `0` and `1`.<br />
+`tolerance:` The allowable tolerance for the check. Default is `0.001`.
+
+### isTimeAt()
+
+`isTimeAt(time: number, tolerance?: number): boolean`
+
+Checks if a given time value is within the current elapsed time.<br />
+`time:` The time value to check, in milliseconds.<br />
+`tolerance:` The allowable tolerance for the check, in milliseconds. Default is `5` ms.

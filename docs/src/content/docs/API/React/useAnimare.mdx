@@ -1,0 +1,25 @@
+---
+title: useAnimare
+---
+
+A custom react hook to make it easy to create animations in React.
+
+```ts wrap title="syntax"
+function useAnimare(callback: () => TimelineObject, deps?: React.DependencyList): TimelineObject;
+```
+
+## Usage
+
+```ts title="example" frame="terminal"
+import { useAnimare } from 'animare/react';
+
+function MyComponent() {
+  const timeline = useAnimare(() => {
+    return animare.timeline(...params);
+    // or
+    return animare.group(...params);
+    // or
+    return animare.single(...params);
+  }, []);
+}
+```
