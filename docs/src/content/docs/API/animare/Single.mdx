@@ -1,0 +1,80 @@
+---
+title: Single
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+Create a single animation
+
+```ts wrap title="syntax"
+function animare.timeline(
+  animations: SingleAnimationOptions,
+  onUpdateCallback: SingleOnUpdateCallback,
+): TimelineObject;
+```
+
+## Usage
+
+```ts title="example" frame="terminal"
+import animare from 'animare';
+import type { SingleAnimationOptions, SingleOnUpdateCallback } from 'animare';
+
+const options: SingleAnimationOptions = {
+  to: 100,
+  duration: 500,
+  playCount: -1, // infinite repeat
+  autoPlay: false,
+};
+
+const onUpdate: SingleOnUpdateCallback = info => {
+  console.log(info.value);
+};
+
+const myAnimation = animare.single(options, onUpdate);
+
+myAnimation.play(); // 🚀
+```
+
+## animations
+
+`animations: SingleAnimationOptions` <Badge text="Required" variant="note" size="small" />
+
+A single object of [`AnimationOptions`](/api/objects/animationoptions/).
+
+:::note
+This differs from `AnimationOptions` in the following ways:
+
+- It does not include `name` and `timing` properties.
+- It includes an additional `autoPlay` property.
+- The `playCount` property can be `-1` to indicate infinite repeats.
+
+:::
+
+See: [AnimationOptions](/api/objects/animationoptions/)
+
+## OnUpdateCallback
+
+`(AnimationInfo, TimelineInfo) => void` <Badge text="Required" variant="note" size="small" />
+
+This is a callback function that is called on every frame update
+with `CallbackInfo`, and [`TimelineInfo`](/api/objects/timelineinfo) as arguments.
+
+### CallbackInfo
+
+See: [AnimationInfo](/api/objects/animationinfo)
+
+### TimelineInfo
+
+An object containing information about the timeline.
+
+See: [TimelineInfo](/api/objects/timelineinfo)
+
+## Timeline Return Object
+
+The return object when creating a new timeline.
+
+:::note
+There is a slight difference that `updateValues` property accepts a single animation option instead of an array of animation options
+:::
+
+See: [TimelineObject](/api/objects/timelineobject/)

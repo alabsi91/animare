@@ -1,0 +1,54 @@
+---
+title: Group
+description: Create a new timeline by grouping animations.
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+Create a new timeline by grouping animations.
+
+```ts title="syntax"
+function animare.timeline(
+  animations: AnimationGroupOptions,
+  onUpdateCallback: GroupOnUpdateCallback,
+): TimelineObject;
+```
+
+## Usage
+
+```ts title="example" frame="terminal"
+import animare, { createAnimations } from 'animare';
+import { ease } from 'animare/plugins';
+import type { AnimationGroupOptions, GroupOnUpdateCallback } from 'animare';
+
+const animations: AnimationGroupOptions = {
+  from: 50, // => [50, 50]
+  to: [150, 100],
+  duration: [500, 1000],
+  ease: [ease.linear, ease.out.quad],
+  delay: index => index * 100, // => [0, 100]
+
+  // timeline options
+  autoPlay: false,
+  timelinePlayCount: 2,
+};
+
+const onUpdate: GroupOnUpdateCallback = (info, tlInfo) => {
+  squareEl.style.width = `${info[0].value}%`;
+  circleEl.style.height = `${info[1].value}%`;
+
+  if (tlInfo.isFinished) {
+    console.log('finished');
+  }
+};
+
+const myTimeline = animare.group(options, onUpdate);
+
+myTimeline.play(); // 🚀
+```
+
+## API
+
+Same as [Timeline](/api/animare/timeline) the only difference is how you pass the animations options.
+
+It could be useful for scenarios where animations are dynamically calculated.

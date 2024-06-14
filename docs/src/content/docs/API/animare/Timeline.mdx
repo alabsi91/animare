@@ -1,0 +1,121 @@
+---
+title: Timeline
+description: Create a new timeline.
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+Create a new timeline.
+
+```ts title="syntax"
+function animare.timeline(
+  animations: AnimationOptions[],
+  onUpdateCallback: OnUpdateCallback,
+  timelineOptions?: TimelineGlobalValues,
+): TimelineObject;
+```
+
+## Usage
+
+```ts title="example" frame="terminal"
+import animare, { createAnimations } from 'animare';
+import { ease } from 'animare/plugins';
+import type { TimelineGlobalOptions, OnUpdateCallback } from 'animare';
+
+// `createAnimations` only used here for typescript types
+const animations = createAnimations([
+  { name: 'square', to: 100 },
+  { name: 'circle', to: 50 },
+]);
+
+const timelineOptions: TimelineGlobalValues = {
+  // the default animation options
+  // which will be applied if none are specified
+  duration: 1000,
+  ease: ease.out.expo,
+
+  // timelineOptions
+  autoPlay: false,
+  timelinePlayCount: 2, // play 2 times
+};
+
+const onUpdate: OnUpdateCallback<typeof animations> = (info, tlInfo) => {
+  squareEl.style.width = `${info.square.value}%`;
+  circleEl.style.height = `${info.circle.value}%`;
+
+  if (tlInfo.isFinished) {
+    console.log('finished');
+  }
+};
+
+const myTimeline = animare.timeline(options, onUpdate, timelineOptions);
+
+myTimeline.play(); // 🚀
+```
+
+## animations
+
+`animations: AnimationOptions[]` <Badge text="Required" variant="note" size="small" />
+
+An array of [`AnimationOptions`](/api/objects/animationoptions/) objects.
+
+See: [AnimationOptions](/api/objects/animationoptions/)
+
+## OnUpdateCallback
+
+`(CallbackInfo, TimelineInfo) => void` <Badge text="Required" variant="note" size="small" />
+
+This is a callback function that is called on every frame update
+with `CallbackInfo`, and [`TimelineInfo`](/api/objects/timelineinfo) as arguments.
+
+### CallbackInfo
+
+**length** <br />
+`length: number`
+
+The number of animations in the timeline.
+
+**[Animation Name]** <br />
+`[key: string]: AnimationInfo`
+
+Access the [`AnimationInfo`](/api/objects/animationinfo) object by the animation name.
+
+```ts title="Get animation info by name" frame="terminal"
+const info: AnimationInfo = callbackInfo.animationName;
+```
+
+See: [AnimationInfo](/api/objects/animationinfo)
+
+**[Animation Index]** <br />
+`[index: number]: AnimationInfo`
+
+Access the [`AnimationInfo`](/api/objects/animationinfo) object by the animation index.
+
+```ts title="Get animation info by index" frame="terminal"
+for (let i = 0; i < callbackInfo.length; i++) {
+  const info: AnimationInfo = callbackInfo[i];
+}
+```
+
+See: [AnimationInfo](/api/objects/animationinfo)
+
+### TimelineInfo
+
+An object containing information about the timeline.
+
+See: [TimelineInfo](/api/objects/timelineinfo)
+
+## TimelineOptions
+
+`timelineOptions: TimelineGlobalValues` <Badge text="Default: {}" variant="tip" size="small" />
+
+Here, you can set global values for the timeline to be used as defaults for optional animation properties.
+Additionally, you can configure options specific to the timeline, such as `autoPlay`.
+
+See: [TimelineOptions](/api/objects/timelineoptions/)
+
+## Timeline Return Object
+
+The return object when creating a new timeline.
+
+See: [TimelineObject](/api/objects/timelineobject/)
