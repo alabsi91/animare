@@ -17,7 +17,7 @@ Returns the same object that is passed to the update callback.
 This object values will be updated on every frame update if the timeline is playing.
 :::
 
-See: [TimelineInfo](/api/objects/timelineinfo/)
+See: [TimelineInfo](/animare/api/objects/timelineinfo/)
 
 ### animationsInfo
 
@@ -30,7 +30,7 @@ Returns the same object that is passed to the the update callback.
 This object values will be updated on every frame update if the timeline is playing.
 :::
 
-See: [AnimationInfo](/api/objects/animationinfo/)
+See: [AnimationInfo](/animare/api/objects/animationinfo/)
 
 ### play()
 
@@ -130,7 +130,7 @@ Updating the animation values while the timeline is playing might result in flic
 timeline.updateValues([{ name: 'myAnimation', duration: 500 }]);
 ```
 
-See: [AnimationOptions](/api/objects/animationoptions/)
+See: [AnimationOptions](/animare/api/objects/animationoptions/)
 
 ### on()
 
@@ -147,7 +147,7 @@ const unsubscribe = on(Event.Play, () => {
 unsubscribe(); // To remove the event listener
 ```
 
-See: [Event](/api/enums/event/)
+See: [Event](/animare/api/enums/event/)
 
 ### once()
 
@@ -156,7 +156,7 @@ See: [Event](/api/enums/event/)
 Attaches an event listener to the timeline that will be triggered only once.
 returns A function to unsubscribe the event listener.
 
-See: [Event](/api/enums/event/)
+See: [Event](/animare/api/enums/event/)
 
 ### clearEvents()
 

@@ -57,16 +57,16 @@ myTimeline.play(); // 🚀
 
 `animations: AnimationOptions[]` <Badge text="Required" variant="note" size="small" />
 
-An array of [`AnimationOptions`](/api/objects/animationoptions/) objects.
+An array of [`AnimationOptions`](/animare/api/objects/animationoptions/) objects.
 
-See: [AnimationOptions](/api/objects/animationoptions/)
+See: [AnimationOptions](/animare/api/objects/animationoptions/)
 
 ## OnUpdateCallback
 
 `(CallbackInfo, TimelineInfo) => void` <Badge text="Required" variant="note" size="small" />
 
 This is a callback function that is called on every frame update
-with `CallbackInfo`, and [`TimelineInfo`](/api/objects/timelineinfo) as arguments.
+with `CallbackInfo`, and [`TimelineInfo`](/animare/api/objects/timelineinfo) as arguments.
 
 ### CallbackInfo
 
@@ -78,18 +78,18 @@ The number of animations in the timeline.
 **[Animation Name]** <br />
 `[key: string]: AnimationInfo`
 
-Access the [`AnimationInfo`](/api/objects/animationinfo) object by the animation name.
+Access the [`AnimationInfo`](/animare/api/objects/animationinfo) object by the animation name.
 
 ```ts title="Get animation info by name" frame="terminal"
 const info: AnimationInfo = callbackInfo.animationName;
 ```
 
-See: [AnimationInfo](/api/objects/animationinfo)
+See: [AnimationInfo](/animare/api/objects/animationinfo)
 
 **[Animation Index]** <br />
 `[index: number]: AnimationInfo`
 
-Access the [`AnimationInfo`](/api/objects/animationinfo) object by the animation index.
+Access the [`AnimationInfo`](/animare/api/objects/animationinfo) object by the animation index.
 
 ```ts title="Get animation info by index" frame="terminal"
 for (let i = 0; i < callbackInfo.length; i++) {
@@ -97,13 +97,13 @@ for (let i = 0; i < callbackInfo.length; i++) {
 }
 ```
 
-See: [AnimationInfo](/api/objects/animationinfo)
+See: [AnimationInfo](/animare/api/objects/animationinfo)
 
 ### TimelineInfo
 
 An object containing information about the timeline.
 
-See: [TimelineInfo](/api/objects/timelineinfo)
+See: [TimelineInfo](/animare/api/objects/timelineinfo)
 
 ## TimelineOptions
 
@@ -112,10 +112,10 @@ See: [TimelineInfo](/api/objects/timelineinfo)
 Here, you can set global values for the timeline to be used as defaults for optional animation properties.
 Additionally, you can configure options specific to the timeline, such as `autoPlay`.
 
-See: [TimelineOptions](/api/objects/timelineoptions/)
+See: [TimelineOptions](/animare/api/objects/timelineoptions/)
 
 ## Timeline Return Object
 
 The return object when creating a new timeline.
 
-See: [TimelineObject](/api/objects/timelineobject/)
+See: [TimelineObject](/animare/api/objects/timelineobject/)

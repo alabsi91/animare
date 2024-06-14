@@ -39,7 +39,7 @@ myAnimation.play(); // 🚀
 
 `animations: SingleAnimationOptions` <Badge text="Required" variant="note" size="small" />
 
-A single object of [`AnimationOptions`](/api/objects/animationoptions/).
+A single object of [`AnimationOptions`](/animare/api/objects/animationoptions/).
 
 :::note
 This differs from `AnimationOptions` in the following ways:
@@ -50,24 +50,24 @@ This differs from `AnimationOptions` in the following ways:
 
 :::
 
-See: [AnimationOptions](/api/objects/animationoptions/)
+See: [AnimationOptions](/animare/api/objects/animationoptions/)
 
 ## OnUpdateCallback
 
 `(AnimationInfo, TimelineInfo) => void` <Badge text="Required" variant="note" size="small" />
 
 This is a callback function that is called on every frame update
-with `CallbackInfo`, and [`TimelineInfo`](/api/objects/timelineinfo) as arguments.
+with `CallbackInfo`, and [`TimelineInfo`](/animare/api/objects/timelineinfo) as arguments.
 
 ### CallbackInfo
 
-See: [AnimationInfo](/api/objects/animationinfo)
+See: [AnimationInfo](/animare/api/objects/animationinfo)
 
 ### TimelineInfo
 
 An object containing information about the timeline.
 
-See: [TimelineInfo](/api/objects/timelineinfo)
+See: [TimelineInfo](/animare/api/objects/timelineinfo)
 
 ## Timeline Return Object
 
@@ -77,4 +77,4 @@ The return object when creating a new timeline.
 There is a slight difference that `updateValues` property accepts a single animation option instead of an array of animation options
 :::
 
-See: [TimelineObject](/api/objects/timelineobject/)
+See: [TimelineObject](/animare/api/objects/timelineobject/)
