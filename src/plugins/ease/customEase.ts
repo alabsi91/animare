@@ -1,31 +1,19 @@
-type ViewBox = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
+/** - Converts a path string to two dimensional array `[[M], ...[C]]` */
+function parsePointsFromPathString(path: string): number[][] {
+  const pathData = path.match(/-?[0-9.]+/g)?.map(parseFloat);
 
-export function generateEasingFunctionFromString(path: string) {
-  const viewBox = { x: 0, y: 0, width: 1, height: 1 };
-  const points = getPointsFromPathString(path, viewBox);
-  const curves = preparePointsForAnimation(points, viewBox);
+  const points: number[][] = [];
 
-  return (t: number) => {
-    // Special case start and end.
-    if (t === 0) return curves[0][1]; // The Y-coordinate of the first point of the first curve
-    if (t === 1) return curves[curves.length - 1][7]; // The Y-coordinate of the end point of the last curve
+  if (!pathData) return points;
 
-    let from = 0;
-    for (let i = 0; i < curves.length; i++) {
-      const [p0x, p0y, c0x, c0y, c1x, c1y, p1x, p1y] = curves[i];
-      if (t >= from && t <= p1x) {
-        from = p1x;
-        return solvePositionYFromT(p0x, p0y, c0x, c0y, c1x, c1y, p1x, p1y, t);
-      }
-    }
+  points.push([pathData[0], pathData[1]]); // M points
 
-    return 0;
-  };
+  // C points
+  for (let i = 2; i < pathData.length; i += 6) {
+    points.push([pathData[i], pathData[i + 1], pathData[i + 2], pathData[i + 3], pathData[i + 4], pathData[i + 5]]);
+  }
+
+  return points;
 }
 
 /**
@@ -33,15 +21,13 @@ export function generateEasingFunctionFromString(path: string) {
  * - Flip the Y points ->
  * - Store only Cubic curves with starting, control, and ending points (without the first M command).
  */
-function preparePointsForAnimation(array: number[][], viewBox: ViewBox): number[][] {
-  const relativePoints = convertPointsToRelativeValues(array, viewBox);
-
+function preparePointsForAnimation(array: number[][]): number[][] {
   const results: number[][] = [];
 
   let x = 0;
   let y = 0;
-  for (let i = 0; i < relativePoints.length; i++) {
-    const curve = relativePoints[i];
+  for (let i = 0; i < array.length; i++) {
+    const curve = array[i];
 
     const c1x = curve[0];
     const c1y = 1 - curve[1];
@@ -66,114 +52,56 @@ function preparePointsForAnimation(array: number[][], viewBox: ViewBox): number[
   return results;
 }
 
-/** - Converts a path string to two dimensional array `[[M], ...[C]]` */
-function getPointsFromPathString(path: string, viewBox: ViewBox): number[][] {
-  const x = viewBox.x;
-  const y = viewBox.y;
-  const height = viewBox.height;
-  const width = viewBox.width;
+export function generateEasingFunctionFromString(path: string) {
+  const points = parsePointsFromPathString(path);
+  const curves = preparePointsForAnimation(points);
 
-  // get numbers from the string and convert them from percentage values.
-  const pathData = path
-    .match(/-?[0-9.]+/g)
-    ?.map((v, i) => (i % 2 === 0 ? parseFloat(v) * width + x : parseFloat(v) * height + y));
+  const epsilon = 1e-6; // Desired precision on the computation.
 
-  const points: number[][] = [];
+  return (t: number) => {
+    // Special case start and end.
+    if (t === 0) return curves[0][1]; // The Y-coordinate of the first point of the first curve
+    if (t === 1) return curves[curves.length - 1][7]; // The Y-coordinate of the end point of the last curve
 
-  if (!pathData) return points;
+    let from = 0;
+    for (let i = 0; i < curves.length; i++) {
+      const [p0x, p0y, c0x, c0y, c1x, c1y, p1x, p1y] = curves[i];
 
-  points.push([pathData[0], pathData[1]]); // M points
+      if (t < from || t > p1x) continue; // t is outside the range of the current curve
 
-  // C points
-  for (let i = 2; i < pathData.length; i += 6) {
-    points.push([pathData[i], pathData[i + 1], pathData[i + 2], pathData[i + 3], pathData[i + 4], pathData[i + 5]]);
-  }
+      from = p1x;
 
-  return points;
-}
+      // A binary search algorithm is used to determine the Y-coordinate value
+      // corresponding to a specified position on the X-coordinate.
+      let start = 0,
+        end = 1,
+        target = (start + end) / 2,
+        times = 0;
 
-/** Converts the values in a two-dimensional array to percentage values (ranging from 0 to 1). */
-function convertPointsToRelativeValues(array: number[][], { x, y, width, height }: ViewBox): number[][] {
-  const result: number[][] = [];
+      while (target >= start && target <= 1) {
+        // Compute the point (x, y) on the curve for a given time `target` [0 to 1]
+        const mt = 1 - target,
+          mt2 = mt * mt,
+          mt3 = mt2 * mt;
 
-  for (let i = 0; i < array.length; i++) {
-    const curve = array[i];
-    const newCurve: number[] = [];
+        const x = p0x * mt3 + c0x * 3 * mt2 * target + c1x * 3 * mt * target * target + p1x * target ** 3;
+        const y = p0y * mt3 + c0y * 3 * mt2 * target + c1y * 3 * mt * target * target + p1y * target ** 3;
 
-    for (let j = 0; j < curve.length; j++) {
-      if (j % 2 === 0) {
-        newCurve.push((curve[j] - x) / width);
-        continue;
+        // If the point cannot be found within 50 attempts, a safe loop break will be triggered.
+        if (++times > 50) return y;
+
+        // Return the located Y-coordinate value.
+        if (Math.abs(x - t) <= epsilon) return y;
+
+        if (x >= t) end = target;
+        else start = target;
+
+        target = (start + end) / 2;
       }
 
-      newCurve.push((curve[j] - y) / height);
+      return 0;
     }
 
-    result.push(newCurve);
-  }
-
-  return result;
-}
-
-/** Computes the Y-coordinate of a point on the curve given its X-coordinate.*/
-function solvePositionYFromT(
-  p0x: number,
-  p0y: number,
-  c0x: number,
-  c0y: number,
-  c1x: number,
-  c1y: number,
-  p1x: number,
-  p1y: number,
-  t: number,
-): number {
-  // Desired precision on the computation.
-  const epsilon = 1e-6;
-
-  // A binary search algorithm is used to determine the Y-coordinate value
-  // corresponding to a specified position on the X-coordinate.
-  let start = 0,
-    end = 1,
-    target = (start + end) / 2,
-    times = 0;
-
-  while (target >= start && target <= 1) {
-    const { x, y } = findPointFromT(p0x, p0y, c0x, c0y, c1x, c1y, p1x, p1y, target);
-
-    // If the point cannot be found within 50 attempts, a safe loop break will be triggered.
-    if (++times > 50) return y;
-
-    // Return the located Y-coordinate value.
-    if (Math.abs(x - t) <= epsilon) return y;
-
-    if (x >= t) end = target;
-    else start = target;
-
-    target = (start + end) / 2;
-  }
-
-  return 0;
-}
-
-/** Computes the point (x, y) on the curve for a given time `t` [0 to 1] */
-function findPointFromT(
-  p0x: number,
-  p0y: number,
-  c0x: number,
-  c0y: number,
-  c1x: number,
-  c1y: number,
-  p1x: number,
-  p1y: number,
-  t: number,
-) {
-  const point = { x: 0, y: 0 },
-    mt = 1 - t,
-    mt2 = mt * mt,
-    mt3 = mt2 * mt;
-
-  point.x = p0x * mt3 + c0x * 3 * mt2 * t + c1x * 3 * mt * t * t + p1x * t ** 3;
-  point.y = p0y * mt3 + c0y * 3 * mt2 * t + c1y * 3 * mt * t * t + p1y * t ** 3;
-
-  return point;
+    return 0;
+  };
 }
