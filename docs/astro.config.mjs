@@ -18,6 +18,7 @@ export default defineConfig({
       components: {
         ThemeSelect: './src/components/ThemeSelect.astro',
         SiteTitle: './src/components/Logo.astro',
+        Head: './src/components/Head.astro',
       },
       expressiveCode: {
         styleOverrides: {
