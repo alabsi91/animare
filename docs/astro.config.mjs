@@ -13,7 +13,7 @@ export default defineConfig({
       logo: {
         src: './src/assets/logo.svg',
       },
-      favicon: './src/assets/logo.svg',
+      favicon: '/favicon.svg',
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       components: {
         ThemeSelect: './src/components/ThemeSelect.astro',
