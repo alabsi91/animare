@@ -82,7 +82,9 @@ type RemoveFunctionType<T> = {
 
 /** Extends the types of properties in the given type `T` to allow arrays and functions, except for the 'to' property which only allows arrays. */
 type AllowArray<T> = {
-  [K in keyof T]: K extends 'ease' ? T[K] : T[K] | Exclude<T[K], undefined | ((i: number) => unknown)>[];
+  [K in keyof T]: K extends 'ease'
+    ? T[K] | Exclude<T[K], undefined>[]
+    : T[K] | Exclude<T[K], undefined | ((i: number) => unknown)>[];
 };
 
 // ...
