@@ -13,9 +13,11 @@ export default defineConfig({
       logo: {
         src: './src/assets/logo.svg',
       },
+      favicon: './src/assets/logo.svg',
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       components: {
         ThemeSelect: './src/components/ThemeSelect.astro',
+        SiteTitle: './src/components/Header/HeaderAstro.astro',
       },
       expressiveCode: {
         styleOverrides: {
