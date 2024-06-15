@@ -4,7 +4,12 @@ module.exports = {
     es2021: true,
   },
   root: true,
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:astro/recommended', "plugin:prettier/recommended"],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:astro/recommended',
+    'plugin:prettier/recommended',
+  ],
   overrides: [
     {
       env: {
@@ -26,6 +31,19 @@ module.exports = {
         'react/react-in-jsx-scope': 'off',
       },
     },
+    {
+      files: ['**/*.astro/*.js', '*.astro/*.js'],
+      env: {
+        browser: true,
+        es2020: true,
+      },
+      parserOptions: {
+        sourceType: 'module',
+      },
+      rules: {
+        'prettier/prettier': 'off',
+      },
+    },
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -33,7 +51,5 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint', 'react'],
-  rules: {
-    
-  },
+  rules: {},
 };

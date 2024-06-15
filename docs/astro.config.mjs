@@ -17,7 +17,7 @@ export default defineConfig({
       customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
       components: {
         ThemeSelect: './src/components/ThemeSelect.astro',
-        SiteTitle: './src/components/Header/HeaderAstro.astro',
+        SiteTitle: './src/components/Logo.astro',
       },
       expressiveCode: {
         styleOverrides: {
