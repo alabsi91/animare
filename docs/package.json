@@ -30,6 +30,7 @@
     "@types/react-dom": "^18.3.0",
     "animare": "file:..",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "starlight-package-managers": "^0.6.0"
   }
 }
