@@ -105,9 +105,10 @@ const Title = 'animare';
         parent.style.overflow = 'hidden';
       }
 
-      for (let i = 0; i < values.length; i += 3)
+      for (let i = 0; i < values.length; i += 3) {
         spans[i / 3].style.transform =
           `translateX(${values[i].value}em) translateY(${values[i + 1].value}em) rotateZ(${values[i + 2].value}deg)`;
+      }
 
       if (isFinished) {
         const parent = spans[0].parentElement as HTMLHeadingElement;

@@ -2,7 +2,7 @@
 title: AnimationOptions
 description: Options for creating an animation.
 sidebar:
-    order: 16
+  order: 16
 ---
 
 import { Badge } from '@astrojs/starlight/components';
@@ -69,6 +69,10 @@ See: [Direction](/animare/api/enums/direction/)
 `timing?: AnimationTiming | (index: number) => AnimationTiming` <Badge text="Default: AnimationTiming.AfterPrevious" variant="tip" size="small" />
 
 The position of the animation in the timeline, determining when it should start relative to the timeline.
+
+:::caution
+First animation should always have `AnimationTiming.FromStart`
+:::
 
 See: [AnimationTiming](/animare/api/enums/animationtiming/)
 
