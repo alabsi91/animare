@@ -14,7 +14,7 @@ export enum Direction {
   AlternateReverse = 'alternate-reverse',
 }
 
-export enum AnimationTiming {
+export enum Timing {
   /** Play the animation after the previous one finishes. */
   AfterPrevious = 'after-previous',
 
@@ -154,9 +154,9 @@ export type AnimationOptions<Name extends string = string> = {
 
   /**
    * The position of the animation in the timeline, determining when it should start relative to the timeline.
-   * @default AnimationTiming.AfterPrevious
+   * @default Timing.AfterPrevious
    */
-  timing?: AnimationTiming | ((index: number) => AnimationTiming);
+  timing?: Timing | ((index: number) => Timing);
 
   /**
    * The easing function for the animation, defining the rate of change of the animated value over time.

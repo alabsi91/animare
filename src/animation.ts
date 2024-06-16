@@ -1,5 +1,5 @@
 import { isAlternateDirection, isReverseDirection, validateAnimationValues } from './utils/helpers';
-import { AnimationTiming, Direction } from './types';
+import { Timing, Direction } from './types';
 import { clamp, extendObject, normalizePercentage } from './utils/utils';
 
 import type { AnimationInfo, AnimationPreparedOptions } from './types';
@@ -111,15 +111,15 @@ export default class Animation {
     const delay = this.animationRef.delayCount === 0 ? 0 : this.animationRef.delay;
     const overallDuration = this.animationRef.duration * this.animationRef.playCount + delay * this.animationRef.delayCount;
 
-    const timing = this.#index === 0 ? AnimationTiming.FromStart : this.animationRef.timing;
+    const timing = this.#index === 0 ? Timing.FromStart : this.animationRef.timing;
     switch (timing) {
-      case AnimationTiming.FromStart:
+      case Timing.FromStart:
         this.#start = delay;
         this.#end = this.#start + this.animationRef.duration;
         this.#startPoint = 0;
         this.endPoint = overallDuration;
         break;
-      case AnimationTiming.AfterPrevious:
+      case Timing.AfterPrevious:
         // should not happen because the first animation timing should be `FromStart`
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
 
@@ -128,7 +128,7 @@ export default class Animation {
         this.#startPoint = this.#previousTimelineRef.endPoint;
         this.endPoint = this.#startPoint + overallDuration;
         break;
-      case AnimationTiming.WithPrevious:
+      case Timing.WithPrevious:
         // should not happen because the first animation timing should be `FromStart`
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
 

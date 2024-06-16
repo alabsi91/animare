@@ -1,5 +1,5 @@
 import Animation from '../animation';
-import { AnimationTiming, Direction } from '../types';
+import { Timing, Direction } from '../types';
 
 import type { TimelineGlobalOptions, AnimationPreparedOptions, AnimationOptions, RemoveFunction } from '../types';
 
@@ -10,7 +10,7 @@ export const defaultValues = {
   delayCount: 1,
   playCount: 1,
   direction: Direction.Forward,
-  timing: AnimationTiming.AfterPrevious,
+  timing: Timing.AfterPrevious,
   ease: (t: number) => t,
 };
 
@@ -98,7 +98,7 @@ export function prepareAnimationsValues(
     const withDefaultValues = setDefaultValues(animation, globalValues, i);
 
     // first animation always should play from the start.
-    if (i === 0) withDefaultValues.timing = AnimationTiming.FromStart;
+    if (i === 0) withDefaultValues.timing = Timing.FromStart;
 
     validateAnimationValues(withDefaultValues);
 
@@ -130,8 +130,8 @@ export function calculateTimeline(animations: AnimationPreparedOptions[]) {
     const previousTimeline: Animation | undefined = timelines[i - 1];
 
     // should not throw, because we already forced it to be `AnimationTiming.FromStart`
-    if (i === 0 && animation.timing !== AnimationTiming.FromStart) {
-      throw new Error(`The timing value in the first animation must be "${AnimationTiming.FromStart}".`);
+    if (i === 0 && animation.timing !== Timing.FromStart) {
+      throw new Error(`The timing value in the first animation must be "${Timing.FromStart}".`);
     }
 
     timelines.push(new Animation(animation, previousTimeline, i));

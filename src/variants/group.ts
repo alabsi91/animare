@@ -1,5 +1,5 @@
 import timeline from './timeline';
-import { AnimationTiming } from '../types';
+import { Timing } from '../types';
 
 import type {
   AnimationGroupOptions,
@@ -36,7 +36,7 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
 
   const isNumber = (value: unknown): value is number => typeof value === 'number';
   const isDirection = (value: unknown): value is Direction => typeof value === 'object' && !Array.isArray(value);
-  const isTiming = (value: unknown): value is AnimationTiming => typeof value === 'object' && !Array.isArray(value);
+  const isTiming = (value: unknown): value is Timing => typeof value === 'object' && !Array.isArray(value);
   const isEase = (value: unknown): value is EaseFn => typeof value === 'function';
 
   const fill = <T>(value: T) => new Array<T>(length).fill(value);
@@ -64,7 +64,7 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
       delayCount: Array.isArray(prepared.delayCount) ? prepared.delayCount[i] : prepared.delayCount,
       playCount: Array.isArray(prepared.playCount) ? prepared.playCount[i] : prepared.playCount,
       direction: Array.isArray(prepared.direction) ? prepared.direction[i] : prepared.direction,
-      timing: i === 0 ? AnimationTiming.FromStart : Array.isArray(prepared.timing) ? prepared.timing[i] : prepared.timing,
+      timing: i === 0 ? Timing.FromStart : Array.isArray(prepared.timing) ? prepared.timing[i] : prepared.timing,
       duration: Array.isArray(prepared.duration) ? prepared.duration[i] : prepared.duration,
       ease: Array.isArray(prepared.ease) ? prepared.ease[i] : prepared.ease,
     };
