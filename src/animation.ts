@@ -108,33 +108,34 @@ export default class Animation {
     this.#value = this.#isReverse ? this.animationRef.to : this.animationRef.from;
     this.#endValue = this.#isReverse ? this.animationRef.from : this.animationRef.to;
 
+    const offset = this.animationRef.offset;
     const delay = this.animationRef.delayCount === 0 ? 0 : this.animationRef.delay;
     const overallDuration = this.animationRef.duration * this.animationRef.playCount + delay * this.animationRef.delayCount;
 
     const timing = this.#index === 0 ? Timing.FromStart : this.animationRef.timing;
     switch (timing) {
       case Timing.FromStart:
-        this.#start = delay;
+        this.#start = delay + offset;
         this.#end = this.#start + this.animationRef.duration;
-        this.#startPoint = 0;
-        this.endPoint = overallDuration;
+        this.#startPoint = offset;
+        this.endPoint = this.#startPoint + overallDuration;
         break;
       case Timing.AfterPrevious:
         // should not happen because the first animation timing should be `FromStart`
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
 
-        this.#start = this.#previousTimelineRef.endPoint + delay;
+        this.#start = this.#previousTimelineRef.endPoint + delay + offset;
         this.#end = this.#start + this.animationRef.duration;
-        this.#startPoint = this.#previousTimelineRef.endPoint;
+        this.#startPoint = this.#previousTimelineRef.endPoint + offset;
         this.endPoint = this.#startPoint + overallDuration;
         break;
       case Timing.WithPrevious:
         // should not happen because the first animation timing should be `FromStart`
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
 
-        this.#start = this.#previousTimelineRef.#startPoint + delay;
+        this.#start = this.#previousTimelineRef.#startPoint + delay + offset;
         this.#end = this.#start + this.animationRef.duration;
-        this.#startPoint = this.#previousTimelineRef.#startPoint;
+        this.#startPoint = this.#previousTimelineRef.#startPoint + offset;
         this.endPoint = this.#startPoint + overallDuration;
         break;
     }

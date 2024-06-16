@@ -123,11 +123,17 @@ export type AnimationOptions<Name extends string = string> = {
   duration?: number | ((index: number) => number);
 
   /**
-   * This property specifies the delay before the animation starts, in milliseconds, and can accept negative values.
-   * It acts as an animation offset within the timeline, allowing you to delay the animation or make it start earlier by using negative values.
+   * This property specifies the delay before the animation starts, in milliseconds.
    * @default 0
    */
   delay?: number | ((index: number) => number);
+
+  /**
+   * Offsets the animation by a specific value in milliseconds.
+   * a positive value will act like a delay, while a negative value will play the animation earlier.
+   * @default 0
+   */
+  offset?: number | ((index: number) => number);
 
   /**
    * The number of times the delay should be applied on each animation play.

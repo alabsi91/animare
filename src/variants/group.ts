@@ -44,6 +44,7 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
   const prepared = {
     to: animation.to,
     from: isNumber(animation.from) ? fill(animation.from) : animation.from,
+    offset: isNumber(animation.offset) ? fill(animation.offset) : animation.offset,
     delay: isNumber(animation.delay) ? fill(animation.delay) : animation.delay,
     delayCount: isNumber(animation.delayCount) ? fill(animation.delayCount) : animation.delayCount,
     playCount: isNumber(animation.playCount) ? fill(animation.playCount) : animation.playCount,
@@ -60,6 +61,7 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
       name: i.toString(),
       to: prepared.to[i],
       from: Array.isArray(prepared.from) ? prepared.from[i] : prepared.from,
+      offset: Array.isArray(prepared.offset) ? prepared.offset[i] : prepared.offset,
       delay: Array.isArray(prepared.delay) ? prepared.delay[i] : prepared.delay,
       delayCount: Array.isArray(prepared.delayCount) ? prepared.delayCount[i] : prepared.delayCount,
       playCount: Array.isArray(prepared.playCount) ? prepared.playCount[i] : prepared.playCount,

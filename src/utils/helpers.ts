@@ -7,6 +7,7 @@ export const defaultValues = {
   from: 0,
   duration: 350,
   delay: 0,
+  offset: 0,
   delayCount: 1,
   playCount: 1,
   direction: Direction.Forward,
@@ -35,6 +36,9 @@ export function validateAnimationValues(animation: AnimationOptions) {
 
   if (typeof animation.duration === 'number' && animation.duration < 0)
     throw new Error('The `duration` value cannot be a negative value.');
+
+  if (typeof animation.delay === 'number' && animation.delay < 0)
+    throw new Error('The `delay` value cannot be a negative value.');
 
   if (typeof animation.playCount === 'number' && animation.playCount < 0)
     throw new Error('The `playCount` value cannot be a negative value.');
@@ -65,6 +69,7 @@ export function setDefaultValues(
   const from = perValue(animation.from) ?? globalValues.from ?? defaultValues.from,
     duration = perValue(animation.duration) ?? globalValues.duration ?? defaultValues.duration,
     delay = perValue(animation.delay) ?? globalValues.delay ?? defaultValues.delay,
+    offset = perValue(animation.offset) ?? globalValues.offset ?? defaultValues.offset,
     playCount = perValue(animation.playCount) ?? globalValues.playCount ?? defaultValues.playCount,
     delayCount = typeof delay === 'number' ? perValue(animation.delayCount) ?? globalValues.delayCount ?? playCount : 0,
     direction = perValue(animation.direction) ?? globalValues.direction ?? defaultValues.direction,
@@ -76,6 +81,7 @@ export function setDefaultValues(
     from,
     duration,
     delay,
+    offset,
     playCount,
     delayCount,
     direction,

@@ -109,7 +109,7 @@ export type Ease = {
 
 export type Ease_in_out_inOut = {
   /** **Back** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#back) to learn more.*/
-  back: (c1: number) => EaseFn;
+  back: (c1?: number) => EaseFn;
 
   /** **Bounce** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#bounce) to learn more.*/
   bounce: EaseFn;
@@ -150,5 +150,5 @@ export type Ease_in_out_inOut = {
    *
    * **Wobble** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#wobble) to learn more.
    */
-  wobble: (bounciness: number) => EaseFn;
+  wobble: (bounciness?: number) => EaseFn;
 };
