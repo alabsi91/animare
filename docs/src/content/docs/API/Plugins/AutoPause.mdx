@@ -5,21 +5,19 @@ sidebar:
   order: 8
 ---
 
+import { Badge } from '@astrojs/starlight/components';
+
 Uses the IntersectionObserver API to automatically pauses the animation when the element is not visible.
 
-Plays the timeline when the element becomes visible, even if the timeline was not playing before.
+Resumes the timeline when the element becomes visible, even if the timeline was not playing before.
 
 ```ts wrap title="syntax"
-function autoPause(timeline: TimelineObject, element: Element, observerOptions?: IntersectionObserverInit): () => void;
+function autoPause(timeline: TimelineObject, element: Element, options?: AutoPauseOptions): () => void;
 ```
 
 ## Usage
 
 Useful when you have an infinite repeating animation to save resources.
-
-:::tip
-It can be used to auto play the animation when the element becomes visible
-:::
 
 To use with React see: [useAutoPause](/animare/api/react/useautopause)
 
@@ -36,3 +34,61 @@ const unsubscribe = autoPause(myTimeline, element);
 
 unsubscribe(); // Disconnect the intersection observer
 ```
+
+## Timeline
+
+`timeline: TimelineObject` <Badge text="Required" variant="danger" size="small" />
+
+The timeline return object.
+
+See: [TimelineObject](/animare/api/objects/timelineobject/)
+
+## Element
+
+`element: Element` <Badge text="Required" variant="danger" size="small" />
+
+The element to track when entering and exiting the viewport.
+
+## Options
+
+`options?: AutoPauseOptions` <Badge text="Default: {}" variant="tip" size="small" />
+
+### root
+
+`root?:  Element | Document | null` <Badge text="Default: null" variant="tip" size="small" />
+
+The root element to use for the intersection observer. If not provided, the default is `null` which means the viewport.
+
+See: [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+
+### rootMargin
+
+`rootMargin?: string` <Badge text="Default: '0px 0px 0px 0px'" variant="tip" size="small" />
+
+The margin around the root element to use for the intersection observer.
+
+See: [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+
+### threshold
+
+`threshold?: number | number[]` <Badge text="Default: 0" variant="tip" size="small" />
+
+The threshold to use for the intersection observer, between `0` and `1`.
+
+See: [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+
+### forcePlay
+
+`forcePlay?: boolean` <Badge text="Default: true" variant="tip" size="small" />
+
+Whether to force the timeline to play even if the element is not paused when entering the viewport.
+
+:::tip
+It can be used to auto play the animation when the element becomes visible.
+:::
+
+### onVisibilityChange()
+
+`onVisibilityChange?: (isVisible: boolean) => void` <Badge text="Default: undefined" variant="tip" size="small" />
+
+Callback to call when the element enters or leaves the viewport.

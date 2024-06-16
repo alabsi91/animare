@@ -59,6 +59,10 @@ header.header {
   backdrop-filter: blur(10px);
 }
 
+mobile-starlight-toc nav {
+  backdrop-filter: blur(10px);
+}
+
 .pagination-links {
   backdrop-filter: blur(2px);
 }

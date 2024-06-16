@@ -8,12 +8,7 @@ sidebar:
 A custom react hook to make it easy to create auto pause animations in React.
 
 ```ts wrap title="syntax"
-function autoPause(
-  timeline: TimelineObject,
-  element: Element,
-  observerOptions?: IntersectionObserverInit,
-  deps?: React.DependencyList,
-): void;
+function autoPause(timeline: TimelineObject, element: Element, options?: AutoPauseOptions, deps?: React.DependencyList): void;
 ```
 
 Based on [autoPause](/animare/api/plugins/autopause)
