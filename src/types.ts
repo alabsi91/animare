@@ -546,6 +546,14 @@ export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo
 export type AnimationGroupOptions = Omit<AllowArray<AnimationOptions>, 'name'> & TimelineOptions;
 export type GroupOnUpdateCallback = (info: CallbackInfo<`${number}`>, timelineInfo: TimelineInfo) => void;
 
+export type AutoPauseOptions = {
+  root?: Element | Document | null;
+  rootMargin?: string;
+  threshold?: number | number[];
+  forcePlay?: boolean;
+  onVisibilityChange?: (isVisible: boolean) => void;
+};
+
 export type ScrollAnimationOptions<Name extends string = string> = {
   /**
    * The returned animation object.

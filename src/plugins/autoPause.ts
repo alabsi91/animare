@@ -1,4 +1,4 @@
-import type { SingleObject, TimelineObject } from '../types';
+import type { AutoPauseOptions, SingleObject, TimelineObject } from '../types';
 
 /**
  * Uses the IntersectionObserver API to automatically pauses the animation when the element is not visible.
@@ -7,7 +7,7 @@ import type { SingleObject, TimelineObject } from '../types';
  *
  * @param timeline - The animation object returned by animare.
  * @param element - The HTML element to track when entering and exiting the viewport.
- * @param observerOptions - The options for the intersection observer.
+ * @param options - The options for the intersection observer.
  * @returns A function to remove the intersection observer and stop tracking visibility.
  *
  * @example
@@ -23,8 +23,10 @@ import type { SingleObject, TimelineObject } from '../types';
 export function autoPause<Name extends string>(
   timeline: TimelineObject<Name> | SingleObject,
   element: Element,
-  observerOptions?: IntersectionObserverInit,
+  observerOptions?: AutoPauseOptions,
 ): () => void {
+  const forcePlay = observerOptions?.forcePlay ?? true;
+
   const observer = new IntersectionObserver(entries => {
     if (!timeline) return;
 
@@ -32,8 +34,26 @@ export function autoPause<Name extends string>(
       const entry = entries[i];
       const isVisible = entry.isIntersecting;
 
-      if (isVisible) timeline.play();
-      else if (timeline.timelineInfo.isPlaying) timeline.pause();
+      observerOptions?.onVisibilityChange?.(isVisible);
+
+      if (!timeline) {
+        console.error('[autoPause] The timeline is not defined.');
+        return;
+      }
+
+      // enter the viewport
+      if (isVisible) {
+        // resume if paused
+        if (timeline.timelineInfo.isPaused) return timeline.resume();
+
+        // play anyway
+        if (forcePlay) timeline.play();
+
+        return;
+      }
+
+      // exit the viewport
+      if (timeline.timelineInfo.isPlaying) timeline.pause();
     }
   }, observerOptions);
 
