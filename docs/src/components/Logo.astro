@@ -24,7 +24,7 @@ const Title = 'animare';
 </div>
 
 <script>
-  import animare, { AnimationTiming, Direction } from 'animare';
+  import animare, { Timing, Direction } from 'animare';
   import { ease } from 'animare/plugins';
 
   const svg = document.querySelector('.logo svg') as SVGAElement;
@@ -47,7 +47,7 @@ const Title = 'animare';
       duration: 1200,
       delay: i => delay + ~~(i / 2) * 50,
       ease: new Array(spans.length).fill([ease.out.expo, ease.linear]).flat(),
-      timing: AnimationTiming.FromStart,
+      timing: Timing.FromStart,
       autoPlay: false,
     },
     values => {
@@ -65,7 +65,7 @@ const Title = 'animare';
       delay: i => delay + ~~(i / 3) * 50,
       duration: 800,
       ease: new Array(spans.length).fill([ease.out.expo, ease.out.expo, ease.linear]).flat(),
-      timing: AnimationTiming.FromStart,
+      timing: Timing.FromStart,
       autoPlay: false,
     },
     values => {
@@ -83,7 +83,7 @@ const Title = 'animare';
       duration: i => 1000 + i * 50,
       delay: i => delay + i * 50,
       ease: ease.spring({ mass: 2, damping: 12, stiffness: 70, velocity: 9, duration: 2500 }),
-      timing: AnimationTiming.FromStart,
+      timing: Timing.FromStart,
       autoPlay: false,
     },
     values => spans.forEach((span, i) => (span.style.transform = `scale(${values[i].value})`)),
@@ -96,7 +96,7 @@ const Title = 'animare';
       duration: 750,
       delay: i => delay + ~~(i / 3) * 50,
       ease: ease.out.expo,
-      timing: AnimationTiming.FromStart,
+      timing: Timing.FromStart,
       autoPlay: false,
     },
     (values, { isFirstFrame, isFinished }) => {

@@ -66,15 +66,15 @@ See: [Direction](/animare/api/enums/direction/)
 
 ### timing
 
-`timing?: AnimationTiming | (index: number) => AnimationTiming` <Badge text="Default: AnimationTiming.AfterPrevious" variant="tip" size="small" />
+`timing?: Timing | (index: number) => Timing` <Badge text="Default: Timing.AfterPrevious" variant="tip" size="small" />
 
 The position of the animation in the timeline, determining when it should start relative to the timeline.
 
 :::caution
-First animation should always have `AnimationTiming.FromStart`
+First animation should always have `Timing.FromStart`
 :::
 
-See: [AnimationTiming](/animare/api/enums/animationtiming/)
+See: [Timing](/animare/api/enums/timing/)
 
 ### ease
 

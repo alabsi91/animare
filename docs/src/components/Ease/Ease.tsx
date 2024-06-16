@@ -1,4 +1,4 @@
-import animare, { AnimationTiming, createAnimations } from 'animare';
+import animare, { Timing, createAnimations } from 'animare';
 import { useAnimare, useAutoPause } from 'animare/react';
 import { useRef } from 'react';
 import styles from './Ease.module.css';
@@ -76,14 +76,14 @@ export default function Ease({ title = 'Linear', padding = 10, duration = 2000, 
     const animations = createAnimations([
       { name: 'x', from: ballRadius + pad, to: size - ballRadius - pad },
       { name: 'y', from: size - ballRadius - pad, to: ballRadius + pad, ease: parseEase(easing) },
-      { name: 'empty', to: 0, duration: 1000, timing: AnimationTiming.AfterPrevious },
+      { name: 'empty', to: 0, duration: 1000, timing: Timing.AfterPrevious },
     ]);
 
     const globalOptions: TimelineGlobalOptions = {
       autoPlay: false,
       timelinePlayCount: -1,
       duration,
-      timing: AnimationTiming.FromStart,
+      timing: Timing.FromStart,
     };
 
     const ctx = canvasRef.current?.getContext('2d');
