@@ -1,0 +1,245 @@
+---
+const Title = 'animare';
+---
+
+<div class='container not-content'>
+  <h1 class='title'>
+    {[...Title].map(c => <span class='letter'>{c}</span>)}
+  </h1>
+  <div class='slider-container'>
+    <button class='play-pause'>
+      <svg class='play-svg' xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 0 100 100' width='24px'>
+        <path d='M20,20 L35,20 L35,80 L20,80 Z M65,20 L80,20 L80,80 L65,80 Z'></path>
+      </svg>
+    </button>
+    <input class='animare-slider' type='range' min='0' max='1' step='0.01' value='0' />
+  </div>
+</div>
+
+<div class='hero-buttons not-content'>
+  <a href='/animare/installation' class='cssbuttons-io-button'>
+    Get started
+    <div class='icon'>
+      <svg height='24' width='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+        <path d='M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z' fill='currentColor'></path>
+      </svg>
+    </div>
+  </a>
+</div>
+
+<script>
+  import { TRANSITION_BEFORE_PREPARATION } from 'astro:transitions/client';
+  import animare from 'animare';
+  import { ease, lerp, vecToRGB } from 'animare/plugins';
+
+  import type { AnimationGroupOptions, GroupOnUpdateCallback } from 'animare';
+
+  const letters = document.querySelectorAll<HTMLSpanElement>('.letter')!;
+  const slider = document.querySelector<HTMLInputElement>('.animare-slider')!;
+  const playPauseButton = document.querySelector<HTMLButtonElement>('.play-pause')!;
+  const playSvg = playPauseButton.querySelector<SVGSVGElement>('.play-svg path')!;
+
+  // force reload on transition
+  document.addEventListener(TRANSITION_BEFORE_PREPARATION, e => {
+    if (e.to.pathname === '/animare/') {
+      e.navigationType === 'traverse' ? location.reload() : e.preventDefault();
+    }
+  });
+
+  const togglePlayPauseIcon = (play: boolean) => {
+    if (play) {
+      playSvg.style.d = 'path("M20,20 L80,50 L20,80 L20,80 Z M65,20 L80,20 L80,20 L65,20 Z")';
+      return;
+    }
+
+    playSvg.style.d = 'path("M20,20 L35,20 L35,80 L20,80 Z M65,20 L80,20 L80,80 L65,80 Z")';
+  };
+
+  const em = (n: number) => `${n}em`;
+  const translateZ = (n: number) => `translateZ(${n}px) `;
+  const translateY = (n: number) => `translateY(${n}px) `;
+  const translateX = (n: number) => `translateX(${n}px) `;
+  const scale = (n: number) => `scale(${n})`;
+
+  const animations: AnimationGroupOptions = {
+    to: Array(letters.length).fill(1) as number[],
+    offset: i => (i ? -1700 : 0),
+    duration: 1800,
+    autoPlay: false,
+  };
+
+  const onUpdate: GroupOnUpdateCallback = (values, tl) => {
+    for (let i = 0; i < values.length; i++) {
+      if (tl.isFirstFrame) {
+        togglePlayPauseIcon(false);
+      }
+
+      const t = values[i].value;
+      letters[i].style.marginInline = em(lerp(0, 0, ease.out.back()(t)));
+      letters[i].style.transform =
+        translateZ(lerp(400, 0, ease.out.back()(t))) +
+        translateY(lerp(400, 0, ease.out.elastic(t))) +
+        translateX(lerp(400, 0, ease.out.bounce(t))) +
+        scale(lerp(0.5, 1, ease.out.back(20)(t)));
+      letters[i].style.opacity = `${t}`;
+      letters[i].style.filter = `blur(${lerp(4, 0, t)}px)`;
+      letters[i].style.color = vecToRGB(lerp([244, 96, 54], [255, 255, 255], t));
+      slider!.value = `${tl.progress}`;
+
+      if (tl.isFinished) {
+        togglePlayPauseIcon(true);
+      }
+    }
+  };
+
+  const timeline = animare.group(animations, onUpdate);
+
+  const onRangeChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const value = parseFloat(target.value);
+    timeline.seek(timeline.timelineInfo.duration * value);
+    if (!timeline.timelineInfo.isPlaying) timeline.playOneFrame();
+  };
+
+  const toggleTimeline = () => {
+    if (timeline.timelineInfo.isPlaying) {
+      timeline.pause();
+      togglePlayPauseIcon(true);
+      return;
+    }
+
+    const time = timeline.timelineInfo.isFinished ? 0 : timeline.timelineInfo.duration * parseFloat(slider.value);
+    timeline.play(time);
+  };
+
+  playPauseButton.addEventListener('click', toggleTimeline);
+  slider.addEventListener('input', onRangeChange);
+
+  setTimeout(() => {
+    timeline.play();
+  }, 500);
+</script>
+
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .title {
+    font-size: 5rem;
+    perspective: 300px;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .letter {
+    display: inline-block;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+  }
+
+  .slider-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    align-self: stretch;
+    margin-top: 2rem;
+  }
+
+  .slider-container button {
+    background-color: transparent;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .slider-container button svg {
+    fill: #e8eaed;
+  }
+
+  .slider-container button path {
+    transition: all 0.3s ease-in-out;
+  }
+
+  .animare-slider {
+    accent-color: var(--secondary);
+    width: 100%;
+    max-width: 500px;
+    cursor: pointer;
+  }
+
+  :global(.page) {
+    overflow: clip;
+  }
+
+  .hero-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-block: 4rem;
+  }
+
+  .cssbuttons-io-button {
+    background: var(--purple-blue);
+    color: #fff;
+    font-family: inherit;
+    padding: 0.1em;
+    padding-left: 1.8em;
+    font-weight: 500;
+    border-radius: 0.9em;
+    border: none;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 0 1.6em -0.6em var(--purple-blue);
+    overflow: hidden;
+    position: relative;
+    height: 2.8em;
+    padding-right: 3.3em;
+    cursor: pointer;
+  }
+
+  .cssbuttons-io-button .icon {
+    background: white;
+    margin-left: 1em;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.2em;
+    width: 2.2em;
+    border-radius: 0.7em;
+    box-shadow: 0.1em 0.1em 0.6em 0.2em var(--purple-blue);
+    right: 0.3em;
+    transition: all 0.3s;
+  }
+
+  .cssbuttons-io-button:hover .icon {
+    width: calc(100% - 0.6em);
+  }
+
+  .cssbuttons-io-button .icon svg {
+    width: 1.1em;
+    transition: transform 0.3s;
+    color: var(--purple-blue);
+  }
+
+  .cssbuttons-io-button:hover .icon svg {
+    transform: translateX(0.1em);
+  }
+
+  .cssbuttons-io-button:active .icon {
+    transform: scale(0.95);
+  }
+</style>

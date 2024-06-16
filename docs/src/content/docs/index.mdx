@@ -1,5 +1,5 @@
 ---
-title: Welcome to animare
+title: Welcome to
 description: Get started building your docs site with Starlight.
 template: splash
 pagefind: false
@@ -8,18 +8,14 @@ next: false
 sidebar:
   order: 0
   label: Home
-hero:
-  tagline: Add motion to your apps with ease.
-  actions:
-    - text: Docs
-      link: /animare/installation
-      icon: right-arrow
-      variant: primary
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import Hero from '../../components/Hero.astro';
 
-<CardGrid stagger>
+<Hero />
+
+<CardGrid >
   <Card title='Light' icon='seti:salesforce'>
     Advanced animation library for modern JavaScript.
   </Card>

@@ -1,9 +1,12 @@
 ---
-import type { Props } from '@astrojs/starlight/props';
 import StarlightHead from '@astrojs/starlight/components/Head.astro';
 import VtbotStarlight from 'astro-vtbot/components/starlight/Base.astro';
+
+import type { Props } from '@astrojs/starlight/props';
 ---
 
 <VtbotStarlight {...Astro.props}>
-  <StarlightHead {...Astro.props}><slot /></StarlightHead>
+  <StarlightHead {...Astro.props}>
+    <slot />
+  </StarlightHead>
 </VtbotStarlight>
