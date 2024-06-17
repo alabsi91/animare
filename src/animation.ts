@@ -112,33 +112,26 @@ export default class Animation {
     const delay = this.animationRef.delayCount === 0 ? 0 : this.animationRef.delay;
     const overallDuration = this.animationRef.duration * this.animationRef.playCount + delay * this.animationRef.delayCount;
 
+    // ensure that the first animation is always `Timing.FromStart`
     const timing = this.#index === 0 ? Timing.FromStart : this.animationRef.timing;
+
     switch (timing) {
       case Timing.FromStart:
-        this.#start = delay + offset;
-        this.#end = this.#start + this.animationRef.duration;
         this.#startPoint = offset;
-        this.endPoint = this.#startPoint + overallDuration;
         break;
       case Timing.AfterPrevious:
-        // should not happen because the first animation timing should be `FromStart`
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
-
-        this.#start = this.#previousTimelineRef.endPoint + delay + offset;
-        this.#end = this.#start + this.animationRef.duration;
         this.#startPoint = this.#previousTimelineRef.endPoint + offset;
-        this.endPoint = this.#startPoint + overallDuration;
         break;
       case Timing.WithPrevious:
-        // should not happen because the first animation timing should be `FromStart`
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
-
-        this.#start = this.#previousTimelineRef.#startPoint + delay + offset;
-        this.#end = this.#start + this.animationRef.duration;
         this.#startPoint = this.#previousTimelineRef.#startPoint + offset;
-        this.endPoint = this.#startPoint + overallDuration;
         break;
     }
+
+    this.endPoint = this.#startPoint + overallDuration;
+    this.#start = this.#startPoint + delay;
+    this.#end = this.#start + this.animationRef.duration;
   }
 
   public Update(elapsedTime: number) {
@@ -157,10 +150,8 @@ export default class Animation {
       this.#overallProgress = 1;
       this.#elapsedTime = this.endPoint - this.#startPoint;
 
-      this.#value =
-        this.animationRef.direction === Direction.Reverse || this.animationRef.direction === Direction.Alternate
-          ? this.animationRef.from
-          : this.animationRef.to;
+      const isReverse = this.animationRef.direction === Direction.Reverse || this.animationRef.direction === Direction.Alternate;
+      this.#value = isReverse ? this.animationRef.from : this.animationRef.to;
 
       return;
     }
@@ -215,24 +206,23 @@ export default class Animation {
       const at = clamp(Math.floor(targetLength / withDelayLength), 0, withDelayCount - 1);
       const delay = withDelayCount === 0 ? 0 : this.animationRef.delay;
 
+      this.#start = this.#startPoint + withDelayLength * at + delay;
       this.#delayCount = at + 1;
       this.#playCount = at + 1;
-      this.#start = this.#startPoint + withDelayLength * at + delay;
 
       // falls under without delay parts
     } else {
       const remainingLength = targetLength - withDelayTotalLength;
       const at = withDelayCount + clamp(Math.floor(remainingLength / withoutDelayLength), 0, this.animationRef.playCount - 1);
 
+      this.#start = this.#startPoint + withDelayTotalLength + withoutDelayLength * (at - withDelayCount);
       this.#delayCount = withDelayCount;
       this.#playCount = at + 1;
-      this.#start = this.#startPoint + withDelayTotalLength + withoutDelayLength * (at - withDelayCount);
     }
 
     this.#end = this.#start + this.animationRef.duration;
 
     this.#elapsedTime = elapsedTime - this.#start;
-    // console.log('elapsedTime - this.#start :', clamp(elapsedTime, this.#start, this.#end - this.#start), this.#start, this.#end);
     this.#progress = normalizePercentage(this.#elapsedTime / (this.#end - this.#start));
 
     const internalProgress = this.#calculateProgress();
