@@ -39,7 +39,7 @@ const Title = 'animare';
   import animare from 'animare';
   import { ease, lerp, vecToRGB } from 'animare/plugins';
 
-  import type { AnimationGroupOptions, GroupOnUpdateCallback } from 'animare';
+  import type { AnimationGroupOptions, GroupOnUpdateCallback, Vec3Array } from 'animare';
 
   const letters = document.querySelectorAll<HTMLSpanElement>('.letter');
   const title = document.querySelector<HTMLElement>('.title');
@@ -63,60 +63,76 @@ const Title = 'animare';
     playSvg.style.d = 'path("M20,20 L35,20 L35,80 L20,80 Z M65,20 L80,20 L80,80 L65,80 Z")';
   };
 
+  const alternate = (t: number) => (t <= 0.5 ? t : 1 - t) * 2;
+
+  const colors: { [K: string]: Vec3Array } = {
+    white: [255, 255, 255],
+    orange: [244, 96, 54],
+  };
+
   const animations: AnimationGroupOptions = {
-    to: Array(letters.length + 1).fill(1) as number[],
-    offset: [0, ...Array(letters.length - 1).fill(-800), -200],
+    to: Array(letters.length + 1).fill(1),
+    offset: i => (i === 0 ? 0 : i === letters.length ? -200 : -800),
     duration: 1000,
     autoPlay: false,
   };
 
-  const onUpdate: GroupOnUpdateCallback = (values, tl) => {
+  const onUpdate: GroupOnUpdateCallback = (info, tl) => {
+    // timeline is started
     if (tl.isFirstFrame) togglePlayPauseIcon(false);
 
-    for (let i = 0; i < values.length; i++) {
-      const t = values[i].value;
+    // update progress slider
+    slider.value = `${tl.progress}`;
 
-      slider.value = `${tl.progress}`;
+    // loop over animations values except last one
+    for (let i = 0; i < info.length - 1; i++) {
+      const letter = letters[i];
+      const t = info[i].value;
 
-      // last animation
-      if (i === values.length - 1) {
-        if (title) title.style.letterSpacing = `${lerp(15, 0, ease.spring({ damping: 7 })(t))}px`;
-
-        // apply scale on last animation only
-        if (values[i].isPlaying || values[i].isFinished) {
-          letters.forEach(letter => (letter.style.scale = `${lerp(1.2, 1, ease.spring({ damping: 7 })(t))}`));
-        }
-        continue;
-      }
-
-      const x = lerp(i >= values.length / 2 ? -400 : 400, 0, ease.in.wobble(2)(t)),
-        y = lerp(i >= values.length / 2 ? 200 : -200, 0, ease.out.elastic(t)),
+      const x = lerp(i >= info.length / 2 ? -400 : 400, 0, ease.in.wobble(2)(t)),
+        y = lerp(i >= info.length / 2 ? 200 : -200, 0, ease.out.elastic(t)),
         z = lerp(400, 0, ease.out.back()(t)),
         rotate = lerp(i % 2 === 0 ? 90 : -90, 0, ease.in.wobble(6)(t)),
         scale = lerp(0, 1.2, ease.in.wobble(4)(t));
 
-      letters[i].style.scale = `${scale}`;
-      letters[i].style.translate = `${x}px ${y}px ${z}px`;
-      letters[i].style.rotate = `${rotate}deg`;
+      letter.style.scale = `${scale}`;
+      letter.style.translate = `${x}px ${y}px ${z}px`;
+      letter.style.rotate = `${rotate}deg`;
 
-      letters[i].style.opacity = `${t}`;
-      letters[i].style.filter = `blur(${lerp(4, 0, t)}px)`;
-      letters[i].style.color = vecToRGB(lerp([244, 96, 54], [255, 255, 255], t));
+      letter.style.opacity = `${t}`;
+      letter.style.filter = `blur(${lerp(4, 0, t)}px)`;
+      letter.style.color = vecToRGB(lerp(colors.orange, colors.white, t));
     }
 
+    // last animation
+    const a = info[info.length - 1];
+    const t = a.value;
+    if (title) title.style.letterSpacing = `${lerp(15, 0, ease.spring({ damping: 7, duration: 1400 })(t))}px`;
+
+    // apply only when the last animation is playing to prevent conflict with previous animations
+    if (a.isPlaying || a.isFinished) {
+      for (let i = 0; i < letters.length; i++) {
+        const letter = letters[i];
+        letter.style.scale = `${lerp(1.2, 1, ease.in.wobble(i % 2 === 0 ? 4 : 3)(t))}`;
+        letter.style.color = vecToRGB(lerp(colors.white, colors.orange, ease.out.back(4)(t)));
+        letter.style.filter = `blur(${lerp(0, i % 2 === 0 ? 3 : 2, alternate(t))}px)`;
+      }
+    }
+
+    // timeline is completed
     if (tl.isFinished) togglePlayPauseIcon(true);
   };
 
   const timeline = animare.group(animations, onUpdate);
 
-  const onRangeChange = (e: Event) => {
+  function inputRangeHandler(e: Event) {
     const target = e.target as HTMLInputElement;
     const value = parseFloat(target.value);
     timeline.seek(timeline.timelineInfo.duration * value);
     if (!timeline.timelineInfo.isPlaying) timeline.playOneFrame();
-  };
+  }
 
-  const toggleTimeline = () => {
+  function playPauseHandler() {
     if (timeline.timelineInfo.isPlaying) {
       timeline.pause();
       togglePlayPauseIcon(true);
@@ -125,14 +141,12 @@ const Title = 'animare';
 
     const time = timeline.timelineInfo.isFinished ? 0 : timeline.timelineInfo.duration * parseFloat(slider.value);
     timeline.play(time);
-  };
+  }
 
-  playPauseButton.addEventListener('click', toggleTimeline);
-  slider.addEventListener('input', onRangeChange);
+  playPauseButton.addEventListener('click', playPauseHandler);
+  slider.addEventListener('input', inputRangeHandler);
 
-  setTimeout(() => {
-    timeline.play();
-  }, 500);
+  setTimeout(() => timeline.play(), 500);
 </script>
 
 <style>
