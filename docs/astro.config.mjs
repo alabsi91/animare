@@ -10,6 +10,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'animare',
+      description: 'Advanced animation library for modern JavaScript.',
       logo: {
         src: './src/assets/logo.svg',
       },

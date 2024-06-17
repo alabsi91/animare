@@ -1,7 +1,9 @@
 ---
+import { Card, CardGrid } from '@astrojs/starlight/components';
 const Title = 'animare';
 ---
 
+<h1>Welcome to</h1>
 <div class='container not-content'>
   <h1 class='title'>
     {[...Title].map(c => <span class='letter'>{c}</span>)}
@@ -27,6 +29,11 @@ const Title = 'animare';
   </a>
 </div>
 
+<CardGrid>
+  <Card title='Light' icon='seti:salesforce'>Advanced animation library for modern JavaScript.</Card>
+  <Card title='Modern' icon='seti:crystal_embedded'>Based on `requestAnimationFrame`</Card>
+</CardGrid>
+
 <script>
   import { TRANSITION_BEFORE_PREPARATION } from 'astro:transitions/client';
   import animare from 'animare';
@@ -34,7 +41,8 @@ const Title = 'animare';
 
   import type { AnimationGroupOptions, GroupOnUpdateCallback } from 'animare';
 
-  const letters = document.querySelectorAll<HTMLSpanElement>('.letter')!;
+  const letters = document.querySelectorAll<HTMLSpanElement>('.letter');
+  const title = document.querySelector<HTMLElement>('.title');
   const slider = document.querySelector<HTMLInputElement>('.animare-slider')!;
   const playPauseButton = document.querySelector<HTMLButtonElement>('.play-pause')!;
   const playSvg = playPauseButton.querySelector<SVGSVGElement>('.play-svg path')!;
@@ -55,38 +63,48 @@ const Title = 'animare';
     playSvg.style.d = 'path("M20,20 L35,20 L35,80 L20,80 Z M65,20 L80,20 L80,80 L65,80 Z")';
   };
 
-  const blur = (v: number) => `blur(${v}px)`;
-  const transform = (x: number, y: number, z: number, rotate: number, scale: number) =>
-    `translate(${x}px, ${y}px) translateZ(${z}px) rotate(${rotate}deg) scale(${scale})`;
-
   const animations: AnimationGroupOptions = {
-    to: Array(letters.length).fill(1) as number[],
-    offset: i => (i ? -800 : 0),
+    to: Array(letters.length + 1).fill(1) as number[],
+    offset: [0, ...Array(letters.length - 1).fill(-800), -200],
     duration: 1000,
     autoPlay: false,
   };
 
   const onUpdate: GroupOnUpdateCallback = (values, tl) => {
-    for (let i = 0; i < values.length; i++) {
-      if (tl.isFirstFrame) togglePlayPauseIcon(false);
+    if (tl.isFirstFrame) togglePlayPauseIcon(false);
 
+    for (let i = 0; i < values.length; i++) {
       const t = values[i].value;
+
+      slider.value = `${tl.progress}`;
+
+      // last animation
+      if (i === values.length - 1) {
+        if (title) title.style.letterSpacing = `${lerp(15, 0, ease.spring({ damping: 7 })(t))}px`;
+
+        // apply scale on last animation only
+        if (values[i].isPlaying || values[i].isFinished) {
+          letters.forEach(letter => (letter.style.scale = `${lerp(1.2, 1, ease.spring({ damping: 7 })(t))}`));
+        }
+        continue;
+      }
 
       const x = lerp(i >= values.length / 2 ? -400 : 400, 0, ease.in.wobble(2)(t)),
         y = lerp(i >= values.length / 2 ? 200 : -200, 0, ease.out.elastic(t)),
         z = lerp(400, 0, ease.out.back()(t)),
         rotate = lerp(i % 2 === 0 ? 90 : -90, 0, ease.in.wobble(6)(t)),
-        scale = lerp(0, 1, ease.in.wobble(4)(t));
+        scale = lerp(0, 1.2, ease.in.wobble(4)(t));
 
-      letters[i].style.transform = transform(x, y, z, rotate, scale);
+      letters[i].style.scale = `${scale}`;
+      letters[i].style.translate = `${x}px ${y}px ${z}px`;
+      letters[i].style.rotate = `${rotate}deg`;
+
       letters[i].style.opacity = `${t}`;
-      letters[i].style.filter = blur(lerp(4, 0, t));
+      letters[i].style.filter = `blur(${lerp(4, 0, t)}px)`;
       letters[i].style.color = vecToRGB(lerp([244, 96, 54], [255, 255, 255], t));
-
-      slider.value = `${tl.progress}`;
-
-      if (tl.isFinished) togglePlayPauseIcon(true);
     }
+
+    if (tl.isFinished) togglePlayPauseIcon(true);
   };
 
   const timeline = animare.group(animations, onUpdate);
@@ -128,10 +146,11 @@ const Title = 'animare';
   }
 
   .title {
-    font-size: 5rem;
+    font-size: 4rem;
     perspective: 300px;
     pointer-events: none;
     user-select: none;
+    white-space: nowrap;
   }
 
   .letter {
@@ -222,6 +241,11 @@ const Title = 'animare';
     overflow: clip;
   }
 
+  /* Remove title */
+  :global(main > .content-panel:first-child) {
+    display: none;
+  }
+
   .hero-buttons {
     display: flex;
     flex-direction: row;
@@ -231,18 +255,19 @@ const Title = 'animare';
   }
 
   .cssbuttons-io-button {
-    background: var(--purple-blue);
+    text-decoration: none;
+    background: #5b3a86;
     color: #fff;
     font-family: inherit;
     padding: 0.1em;
     padding-left: 1.8em;
     font-weight: 500;
-    border-radius: 0.9em;
+    border-radius: 0.6em;
     border: none;
     letter-spacing: 0.05em;
     display: flex;
     align-items: center;
-    box-shadow: inset 0 0 1.6em -0.6em var(--purple-blue);
+    box-shadow: inset 0 0 1.6em -0.6em #5b3a86;
     overflow: hidden;
     position: relative;
     height: 2.8em;
@@ -259,8 +284,8 @@ const Title = 'animare';
     justify-content: center;
     height: 2.2em;
     width: 2.2em;
-    border-radius: 0.7em;
-    box-shadow: 0.1em 0.1em 0.6em 0.2em var(--purple-blue);
+    border-radius: 0.5em;
+    box-shadow: 0.1em 0.1em 0.6em 0.2em #5b3a86;
     right: 0.3em;
     transition: all 0.3s;
   }
@@ -272,7 +297,7 @@ const Title = 'animare';
   .cssbuttons-io-button .icon svg {
     width: 1.1em;
     transition: transform 0.3s;
-    color: var(--purple-blue);
+    color: #5b3a86;
   }
 
   .cssbuttons-io-button:hover .icon svg {

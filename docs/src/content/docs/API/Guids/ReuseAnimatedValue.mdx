@@ -1,0 +1,43 @@
+---
+title: Reuse Animated Value
+---
+
+The fewer animations in the timeline, the better the performance. When animating multiple CSS properties with the same duration and start time, you don't need to create a new animation for each property.
+
+- Ensure that you animate from `0` to `1`, as this range represents the progress.
+- Use [`info.value`](/animare/api/objects/animationinfo#value) instead of [`info.progress`](/animare/api/objects/animationinfo#progress) because [`info.value`](/animare/api/objects/animationinfo#value) accounts for the animation [`direction`](/animare/api/objects/animationoptions#direction) , whereas [`info.progress`](/animare/api/objects/animationinfo#progress) does not.
+- Do not pass an easing function; leave it as the default so you can assign one to each css property.
+
+```ts title="example" frame="terminal"
+import animare, { Direction } from 'animare';
+import { lerp, vecToRGB, ease } from 'animare/plugins';
+import type { AnimationGroupOptions } from 'animare';
+
+const elements = document.querySelectorAll<HTMLDivElement>('.elements');
+
+const animations: AnimationGroupOptions = {
+  to: Array<number>(elements.length).fill(1), // create an animation for each element
+  duration: 1000, // for each animation
+  direction: Direction.Alternate,
+};
+
+animare.group(animations, info => {
+  for (let i = 0; i < elements.length; i++) {
+    const el = elements[i];
+    if (!el) return;
+
+    const t = info.value[i]; // represents the progress of the animation
+
+    // opacity
+    el.style.opacity = ease.out.quad(t).toString();
+
+    // rotate
+    const rotate = lerp(90, 0, ease.out.bounce(t));
+    el.style.transform = `rotate(${rotate}deg)`;
+
+    // background color
+    const interpolatedColor = lerp([255, 0, 0], [0, 255, 0], ease.out.expo(t));
+    el.style.backgroundColor = vecToRGB(interpolatedColor);
+  }
+});
+```
