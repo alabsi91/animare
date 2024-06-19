@@ -115,7 +115,7 @@ const Title = 'animare';
         const letter = letters[i];
         letter.style.scale = `${lerp(1.2, 1, ease.in.wobble(i % 2 === 0 ? 4 : 3)(t))}`;
         letter.style.color = vecToRGB(lerp(colors.white, colors.orange, ease.out.back(4)(t)));
-        letter.style.filter = `blur(${lerp(0, i % 2 === 0 ? 3 : 2, alternate(t))}px)`;
+        letter.style.filter = `blur(${lerp(0, i % 2 === 0 ? 2 : 3, alternate(t))}px)`;
       }
     }
 

@@ -1,0 +1,94 @@
+.wrapper {
+  background-color: var(--code-background);
+  border: solid var(--code-border-color) 1px;
+  border-radius: 0.5rem;
+  margin-block: 2rem;
+}
+
+.wrapper > span {
+  display: block;
+  text-align: center;
+  font-weight: 500;
+  font-size: var(--ec-uiFontSize);
+  letter-spacing: 0.025ch;
+  color: var(--ec-frm-trmTtbFg);
+  margin-block: 0.2rem;
+}
+
+.controlsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  align-self: stretch;
+  padding: 1rem;
+  border-top: solid var(--code-border-color) 1px;
+}
+
+.controlsContainer button {
+  background-color: transparent;
+  border: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.controlsContainer button svg {
+  fill: var(--secondary);
+}
+
+.controlsContainer button path {
+  transition: all 0.3s ease-in-out;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+
+  accent-color: var(--secondary);
+  width: 100%;
+  max-width: 500px;
+}
+
+/***** Track Styles *****/
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+.slider::-webkit-slider-runnable-track {
+  background: #a1a1a1;
+  height: 0.1rem;
+  border-radius: 0.5rem;
+}
+
+/******** Firefox ********/
+.slider::-moz-range-track {
+  background: #a1a1a1;
+  height: 0.1rem;
+  border-radius: 0.5rem;
+}
+
+/***** Thumb Styles *****/
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -0.5rem;
+  background: var(--secondary);
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/******** Firefox ********/
+.slider::-moz-range-thumb {
+  border: none;
+  border-radius: 0;
+  background: var(--secondary);
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+  cursor: pointer;
+}

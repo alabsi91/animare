@@ -2,23 +2,28 @@
 title: Animate Color
 ---
 
+import Example from '../../../../components/Examples/AnimateColor';
+
 Here's a simple example demonstrating how to animate colors in Animare:
 
 - Ensure that you animate from `0` to `1`, as this range will be used to represent progress.
 - Use [`info.value`](/animare/api/objects/animationinfo#value) instead of [`info.progress`](/animare/api/objects/animationinfo#progress) because [`info.value`](/animare/api/objects/animationinfo#value) accounts for the animation [`direction`](/animare/api/objects/animationoptions#direction) , whereas [`info.progress`](/animare/api/objects/animationinfo#progress) does not.
 
+<Example client:idle />
+
 ```ts title="example" frame="terminal" ins="to: 1"
 import animare from 'animare';
 import { lerp, vecToRGB, ease } from 'animare/plugins';
+import type { Vec3Array } from 'animare';
 
-const el = document.querySelector<HTMLDivElement>('.element');
-const fromColor = [255, 0, 0];
-const toColor = [0, 255, 0];
+const circle = document.querySelector<HTMLDivElement>('.circle');
+const fromColor: Vec3Array = [255, 0, 0];
+const toColor: Vec3Array = [0, 255, 0];
 
-animare.single({ from: 0, to: 1, ease: ease.out.expo }, info => {
-  if (!el) return;
+animare.single({ from: 0, to: 1, duration: 1000, ease: ease.linear }, info => {
+  if (!circle) return;
   const mixed = lerp(fromColor, toColor, info.value);
   const rgbString = vecToRGB(mixed);
-  el.style.color = rgbString;
+  circle.style.backgroundColor = rgbString;
 });
 ```
