@@ -7,7 +7,7 @@ type Props = {
   title: string;
   timeline: TimelineObject<string> | TimelineObject<`${number}`> | SingleObject;
   slider: React.MutableRefObject<HTMLInputElement | null>;
-  children: JSX.Element;
+  children: React.ReactNode;
 };
 export default function Example(props: Props) {
   const playButtonIcon = useRef<SVGPathElement>(null);
