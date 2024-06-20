@@ -45,6 +45,11 @@ aside.starlight-aside--note {
   background-color: color-mix(in srgb, var(--sl-color-blue-low), transparent 90%);
 }
 
+aside.starlight-aside--danger {
+  --sl-color-red-low: red;
+  background-color: color-mix(in srgb, var(--sl-color-red-low), transparent 90%);
+}
+
 :not(pre) > code {
   color: #ffffff;
   border: #ffffff1a solid 0.1px;

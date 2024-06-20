@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import styles from './ExampleFrame.module.css';
 
-import { Event, type SingleObject, type TimelineObject } from 'animare';
+import { Event, type GroupTimelineObject, type SingleObject, type TimelineObject } from 'animare';
 
 type Props = {
   title: string;
-  timeline: TimelineObject<string> | TimelineObject<`${number}`> | SingleObject;
+  timeline: TimelineObject<string> | GroupTimelineObject | SingleObject;
   slider: React.MutableRefObject<HTMLInputElement | null>;
   children: React.ReactNode;
 };
@@ -18,6 +18,10 @@ export default function Example(props: Props) {
     if (!props.timeline) return;
 
     props.timeline.on(Event.Play, () => {
+      togglePlayButtonIcon(false);
+    });
+
+    props.timeline.on(Event.Resume, () => {
       togglePlayButtonIcon(false);
     });
 
