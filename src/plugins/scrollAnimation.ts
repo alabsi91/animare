@@ -46,8 +46,8 @@ function onScroll<Name extends string>({
   const viewPortSize = isVertical ? root.clientHeight : root.clientWidth;
   const scrollPosition = isVertical ? root.scrollTop : root.scrollLeft;
 
-  const startPosition = calcElementPosition(element, start) + startOffset;
-  const endPosition = calcElementPosition(element, end) + endOffset;
+  const startPosition = calcElementPosition(element, root, start) + startOffset;
+  const endPosition = calcElementPosition(element, root, end) + endOffset;
 
   const isEntered = startPosition <= scrollPosition + viewPortSize;
   const isExited = endPosition < scrollPosition;
@@ -66,11 +66,11 @@ function onScroll<Name extends string>({
   if (!timeline.timelineInfo.isPlaying) timeline.playOneFrame();
 }
 
-function calcElementPosition(element: HTMLElement, edge: ScrollElementEdge): number {
-  if (edge === ScrollElementEdge.Top) return element.offsetTop;
-  if (edge === ScrollElementEdge.Bottom) return element.offsetTop + element.offsetHeight;
-  if (edge === ScrollElementEdge.Left) return element.offsetLeft;
-  if (edge === ScrollElementEdge.Right) return element.offsetLeft + element.offsetWidth;
+function calcElementPosition(element: HTMLElement, root: HTMLElement, edge: ScrollElementEdge): number {
+  if (edge === ScrollElementEdge.Top) return element.offsetTop - root.offsetTop;
+  if (edge === ScrollElementEdge.Bottom) return element.offsetTop - root.offsetTop + element.offsetHeight;
+  if (edge === ScrollElementEdge.Left) return element.offsetLeft - root.offsetLeft;
+  if (edge === ScrollElementEdge.Right) return element.offsetLeft - root.offsetLeft + element.offsetWidth;
 
   return element.offsetTop;
 }

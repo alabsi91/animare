@@ -26,6 +26,7 @@ export function autoPause<Name extends string>(
   observerOptions?: AutoPauseOptions,
 ): () => void {
   const forcePlay = observerOptions?.forcePlay ?? true;
+  let isPausedByMe = false;
 
   const observer = new IntersectionObserver(entries => {
     if (!timeline) return;
@@ -44,16 +45,23 @@ export function autoPause<Name extends string>(
       // enter the viewport
       if (isVisible) {
         // resume if paused
-        if (timeline.timelineInfo.isPaused) return timeline.resume();
+        if (timeline.timelineInfo.isPaused && isPausedByMe) {
+          isPausedByMe = false;
+          timeline.resume();
+          return;
+        }
 
         // play anyway
-        if (forcePlay) timeline.play();
+        if (forcePlay && !timeline.timelineInfo.isPaused) timeline.play();
 
         return;
       }
 
       // exit the viewport
-      if (timeline.timelineInfo.isPlaying) timeline.pause();
+      if (timeline.timelineInfo.isPlaying) {
+        isPausedByMe = true;
+        timeline.pause();
+      }
     }
   }, observerOptions);
 
