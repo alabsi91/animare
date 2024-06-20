@@ -33,7 +33,7 @@ const timeline = animare.timeline(
   },
 );
 
-timeline.updateValues({ name: 'first', duration: 1000 });
+timeline.updateValues([{ name: 'first', duration: 1000 }]);
 ```
 
 ## group
@@ -47,7 +47,7 @@ const timeline = animare.group({ to: [100, 50] }, info => {
   // ...
 });
 
-timeline.updateValues({ index: 0, duration: 1000 });
+timeline.updateValues([{ index: 0, duration: 1000 }]);
 ```
 
 ## single

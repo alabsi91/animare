@@ -1,0 +1,44 @@
+---
+title: Scroll Animation
+---
+
+import Example from '../../../../components/Examples/ScrollAnimation.tsx';
+
+Here a simple Example of how to use the `scrollAnimation` plugin.
+
+<Example client:idle />
+
+```ts title="example" frame="terminal"
+import animare, { ScrollElementEdge } from 'animare';
+import { lerp, vecToRGB, ease, scrollAnimation } from 'animare/plugins';
+import type { Vec3Array } from 'animare';
+
+// the element which has the scrollbar
+const root = document.querySelector<HTMLDivElement>('.container');
+const text = document.querySelector<HTMLHeadingElement>('.text');
+
+const white: Vec3Array = [255, 0, 0];
+const orange: Vec3Array = [244, 96, 54];
+
+const animation = animare.single({ to: 1, autoPlay: false }, info => {
+  if (!text || !root) return;
+
+  // keep the text element centered while the animation is playing
+  text.current.style.translate = `0px ${info.value * (root.clientHeight / 2 + text.clientHeight / 2)}px`;
+
+  text.style.letterSpacing = lerp(40, 0, info.value) + 'px';
+  text.style.scale = lerp(0.5, 1, info.value).toString();
+
+  const interpolatedColor = lerp(white, orange, info.value);
+  text.style.color = vecToRGB(interpolatedColor);
+});
+
+scrollAnimation({
+  timeline: animation,
+  root: root,
+  element: text,
+  start: ScrollElementEdge.Bottom,
+  // start the animation at the center of the root element
+  startOffset: root.clientHeight / 2 - text.clientHeight / 2,
+});
+```

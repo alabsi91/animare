@@ -7,7 +7,7 @@ import Example from '../../../../components/Examples/ReuseValues';
 The fewer animations in the timeline, the better the performance. When animating multiple CSS properties with the same duration and start time, you don't need to create a new animation for each property.
 
 - Ensure that you animate from `0` to `1`, as this range represents the progress.
-- Use [`info.value`](/animare/api/objects/animationinfo#value) instead of [`info.progress`](/animare/api/objects/animationinfo#progress) because [`info.value`](/animare/api/objects/animationinfo#value) accounts for the animation [`direction`](/animare/api/objects/animationoptions#direction) , whereas [`info.progress`](/animare/api/objects/animationinfo#progress) does not.
+- Use [`AnimationInfo.value`](/animare/api/objects/animationinfo#value) instead of [`AnimationInfo.progress`](/animare/api/objects/animationinfo#progress) because [`AnimationInfo.value`](/animare/api/objects/animationinfo#value) accounts for the animation [`direction`](/animare/api/objects/animationoptions#direction) , whereas [`AnimationInfo.progress`](/animare/api/objects/animationinfo#progress) does not.
 - Do not pass an easing function; leave it as the default so you can assign one to each css property.
 
 <Example client:idle />

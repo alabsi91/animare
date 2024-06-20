@@ -28,7 +28,7 @@ export default function UpdateAnimationValues() {
     return timeline;
   }, [container]);
 
-  useAutoPause(animation, container.current);
+  useAutoPause(animation, container.current, { forcePlay: false });
 
   const updateDuration = (e: React.PointerEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
