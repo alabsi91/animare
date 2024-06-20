@@ -1,13 +1,20 @@
 import { Event } from '../types';
 import EventManager from '../utils/EventManager';
-import { calculateTimeline, calculateTimelineDuration, prepareAnimationsValues, prepareTimelineValues } from '../utils/helpers';
+import {
+  calculateTimeline,
+  calculateTimelineDuration,
+  prepareAnimationsPartialOptions,
+  prepareAnimationsValues,
+  prepareTimelineValues,
+} from '../utils/helpers';
 import { clamp, normalizePercentage, percentageStringToNumber } from '../utils/utils';
 
 import type {
+  AnimationOptions,
   AnimationOptionsParam,
-  AnimationOptionsWithoutFn,
   CallbackInfo,
   OnUpdateCallback,
+  PartialExcept,
   PercentageString,
   PrivateTimelineInfo,
   TimelineGlobalOptions,
@@ -313,18 +320,27 @@ export default function timeline<Name extends string>(
     eventManager.emit(Event.Stop);
   };
 
-  const updateValues = (newValues: Partial<AnimationOptionsWithoutFn<Name>>[]) => {
+  const updateValues = (newValues: PartialExcept<AnimationOptions<Name>, 'name'>[]) => {
     for (let i = 0; i < newValues.length; i++) {
       const newValuesItem = newValues[i];
       if (!newValuesItem.name) throw new Error('[updateValues] Animation name is required.');
 
-      const anim = timelineInfo.__animations.find(a => a.animationRef.name === newValuesItem.name);
-      if (!anim) throw new Error(`[updateValues] Animation with name '${newValuesItem.name}' not found.`);
+      const animIndex = timelineInfo.__animations.findIndex(a => a.animationRef.name === newValuesItem.name);
+      if (animIndex === -1) throw new Error(`[updateValues] Animation with name '${newValuesItem.name}' not found.`);
 
-      anim.Set(newValuesItem);
+      const prepared = prepareAnimationsPartialOptions<Name>(newValuesItem, animIndex);
+      timelineInfo.__animations[animIndex].Set(prepared);
     }
 
     for (let i = 0; i < callbackAnimationInfo.length; i++) timelineInfo.__animations[i].Setup();
+
+    // to make a smooth transition if the duration was changed
+    if (timelineInfo.isPlaying) {
+      const currentProgress = timelineInfo.progress;
+      timelineInfo.duration = calculateTimelineDuration(timelineInfo.__animations);
+      seek(timelineInfo.duration * currentProgress);
+      return;
+    }
 
     timelineInfo.duration = calculateTimelineDuration(timelineInfo.__animations);
   };

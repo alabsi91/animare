@@ -87,6 +87,8 @@ type AllowArray<T> = {
     : T[K] | Exclude<T[K], undefined | ((i: number) => unknown)>[];
 };
 
+export type PartialExcept<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+
 // ...
 
 export type EventCallback = () => void;
@@ -363,7 +365,7 @@ export type TimelineObject<Name extends string = string> = {
    *   duration: 500
    * }]);
    */
-  updateValues: (newValues: Partial<AnimationOptionsWithoutFn<Name>>[]) => void;
+  updateValues: (newValues: PartialExcept<AnimationOptions<Name>, 'name'>[]) => void;
 
   /**
    * Plays the timeline.
@@ -551,6 +553,21 @@ export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo
 
 export type AnimationGroupOptions = Omit<AllowArray<AnimationOptions>, 'name'> & TimelineOptions;
 export type GroupOnUpdateCallback = (info: CallbackInfo<`${number}`>, timelineInfo: TimelineInfo) => void;
+export type GroupTimelineObject = Omit<TimelineObject<`${number}`>, 'updateValues'> & {
+  /**
+   * Updates the animation values.
+   *
+   * ⚠️ **Warning** ⚠️ This method will throw an error if the some of the values are invalid.
+   *
+   * **Note:** Updating the animation values while the timeline is playing might result in flickering.
+   *
+   * @param newValues - An array of objects containing the new values.
+   *
+   * @example
+   * updateValues([{ index: 0, duration: 500 }]);
+   */
+  updateValues: (newValues: (Partial<Omit<AnimationOptions<`${number}`>, 'name'>> & { index: number })[]) => void;
+};
 
 export type AutoPauseOptions = {
   root?: Element | Document | null;
@@ -566,7 +583,7 @@ export type ScrollAnimationOptions<Name extends string = string> = {
    *
    * **Required**
    */
-  timeline: TimelineObject<Name> | SingleObject;
+  timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject;
 
   /**
    * The HTML element to track when entering and exiting the viewport.

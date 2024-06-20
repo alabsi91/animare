@@ -1,7 +1,13 @@
 import Animation from '../animation';
 import { Timing, Direction } from '../types';
 
-import type { TimelineGlobalOptions, AnimationPreparedOptions, AnimationOptions, RemoveFunction } from '../types';
+import type {
+  TimelineGlobalOptions,
+  AnimationPreparedOptions,
+  AnimationOptions,
+  RemoveFunction,
+  AnimationOptionsWithoutFn,
+} from '../types';
 
 export const defaultValues = {
   from: 0,
@@ -88,6 +94,32 @@ export function setDefaultValues(
     timing,
     ease: animation.ease ?? globalValues.ease ?? defaultValues.ease,
   };
+
+  return results;
+}
+
+export function prepareAnimationsPartialOptions<Name extends string>(
+  newValues: Partial<AnimationOptions>,
+  index: number,
+): Partial<AnimationOptionsWithoutFn<Name>> {
+  const hasValue = <T>(value: T | undefined): value is T => typeof value !== 'undefined';
+
+  // call functions with the current index
+  const perValue = <T>(value: T): RemoveFunction<T> => (typeof value === 'function' ? value(index) : value);
+
+  const results: Partial<AnimationOptionsWithoutFn<Name>> = {};
+
+  if (hasValue(newValues.from)) results.from = perValue(newValues.from);
+  if (hasValue(newValues.duration)) results.duration = perValue(newValues.duration);
+  if (hasValue(newValues.delay)) results.delay = perValue(newValues.delay);
+  if (hasValue(newValues.offset)) results.offset = perValue(newValues.offset);
+  if (hasValue(newValues.playCount)) results.playCount = perValue(newValues.playCount);
+  if (hasValue(newValues.delayCount)) results.delayCount = perValue(newValues.delayCount);
+  if (hasValue(newValues.direction)) results.direction = perValue(newValues.direction);
+  if (hasValue(newValues.timing)) results.timing = perValue(newValues.timing);
+
+  if (hasValue(newValues.to)) results.to = newValues.to;
+  if (hasValue(newValues.ease)) results.ease = newValues.ease;
 
   return results;
 }

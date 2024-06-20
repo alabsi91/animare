@@ -8,7 +8,10 @@ import type {
   Direction,
   EaseFn,
   GroupOnUpdateCallback,
+  GroupTimelineObject,
+  PartialExcept,
 } from '../types';
+import { extendObject } from '../utils/utils';
 
 /**
  * Allows for a different input method where you can use an object with arrays of values for each property instead of an array of animation values.
@@ -28,7 +31,7 @@ import type {
  *  console.log(info[0].value);
  * });
  */
-export default function group(animation: AnimationGroupOptions, callback: GroupOnUpdateCallback) {
+export default function group(animation: AnimationGroupOptions, callback: GroupOnUpdateCallback): GroupTimelineObject {
   if (typeof animation.to === 'undefined') throw new Error('[group] The `to` value is required');
 
   animation.to = typeof animation.to === 'number' ? [animation.to] : animation.to;
@@ -72,10 +75,27 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
     };
   }
 
-  return timeline(animationOptions as AnimationOptionsParam<`${number}`>, callback, {
+  const timelineReturnObj = timeline(animationOptions as AnimationOptionsParam<`${number}`>, callback, {
     autoPlay: animation.autoPlay,
     timelinePlayCount: animation.timelinePlayCount,
   });
+
+  const timelineUpdateValues = timelineReturnObj.updateValues;
+
+  const updateValues: GroupTimelineObject['updateValues'] = newValues => {
+    const mapped: PartialExcept<AnimationOptions<`${number}`>, 'name'>[] = [];
+
+    for (let i = 0; i < newValues.length; i++) {
+      if (typeof newValues[i].index !== 'number') throw new Error('[updateValues] Animation index is required.');
+      mapped[i] = { name: `${newValues[i].index}`, ...newValues[i] };
+    }
+
+    timelineUpdateValues(mapped);
+  };
+
+  const groupReturnObj = extendObject(timelineReturnObj, { updateValues });
+
+  return groupReturnObj as GroupTimelineObject;
 }
 
 export type Group = typeof group;

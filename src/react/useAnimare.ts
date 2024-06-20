@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { TimelineObject, SingleObject } from '../types';
+import type { GroupTimelineObject, SingleObject, TimelineObject } from '../types';
 
 /**
  * `useAnimare` custom React hook.
@@ -20,8 +20,9 @@ export function useAnimare<Name extends string>(
   callback: () => TimelineObject<Name>,
   deps?: React.DependencyList,
 ): TimelineObject<Name>;
+export function useAnimare(callback: () => GroupTimelineObject, deps?: React.DependencyList): GroupTimelineObject;
 export function useAnimare(callback: () => SingleObject, deps?: React.DependencyList): SingleObject;
-export function useAnimare<Name extends string, R extends TimelineObject<Name> | SingleObject>(
+export function useAnimare<Name extends string, R extends TimelineObject<Name> | GroupTimelineObject | SingleObject>(
   callback: () => R,
   deps: React.DependencyList = [],
 ): R {

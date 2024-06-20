@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { autoPause } from '../plugins';
 
-import type { AutoPauseOptions, SingleObject, TimelineObject } from '../types';
+import type { AutoPauseOptions, GroupTimelineObject, SingleObject, TimelineObject } from '../types';
 
 /**
  * Automatically pauses the animation when the element is not visible.
@@ -37,18 +37,18 @@ import type { AutoPauseOptions, SingleObject, TimelineObject } from '../types';
  * }
  */
 export function useAutoPause<Name extends string>(
-  timeline: TimelineObject<Name> | SingleObject,
+  timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element | null,
   deps?: React.DependencyList,
 ): void;
 export function useAutoPause<Name extends string>(
-  timeline: TimelineObject<Name> | SingleObject,
+  timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element | null,
   observerOptions?: AutoPauseOptions,
   deps?: React.DependencyList,
 ): void;
 export function useAutoPause<Name extends string>(
-  timeline: TimelineObject<Name> | SingleObject,
+  timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element | null,
   observerOptionsOrDeps?: AutoPauseOptions | React.DependencyList,
   deps: React.DependencyList = [],

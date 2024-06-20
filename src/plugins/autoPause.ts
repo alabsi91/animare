@@ -1,4 +1,4 @@
-import type { AutoPauseOptions, SingleObject, TimelineObject } from '../types';
+import type { AutoPauseOptions, GroupTimelineObject, SingleObject, TimelineObject } from '../types';
 
 /**
  * Uses the IntersectionObserver API to automatically pauses the animation when the element is not visible.
@@ -21,7 +21,7 @@ import type { AutoPauseOptions, SingleObject, TimelineObject } from '../types';
  * unsubscribe(); // Disconnect the intersection observer
  */
 export function autoPause<Name extends string>(
-  timeline: TimelineObject<Name> | SingleObject,
+  timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element,
   observerOptions?: AutoPauseOptions,
 ): () => void {
