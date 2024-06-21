@@ -151,9 +151,14 @@ export function prepareTimelineValues(options: TimelineGlobalOptions) {
     console.warn('The `timelinePlayCount` with the value `0` will make the timeline not play.');
   }
 
+  if (typeof options.timelineSpeed === 'number' && (options.timelineSpeed === 0 || options.timelineSpeed < 0)) {
+    throw new Error('The `timelineSpeed` value cannot be a negative value or a zero.');
+  }
+
   return {
     timelinePlayCount: options.timelinePlayCount ?? 1,
     autoPlay: options.autoPlay ?? true,
+    timelineSpeed: options.timelineSpeed ?? 1,
   };
 }
 

@@ -7,7 +7,7 @@ import {
   prepareAnimationsValues,
   prepareTimelineValues,
 } from '../utils/helpers';
-import { clamp, normalizePercentage, percentageStringToNumber } from '../utils/utils';
+import { clamp, extendObject, normalizePercentage, percentageStringToNumber } from '../utils/utils';
 
 import type {
   AnimationOptions,
@@ -20,6 +20,7 @@ import type {
   TimelineGlobalOptions,
   TimelineInfo,
   TimelineObject,
+  TimelineOptions,
 } from '../types';
 
 export default function timeline<Name extends string>(
@@ -43,6 +44,7 @@ export default function timeline<Name extends string>(
     progress: 0,
     duration: 0,
     elapsedTime: 0,
+    speed: timelineOptions.timelineSpeed,
 
     isPlaying: false,
     isPaused: false,
@@ -96,9 +98,14 @@ export default function timeline<Name extends string>(
   callbackAnimationInfo.length = animations.length;
 
   const executePerFrame = (now: number, oneFrame?: boolean) => {
+    now *= timelineInfo.speed;
+
     timelineInfo.elapsedTime = now - timelineInfo.__startTime + timelineInfo.__startProgress * timelineInfo.duration; // Time passed since the start
     timelineInfo.progress = normalizePercentage(timelineInfo.elapsedTime / timelineInfo.duration);
-    timelineInfo.fps = Math.round(1000 / (now - timelineInfo.__lastFrameTime || 16.66));
+
+    timelineInfo.fps = Math.round(1000 / (now - timelineInfo.__lastFrameTime)) * timelineInfo.speed;
+    if (!isFinite(timelineInfo.fps)) timelineInfo.fps = 60;
+
     timelineInfo.__lastFrameTime = now;
 
     for (let i = 0; i < timelineInfo.__animations.length; i++) {
@@ -139,8 +146,8 @@ export default function timeline<Name extends string>(
     eventManager.emit(Event.Repeat);
 
     timelineInfo.__requestAnimationId = requestAnimationFrame(next => {
-      timelineInfo.__startTime = next;
-      timelineInfo.__lastFrameTime = next;
+      timelineInfo.__startTime = next * timelineInfo.speed;
+      timelineInfo.__lastFrameTime = next * timelineInfo.speed;
       timelineInfo.playCount++;
       timelineInfo.__startProgress = 0;
 
@@ -148,7 +155,7 @@ export default function timeline<Name extends string>(
     });
   };
 
-  const seek = (seekTo: number | PercentageString, playCount: number = 1) => {
+  const seek = (seekTo: number | PercentageString, playCount: number = timelineInfo.playCount) => {
     // disabled timeline
     if (timelineOptions.timelinePlayCount === 0 || playCount === 0) {
       console.warn('[seek] Cannot seek the timeline because the `playCount` is set to 0.');
@@ -198,7 +205,7 @@ export default function timeline<Name extends string>(
     }
 
     if (timelineInfo.isPlaying) {
-      const now = performance.now();
+      const now = performance.now() * timelineInfo.speed;
       timelineInfo.__startTime = now;
       timelineInfo.__lastFrameTime = now;
     }
@@ -217,8 +224,8 @@ export default function timeline<Name extends string>(
     seek(startFrom, playCount); // sets the start progress and play count
 
     timelineInfo.__requestAnimationId = requestAnimationFrame(now => {
-      timelineInfo.__startTime = now;
-      timelineInfo.__lastFrameTime = now;
+      timelineInfo.__startTime = now * timelineInfo.speed;
+      timelineInfo.__lastFrameTime = now * timelineInfo.speed;
       timelineInfo.progress = timelineInfo.__startProgress;
 
       timelineInfo.isPlaying = timelineInfo.progress !== 1;
@@ -244,8 +251,8 @@ export default function timeline<Name extends string>(
     }
 
     const now = performance.now();
-    timelineInfo.__startTime = now;
-    timelineInfo.__lastFrameTime = now;
+    timelineInfo.__startTime = now * timelineInfo.speed;
+    timelineInfo.__lastFrameTime = now * timelineInfo.speed;
     timelineInfo.progress = timelineInfo.__startProgress;
 
     timelineInfo.isPlaying = false;
@@ -293,7 +300,7 @@ export default function timeline<Name extends string>(
       return;
     }
 
-    timelineInfo.__startTime += performance.now() - timelineInfo.__pauseTime;
+    timelineInfo.__startTime += (performance.now() - timelineInfo.__pauseTime) * timelineInfo.speed;
     timelineInfo.__pauseTime = 0;
     timelineInfo.isPaused = false;
     timelineInfo.isPlaying = true;
@@ -345,12 +352,30 @@ export default function timeline<Name extends string>(
     timelineInfo.duration = calculateTimelineDuration(timelineInfo.__animations);
   };
 
+  const updateTimelineOptions = (newOptions: Partial<TimelineOptions>) => {
+    if (newOptions.timelinePlayCount === 0) {
+      console.warn('The `timelinePlayCount` with the value `0` will make the timeline not play.');
+    }
+
+    if (typeof newOptions.timelineSpeed === 'number' && (newOptions.timelineSpeed === 0 || newOptions.timelineSpeed < 0)) {
+      throw new Error('The `timelineSpeed` value cannot be a negative value or a zero.');
+    }
+
+    extendObject(timelineOptions, newOptions);
+
+    const currentProgress = timelineInfo.progress;
+    timelineInfo.speed = timelineOptions.timelineSpeed;
+
+    if (timelineInfo.isPlaying) seek(currentProgress * timelineInfo.duration);
+  };
+
   if (timelineOptions.autoPlay) play();
 
   const returnObj: TimelineObject<Name> = {
     timelineInfo,
     animationsInfo: callbackAnimationInfo,
     updateValues,
+    updateTimelineOptions,
     play,
     playOneFrame,
     resume,

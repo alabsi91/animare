@@ -78,6 +78,7 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
   const timelineReturnObj = timeline(animationOptions as AnimationOptionsParam<`${number}`>, callback, {
     autoPlay: animation.autoPlay,
     timelinePlayCount: animation.timelinePlayCount,
+    timelineSpeed: animation.timelineSpeed,
   });
 
   const timelineUpdateValues = timelineReturnObj.updateValues;

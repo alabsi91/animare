@@ -187,6 +187,14 @@ export type TimelineOptions = {
    */
   timelinePlayCount?: number;
 
+  /**
+   * The speed of the timeline, the normal speed is `1`.
+   * - E.g. `2` means the animation plays twice as fast.
+   * - E.g. `0.5` means the animation plays half as fast.
+   * @default 1
+   */
+  timelineSpeed?: number;
+
   /** Indicates whether the animation should start playing automatically. */
   autoPlay?: boolean;
 };
@@ -254,6 +262,14 @@ export type TimelineInfo = {
 
   /** The total duration of the timeline in milliseconds. */
   duration: number;
+
+  /**
+   * The speed of the timeline, the normal speed is `1`.
+   * - E.g. `2` means the animation plays twice as fast.
+   * - E.g. `0.5` means the animation plays half as fast.
+   * @default 1
+   */
+  speed: number;
 
   /** The current progress of the timeline, typically a value between `0` and `1`. */
   progress: number;
@@ -366,6 +382,19 @@ export type TimelineObject<Name extends string = string> = {
    * }]);
    */
   updateValues: (newValues: PartialExcept<AnimationOptions<Name>, 'name'>[]) => void;
+
+  /**
+   *  Updates the options of the timeline.
+   *
+   * ⚠️ **Warning** ⚠️ This method will throw an error if the some of the values are invalid.
+   * @param newOptions - An object containing the new options.
+   *
+   * @example
+   * updateTimelineOptions({
+   *   timelineSpeed: 0.5
+   *})
+   */
+  updateTimelineOptions: (newOptions: Partial<TimelineOptions>) => void;
 
   /**
    * Plays the timeline.
@@ -523,7 +552,7 @@ export type TimelineObject<Name extends string = string> = {
 export type SingleAnimationOptions = Omit<AnimationOptionsWithoutFn, 'name' | 'timing'> & { autoPlay?: boolean };
 export type SingleAnimationOptionsWithoutFn = RemoveFunctionType<SingleAnimationOptions>;
 export type SingleOnUpdateCallback = (info: Omit<AnimationInfo, 'name' | 'index'>) => void;
-export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo'> & {
+export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo' | 'updateTimelineOptions'> & {
   /**
    * Updates the animation values.
    *

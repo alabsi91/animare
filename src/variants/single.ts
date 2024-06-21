@@ -40,9 +40,22 @@ export default function single(animation: SingleAnimationOptions, onUpdateCallba
 
   const timelineUpdateValues = timelineReturnObj.updateValues;
 
+  const updateValues = (newValues: Partial<SingleAnimationOptionsWithoutFn>) => {
+    if ('autoPlay' in newValues) {
+      timelineReturnObj.updateTimelineOptions({ autoPlay: newValues.autoPlay });
+      delete newValues.autoPlay;
+    }
+
+    if ('playCount' in newValues) {
+      timelineReturnObj.updateTimelineOptions({ timelinePlayCount: newValues.playCount });
+      delete newValues.playCount;
+    }
+
+    timelineUpdateValues([{ name: 'single', ...newValues }]);
+  };
+
   const singleReturnObj = extendObject(timelineReturnObj, {
-    updateValues: (newValues: Partial<SingleAnimationOptionsWithoutFn>) =>
-      timelineUpdateValues([{ name: 'single', ...newValues }]),
+    updateValues,
     animationsInfo: timelineReturnObj.animationsInfo[0],
   });
 
