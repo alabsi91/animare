@@ -103,7 +103,7 @@ export default function timeline<Name extends string>(
     timelineInfo.elapsedTime = now - timelineInfo.__startTime + timelineInfo.__startProgress * timelineInfo.duration; // Time passed since the start
     timelineInfo.progress = normalizePercentage(timelineInfo.elapsedTime / timelineInfo.duration);
 
-    timelineInfo.fps = Math.round(1000 / (now - timelineInfo.__lastFrameTime)) * timelineInfo.speed;
+    timelineInfo.fps = Math.round((1000 / (now - timelineInfo.__lastFrameTime)) * timelineInfo.speed);
     if (!isFinite(timelineInfo.fps)) timelineInfo.fps = 60;
 
     timelineInfo.__lastFrameTime = now;
