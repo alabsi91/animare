@@ -20,7 +20,7 @@ export default function ReuseValues() {
       autoPlay: false,
     };
 
-    return animare.group(animations, (info, tlInfo) => {
+    const timeline = animare.group(animations, (info, tlInfo) => {
       if (slider.current) slider.current.value = tlInfo.progress.toString();
 
       for (let i = 0; i < elements.length; i++) {
@@ -45,6 +45,8 @@ export default function ReuseValues() {
         el.style.filter = `blur(${blur}px)`;
       }
     });
+
+    return timeline;
   });
 
   return (

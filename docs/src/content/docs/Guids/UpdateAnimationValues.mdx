@@ -1,0 +1,63 @@
+---
+title: Update Animation Values
+---
+
+import Example from '../../../components/Examples/UpdateValues';
+
+Here some examples of how to update and change the animation values after creating the timeline.
+
+:::caution
+Updating some animation values like `to` while the timeline is playing might result in flickering.
+:::
+
+:::danger
+`updateValues` will throw an error if one of the values are invalid.
+:::
+
+<Example client:idle />
+
+## timeline
+
+The `name` property is **required** to target a specific animation for updating it.
+
+```ts title="example" frame="terminal"
+import animare from 'animare';
+
+const timeline = animare.timeline(
+  [
+    { name: 'first', to: 100 },
+    { name: 'second', to: 50 },
+  ],
+  info => {
+    // ...
+  },
+);
+
+timeline.updateValues([{ name: 'first', duration: 1000 }]);
+```
+
+## group
+
+The `index` property is **required** to target a specific animation for updating it.
+
+```ts title="example" frame="terminal"
+import animare from 'animare';
+
+const timeline = animare.group({ to: [100, 50] }, info => {
+  // ...
+});
+
+timeline.updateValues([{ index: 0, duration: 1000 }]);
+```
+
+## single
+
+```ts title="example" frame="terminal"
+import animare from 'animare';
+
+const animation = animare.single({ to: 100 }, info => {
+  // ...
+});
+
+animation.updateValues({ duration: 1000 });
+```

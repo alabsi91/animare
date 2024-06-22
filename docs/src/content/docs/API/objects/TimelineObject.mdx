@@ -110,7 +110,7 @@ Seeks the timeline to a specified time or percentage value.
 If the timeline is not playing, it will seek without playing.
 
 `seekTo` The point to seek to, specified as a `time` in milliseconds or a percentage value. <br/>
-`playCount` The repeat count to seek to before playing.
+`playCount` <Badge text="Default: current playCount" variant="tip" size="small" /> The repeat count to seek to before playing.
 
 ```ts title="Seek" frame="terminal"
 timeline.seek(500); // Seek to 500 milliseconds
@@ -134,6 +134,18 @@ timeline.updateValues([{ name: 'myAnimation', duration: 500 }]);
 ```
 
 See: [AnimationOptions](/animare/api/objects/animationoptions/)
+
+### updateTimelineOptions()
+
+`(newValues: Partial<TimelineOptions>) => void` <Badge text="Throws" variant="danger" size="small" />
+
+Updates the options of the timeline.
+
+```ts title="Change animation values" frame="terminal"
+timeline.updateTimelineOptions({ timelineSpeed: 2 });
+```
+
+See: [TimelineOptions](/animare/api/objects/timelineoptions/)
 
 ### on()
 

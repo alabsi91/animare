@@ -14,6 +14,18 @@ import { Badge } from '@astrojs/starlight/components';
 The number of times the timeline should play.
 Use `-1` for infinite plays.
 
+### timelineSpeed
+
+`timelineSpeed?: number` <Badge text="Default: 1" variant="tip" size="small" />
+
+The speed at which the timeline should play.
+
+Entering a Zero or negative number will cause an error.
+
+- `1` = normal speed
+- `2` = double speed
+- `0.5` = half speed
+
 ### autoPlay
 
 `autoPlay?: boolean` <Badge text="Default: true" variant="tip" size="small" />
