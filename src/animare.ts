@@ -1,8 +1,9 @@
-import group from './variants/group';
-import single from './variants/single';
-import timeline from './variants/timeline';
+import group from './variants/group.js';
+import loop from './variants/loop.js';
+import single from './variants/single.js';
+import timeline from './variants/timeline.js';
 
-import type { AnimationOptionsParam, OnUpdateCallback, TimelineGlobalOptions, TimelineObject } from './types';
+import type { AnimationOptionsParam, OnUpdateCallback, TimelineGlobalOptions, TimelineObject } from './types.js';
 
 export function animare<Name extends string>(
   animations: AnimationOptionsParam<Name>,
@@ -15,3 +16,4 @@ export function animare<Name extends string>(
 animare.timeline = timeline;
 animare.single = single;
 animare.group = group;
+animare.loop = loop;

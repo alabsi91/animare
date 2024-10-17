@@ -1,6 +1,6 @@
-import { Event } from '../types';
+import { Event } from '../types.js';
 
-import type { EventCallback, EventUnsubscribe } from '../types';
+import type { EventCallback, EventUnsubscribe } from '../types.js';
 
 export default class EventManager {
   #registeredEvents: Record<Event, Set<EventCallback>> = Object.assign({});

@@ -1,5 +1,6 @@
-import timeline from './timeline';
-import { Timing } from '../types';
+import { Timing } from '../types.js';
+import { extendObject } from '../utils/utils.js';
+import timeline from './timeline.js';
 
 import type {
   AnimationGroupOptions,
@@ -10,8 +11,7 @@ import type {
   GroupOnUpdateCallback,
   GroupTimelineObject,
   PartialExcept,
-} from '../types';
-import { extendObject } from '../utils/utils';
+} from '../types.js';
 
 /**
  * Allows for a different input method where you can use an object with arrays of values for each property instead of an array of animation values.

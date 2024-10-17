@@ -1,7 +1,7 @@
-import { ScrollAxis, ScrollElementEdge } from '../types';
-import { normalizePercentage } from '../utils/utils';
+import { ScrollAxis, ScrollElementEdge } from '../types.js';
+import { normalizePercentage } from './utils.js';
 
-import type { ScrollAnimationOptions } from '../types';
+import type { ScrollAnimationOptions } from '../types.js';
 
 /**
  * Makes the scroll progress control the timeline.

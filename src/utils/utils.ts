@@ -1,4 +1,4 @@
-import type { PercentageString, Vec1, Vec1Object, Vec2, Vec2Object, Vec3, Vec3Object, Vec4, Vec4Object } from '../types';
+import type { PercentageString } from '../types.js';
 
 /** - Returns `true` if the value is a valid number, not `NaN` and finite. */
 export function isValidNumber(value: unknown): value is number {
@@ -56,8 +56,4 @@ export function extendObject<T extends object, U extends object[]>(sourceObj: T,
     for (const key in obj) result[key] = obj[key];
   }
   return result as T & UnionToIntersection<U[number]>;
-}
-
-export function isObjectVector(vector: Vec1 | Vec2 | Vec3 | Vec4): vector is Vec1Object | Vec2Object | Vec3Object | Vec4Object {
-  return typeof vector === 'object' && !Array.isArray(vector);
 }

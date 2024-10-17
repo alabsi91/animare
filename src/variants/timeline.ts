@@ -1,13 +1,13 @@
-import { Event } from '../types';
-import EventManager from '../utils/EventManager';
+import { Event } from '../types.js';
+import EventManager from '../utils/EventManager.js';
 import {
   calculateTimeline,
   calculateTimelineDuration,
   prepareAnimationsPartialOptions,
   prepareAnimationsValues,
   prepareTimelineValues,
-} from '../utils/helpers';
-import { clamp, extendObject, normalizePercentage, percentageStringToNumber } from '../utils/utils';
+} from '../utils/helpers.js';
+import { clamp, extendObject, normalizePercentage, percentageStringToNumber } from '../utils/utils.js';
 
 import type {
   AnimationOptions,
@@ -21,7 +21,7 @@ import type {
   TimelineInfo,
   TimelineObject,
   TimelineOptions,
-} from '../types';
+} from '../types.js';
 
 export default function timeline<Name extends string>(
   animations: AnimationOptionsParam<Name>,

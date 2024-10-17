@@ -1,6 +1,16 @@
-import { isObjectVector } from '../utils/utils';
+import { isObjectVector } from './utils.js';
 
-import type { Vec, Vec1Array, Vec1Object, Vec2Array, Vec2Object, Vec3Array, Vec3Object, Vec4Array, Vec4Object } from '../types';
+import type {
+  Vec,
+  Vec1Array,
+  Vec1Object,
+  Vec2Array,
+  Vec2Object,
+  Vec3Array,
+  Vec3Object,
+  Vec4Array,
+  Vec4Object,
+} from '../types.js';
 
 export function lerp(start: number, end: number, t: number): number;
 

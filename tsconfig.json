@@ -19,7 +19,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "strictPropertyInitialization": false,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"]
+    "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "animare": ["./src/index"],
+      "animare/plugins": ["./src/plugins/index"]
+    }
+  }
 }

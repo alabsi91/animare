@@ -1,6 +1,6 @@
-import { isObjectVector } from '../utils/utils';
+import { isObjectVector } from './utils.js';
 
-import type { Vec3Array, Vec3Object, Vec4Array, Vec4Object } from '../types';
+import type { Vec3Array, Vec3Object, Vec4Array, Vec4Object } from '../types.js';
 
 /**
  * Converts vector to RGB string

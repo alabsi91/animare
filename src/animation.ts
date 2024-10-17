@@ -1,8 +1,8 @@
-import { isAlternateDirection, isReverseDirection, validateAnimationValues } from './utils/helpers';
-import { Timing, Direction } from './types';
-import { clamp, extendObject, normalizePercentage } from './utils/utils';
+import { Direction, Timing } from './types.js';
+import { isAlternateDirection, isReverseDirection, validateAnimationValues } from './utils/helpers.js';
+import { clamp, extendObject, normalizePercentage } from './utils/utils.js';
 
-import type { AnimationInfo, AnimationPreparedOptions } from './types';
+import type { AnimationInfo, AnimationPreparedOptions } from './types.js';
 
 export default class Animation {
   /** The index of the animation. */

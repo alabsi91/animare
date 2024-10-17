@@ -1,6 +1,6 @@
-import { bounce, wobble } from './ease';
+import { bounce, wobble } from './ease.js';
 
-import type { Ease_in_out_inOut, EaseFn } from './types';
+import type { Ease_in_out_inOut, EaseFn } from './types.js';
 
 const easeOut: Ease_in_out_inOut = {
   back: (c1 = 1.70158) => {

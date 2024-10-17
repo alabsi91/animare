@@ -1,5 +1,5 @@
 import { scrollAnimation } from 'animare/plugins';
-import { useEffect } from 'react';
+import { useEffect } from 'preact/hooks';
 
 import type { ScrollAnimationOptions } from '../types.js';
 

@@ -1,13 +1,13 @@
-import Animation from '../animation';
-import { Timing, Direction } from '../types';
+import Animation from '../animation.js';
+import { Direction, Timing } from '../types.js';
 
 import type {
-  TimelineGlobalOptions,
-  AnimationPreparedOptions,
   AnimationOptions,
-  RemoveFunction,
   AnimationOptionsWithoutFn,
-} from '../types';
+  AnimationPreparedOptions,
+  RemoveFunction,
+  TimelineGlobalOptions,
+} from '../types.js';
 
 export const defaultValues = {
   from: 0,

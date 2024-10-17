@@ -4,7 +4,7 @@
  * by Gaëtan Renaudeau 2014 - 2015 – MIT License
  */
 
-import type { EaseFn } from '../../types';
+import type { EaseFn } from '../../types.js';
 
 // These values are established by empiricism with tests (tradeoff: performance VS precision)
 const NEWTON_ITERATIONS = 4,

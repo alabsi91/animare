@@ -1,5 +1,5 @@
-import timeline from './timeline';
-import { extendObject } from '../utils/utils';
+import { extendObject } from '../utils/utils.js';
+import timeline from './timeline.js';
 
 import type {
   AnimationOptionsParam,
@@ -7,7 +7,7 @@ import type {
   SingleAnimationOptionsWithoutFn,
   SingleObject,
   SingleOnUpdateCallback,
-} from '../types';
+} from '../types.js';
 
 /**
  * Play a single animation.

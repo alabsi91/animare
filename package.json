@@ -1,27 +1,45 @@
 {
   "name": "animare",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.1.0.1",
   "description": "Advanced animation library for modern JavaScript.",
   "author": "Ahmed ALAbsi <alabsi91@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alabsi91/animare.git"
+  },
+  "main": "./lib/commonjs/index.js",
+  "module": "./lib/module/index.js",
+  "browser": "./lib/browser/index.js",
+  "types": "./lib/typescript/index.d.ts",
   "exports": {
+    ".": {
+      "import": "./lib/module/index.js",
+      "browser": "./lib/browser/index.js",
+      "require": "./lib/commonjs/index.js",
+      "default": "./lib/module/index",
+      "types": "./lib/typescript/index.d.ts"
+    },
     "./react": {
-      "default": "./lib/module/react/index.js",
       "import": "./lib/module/react/index.js",
+      "browser": "./lib/browser/react/index.js",
       "require": "./lib/commonjs/react/index.js",
+      "default": "./lib/module/react/index.js",
       "types": "./lib/typescript/react/index.d.ts"
     },
-    "./plugins": {
-      "default": "./lib/module/plugins/index.js",
-      "import": "./lib/module/plugins/index.js",
-      "require": "./lib/commonjs/plugins/index.js",
-      "types": "./lib/typescript/plugins/index.d.ts"
+    "./preact": {
+      "import": "./lib/module/preact/index.js",
+      "browser": "./lib/browser/preact/index.js",
+      "require": "./lib/commonjs/preact/index.js",
+      "default": "./lib/module/preact/index.js",
+      "types": "./lib/typescript/preact/index.d.ts"
     },
-    ".": {
-      "default": "./lib/module/index",
-      "import": "./lib/module/index",
-      "require": "./lib/commonjs/index.js",
-      "types": "./lib/typescript/index.d.ts"
+    "./plugins": {
+      "import": "./lib/module/plugins/index.js",
+      "browser": "./lib/browser/plugins/index.js",
+      "require": "./lib/commonjs/plugins/index.js",
+      "default": "./lib/module/plugins/index.js",
+      "types": "./lib/typescript/plugins/index.d.ts"
     }
   },
   "scripts": {
@@ -48,6 +66,9 @@
   "peerDependenciesMeta": {
     "react": {
       "optional": true
+    },
+    "preact": {
+      "optional": true
     }
   },
   "devDependencies": {
@@ -55,14 +76,17 @@
     "@babel/core": "^7.24.6",
     "@babel/preset-env": "^7.24.6",
     "@babel/preset-typescript": "^7.24.6",
-    "@types/react": "^18.3.3",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
+    "esbuild": "^0.24.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react-hooks": "^4.6.0",
     "glob": "^10.4.1",
+    "preact": "^10.24.3",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   }

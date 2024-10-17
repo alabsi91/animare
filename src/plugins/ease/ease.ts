@@ -1,4 +1,4 @@
-import type { SpringParams, EaseFn } from './types';
+import type { SpringParams, EaseFn } from './types.js';
 
 export function spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 }: SpringParams = {}): EaseFn {
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);

@@ -1,5 +1,5 @@
 import { autoPause } from 'animare/plugins';
-import { useEffect } from 'react';
+import { useEffect } from 'preact/hooks';
 
 import type { AutoPauseOptions, GroupTimelineObject, SingleObject, TimelineObject } from '../types';
 
