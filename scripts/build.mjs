@@ -100,7 +100,7 @@ console.log('\n⚙️ ', `Building for ESM...`);
 
 await esbuild.build({
   entryPoints: ['src/index.ts', 'src/plugins/index.ts', 'src/react/index.ts', 'src/preact/index.ts'],
-  outdir: path.join(libDir, 'browser'),
+  outdir: path.join(libDir, 'esm'),
   platform: 'browser',
   format: 'esm',
   bundle: true,

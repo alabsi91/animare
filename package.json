@@ -1,6 +1,6 @@
 {
   "name": "animare",
-  "version": "2.0.0-beta.1.0.1",
+  "version": "2.0.0-beta.1.0.2",
   "description": "Advanced animation library for modern JavaScript.",
   "author": "Ahmed ALAbsi <alabsi91@gmail.com>",
   "license": "MIT",
@@ -10,33 +10,33 @@
   },
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
-  "browser": "./lib/browser/index.js",
+  "browser": "./lib/esm/index.js",
   "types": "./lib/typescript/index.d.ts",
   "exports": {
     ".": {
       "import": "./lib/module/index.js",
-      "browser": "./lib/browser/index.js",
+      "browser": "./lib/esm/index.js",
       "require": "./lib/commonjs/index.js",
       "default": "./lib/module/index",
       "types": "./lib/typescript/index.d.ts"
     },
     "./react": {
       "import": "./lib/module/react/index.js",
-      "browser": "./lib/browser/react/index.js",
+      "browser": "./lib/esm/react/index.js",
       "require": "./lib/commonjs/react/index.js",
       "default": "./lib/module/react/index.js",
       "types": "./lib/typescript/react/index.d.ts"
     },
     "./preact": {
       "import": "./lib/module/preact/index.js",
-      "browser": "./lib/browser/preact/index.js",
+      "browser": "./lib/esm/preact/index.js",
       "require": "./lib/commonjs/preact/index.js",
       "default": "./lib/module/preact/index.js",
       "types": "./lib/typescript/preact/index.d.ts"
     },
     "./plugins": {
       "import": "./lib/module/plugins/index.js",
-      "browser": "./lib/browser/plugins/index.js",
+      "browser": "./lib/esm/plugins/index.js",
       "require": "./lib/commonjs/plugins/index.js",
       "default": "./lib/module/plugins/index.js",
       "types": "./lib/typescript/plugins/index.d.ts"
