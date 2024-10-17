@@ -12,6 +12,32 @@ Install using your package manager of choice to add animare to your project:
 
 <PackageManagers pkg='animare' frame='none' />
 
+### Using in the browser
+
+add a source map script to your HTML file:
+
+```html
+<head>
+  <script type="importmap">
+    {
+      "imports": {
+        "animare": "https://unpkg.com/animare@latest/lib/esm/index.js",
+        "animare/plugins": "https://unpkg.com/animare@latest/lib/esm/plugins/index.js"
+      }
+    }
+  </script>
+</head>
+
+<!-- HTML content -->
+
+<script type="module">
+  import animare from 'animare';
+  import { ease } from 'animare/plugins';
+
+  // use animare
+</script>
+```
+
 <br />
 
 Aaaaand, you’re done! That was fast. 🐇
