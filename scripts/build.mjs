@@ -103,6 +103,7 @@ await esbuild.build({
   outdir: path.join(libDir, 'esm'),
   platform: 'browser',
   format: 'esm',
+  target: 'esnext',
   bundle: true,
   sourcemap: true,
   treeShaking: true,

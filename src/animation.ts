@@ -1,6 +1,6 @@
 import { Direction, Timing } from './types.js';
 import { isAlternateDirection, isReverseDirection, validateAnimationValues } from './utils/helpers.js';
-import { clamp, extendObject, normalizePercentage } from './utils/utils.js';
+import { clamp, normalizePercentage } from './utils/utils.js';
 
 import type { AnimationInfo, AnimationPreparedOptions } from './types.js';
 
@@ -72,8 +72,11 @@ export default class Animation {
     return Math.abs(this.#elapsedTime - time) < tolerance;
   }
 
+  // preserve info object reference
+  #infoRef: AnimationInfo = Object.create(null);
+
   get info(): AnimationInfo {
-    return {
+    return Object.assign(this.#infoRef, {
       name: this.animationRef.name,
       index: this.#index,
       value: this.#value,
@@ -86,7 +89,7 @@ export default class Animation {
       isPlaying: this.#isPlaying,
       isProgressAt: this.#isProgressAt.bind(this),
       isTimeAt: this.#isTimeAt.bind(this),
-    };
+    });
   }
 
   constructor(animation: AnimationPreparedOptions, previousTimeline: Animation | undefined, index: number) {
@@ -98,11 +101,17 @@ export default class Animation {
   }
 
   public Setup() {
-    this.#isAlternate = isAlternateDirection(this.animationRef.direction);
-    this.#isReverse = isReverseDirection(this.animationRef.direction);
-
+    this.#isFinished = false;
+    this.#isPlaying = false;
+    this.#elapsedTime = 0;
+    this.#progress = 0;
+    this.#overallProgress = 0;
+    this.#alternateLap = 0;
     this.#playCount = 0;
     this.#delayCount = 0;
+
+    this.#isAlternate = isAlternateDirection(this.animationRef.direction);
+    this.#isReverse = isReverseDirection(this.animationRef.direction);
 
     this.#startValue = this.#isReverse ? this.animationRef.to : this.animationRef.from;
     this.#value = this.#isReverse ? this.animationRef.to : this.animationRef.from;
@@ -184,7 +193,7 @@ export default class Animation {
    * ⚠️ **Warning** ⚠️ This method will throw an error if the animation values are invalid.
    */
   public Set(animation: Partial<AnimationPreparedOptions>) {
-    extendObject(this.animationRef, animation);
+    Object.assign(this.animationRef, animation);
     validateAnimationValues(this.animationRef);
   }
 

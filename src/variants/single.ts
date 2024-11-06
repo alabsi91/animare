@@ -1,4 +1,3 @@
-import { extendObject } from '../utils/utils.js';
 import timeline from './timeline.js';
 
 import type {
@@ -54,7 +53,7 @@ export default function single(animation: SingleAnimationOptions, onUpdateCallba
     timelineUpdateValues([{ name: 'single', ...newValues }]);
   };
 
-  const singleReturnObj = extendObject(timelineReturnObj, {
+  const singleReturnObj = Object.assign(timelineReturnObj, {
     updateValues,
     animationsInfo: timelineReturnObj.animationsInfo[0],
   });

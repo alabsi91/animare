@@ -1,5 +1,4 @@
 import { Timing } from '../types.js';
-import { extendObject } from '../utils/utils.js';
 import timeline from './timeline.js';
 
 import type {
@@ -94,7 +93,7 @@ export default function group(animation: AnimationGroupOptions, callback: GroupO
     timelineUpdateValues(mapped);
   };
 
-  const groupReturnObj = extendObject(timelineReturnObj, { updateValues });
+  const groupReturnObj = Object.assign(timelineReturnObj, { updateValues });
 
   return groupReturnObj as GroupTimelineObject;
 }

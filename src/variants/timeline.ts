@@ -7,7 +7,7 @@ import {
   prepareAnimationsValues,
   prepareTimelineValues,
 } from '../utils/helpers.js';
-import { clamp, extendObject, normalizePercentage, percentageStringToNumber } from '../utils/utils.js';
+import { clamp, normalizePercentage, percentageStringToNumber } from '../utils/utils.js';
 
 import type {
   AnimationOptions,
@@ -96,6 +96,13 @@ export default function timeline<Name extends string>(
 
   const callbackAnimationInfo: CallbackInfo<Name> = Object.create(null);
   callbackAnimationInfo.length = animations.length;
+
+  // fill `callbackAnimationInfo` with initial values
+  for (let i = 0; i < timelineInfo.__animations.length; i++) {
+    const info = timelineInfo.__animations[i].info as CallbackInfo<Name>[Name];
+    callbackAnimationInfo[info.name] = info;
+    callbackAnimationInfo[info.index] = info;
+  }
 
   const executePerFrame = (now: number, oneFrame?: boolean) => {
     now *= timelineInfo.speed;
@@ -221,6 +228,11 @@ export default function timeline<Name extends string>(
       timelineInfo.__requestAnimationId = null;
     }
 
+    // reset all animations
+    for (let i = 0; i < callbackAnimationInfo.length; i++) {
+      timelineInfo.__animations[i].Setup();
+    }
+
     seek(startFrom, playCount); // sets the start progress and play count
 
     timelineInfo.__requestAnimationId = requestAnimationFrame(now => {
@@ -339,7 +351,9 @@ export default function timeline<Name extends string>(
       timelineInfo.__animations[animIndex].Set(prepared);
     }
 
-    for (let i = 0; i < callbackAnimationInfo.length; i++) timelineInfo.__animations[i].Setup();
+    for (let i = 0; i < callbackAnimationInfo.length; i++) {
+      timelineInfo.__animations[i].Setup();
+    }
 
     // to make a smooth transition if the duration was changed
     if (timelineInfo.isPlaying) {
@@ -361,7 +375,7 @@ export default function timeline<Name extends string>(
       throw new Error('The `timelineSpeed` value cannot be a negative value or a zero.');
     }
 
-    extendObject(timelineOptions, newOptions);
+    Object.assign(timelineOptions, newOptions);
 
     const currentProgress = timelineInfo.progress;
     timelineInfo.speed = timelineOptions.timelineSpeed;
