@@ -82,7 +82,7 @@ const Title = 'animare';
       to: new Array(spans.length).fill(1),
       duration: i => 1000 + i * 50,
       delay: i => delay + i * 50,
-      ease: ease.spring({ mass: 2, damping: 12, stiffness: 70, velocity: 9, duration: 2500 }),
+      ease: ease.out.spring({ mass: 2, damping: 12, stiffness: 70, velocity: 9, duration: 2500 }),
       timing: Timing.FromStart,
       autoPlay: false,
     },

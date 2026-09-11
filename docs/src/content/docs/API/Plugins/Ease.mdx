@@ -106,10 +106,8 @@ Creates a spring-like easing function that overshoots the target and oscillates 
 `period` is how long one oscillation takes, as a fraction of the duration. Smaller means more wiggles.
 
 <Ease title='in.elastic()' padding={74} easing='ease.in.elastic()' client:idle />
-<Ease title='out.elastic()' padding={74} easing='ease.out.elastic()' client:idle />
-<Ease title='inOut.elastic()' padding={74} easing='ease.inOut.elastic()' client:idle />
 <Ease title='out.elastic(1, 0.15)' padding={74} easing='ease.out.elastic(1, 0.15)' client:idle />
-<Ease title='out.elastic(2, 0.5)' padding={74} easing='ease.out.elastic(2, 0.5)' client:idle />
+<Ease title='inOut.elastic(2, 0.5)' padding={74} easing='ease.inOut.elastic(2, 0.5)' client:idle />
 
 ## Bounce()
 
@@ -122,10 +120,8 @@ Creates a bouncing ball easing function.
 `bounciness` is how much speed the ball keeps on each rebound, from `0` (none) to `1` (all).
 
 <Ease title='in.bounce()' easing='ease.in.bounce()' client:idle />
-<Ease title='out.bounce()' easing='ease.out.bounce()' client:idle />
-<Ease title='inOut.bounce()' easing='ease.inOut.bounce()' client:idle />
 <Ease title='out.bounce(2, 0.3)' easing='ease.out.bounce(2, 0.3)' client:idle />
-<Ease title='out.bounce(6, 0.8)' easing='ease.out.bounce(6, 0.8)' client:idle />
+<Ease title='inOut.bounce(6, 0.8)' easing='ease.inOut.bounce(6, 0.8)' client:idle />
 
 ## Back()
 
