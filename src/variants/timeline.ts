@@ -399,6 +399,10 @@ export default function timeline<Name extends string>(
 
     Object.assign(timelineOptions, newOptions);
 
+    // the live play count may be above a lowered limit, the current play becomes the last one
+    const { timelinePlayCount } = timelineOptions;
+    if (timelinePlayCount > 0 && timelineInfo.playCount > timelinePlayCount) timelineInfo.playCount = timelinePlayCount;
+
     const currentProgress = timelineInfo.progress;
     timelineInfo.speed = timelineOptions.timelineSpeed;
 

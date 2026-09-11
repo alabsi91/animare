@@ -308,6 +308,28 @@ describe('repeat', () => {
     assert.equal(info.playCount, 6);
   });
 
+  it('finishes the current play when the limit drops below the live play count', () => {
+    const { timeline, info } = createTimeline({ timelinePlayCount: -1 }, 100);
+    let completes = 0;
+    timeline.on(Event.Complete, () => {
+      completes++;
+    });
+
+    timeline.play();
+    advance(0);
+    for (let step = 0; step < 6; step++) advance(50);
+    assert.equal(info.playCount, 3);
+
+    timeline.updateTimelineOptions({ timelinePlayCount: 1 });
+    advance(50);
+    advance(50);
+    advance(50);
+
+    assert.equal(info.isFinished, true);
+    assert.equal(info.playCount, 1);
+    assert.equal(completes, 1);
+  });
+
   it('never plays with 0', () => {
     const { timeline, values, info } = createTimeline({ timelinePlayCount: 0 }, 100);
 

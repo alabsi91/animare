@@ -62,6 +62,17 @@ describe('single', () => {
     assert.equal(single.timelineInfo.playCount, 6);
   });
 
+  it('switches from infinite to finite while playing', () => {
+    const single = animare.single({ to: 1, duration: 100, playCount: -1 }, () => {});
+
+    advance(0);
+    for (let step = 0; step < 6; step++) advance(50);
+    single.updateValues({ playCount: 1 });
+    for (let step = 0; step < 3; step++) advance(50);
+
+    assert.equal(single.timelineInfo.isFinished, true);
+  });
+
   it('updates other values', () => {
     const single = animare.single({ to: 1, duration: 100, autoPlay: false }, () => {});
 
