@@ -12,55 +12,57 @@ import type { AutoPauseOptions, GroupTimelineObject, SingleObject, TimelineObjec
  *
  * Pauses the timeline when the element is not visible.
  *
- * @param timeline - The animation object returned by animare.
- * @param element - The HTML element to track when entering and exiting the viewport.
- * @param deps - The dependencies for the effect.
- * @returns A function to remove the intersection observer and stop tracking visibility.
- *
  * @example
- * import animare from 'animare';
- * import { useAnimare, useAutoPause } from 'animare/react';
+ *   import animare from 'animare';
+ *   import { useAnimare, useAutoPause } from 'animare/react';
  *
- * function MyComponent() {
+ *   function MyComponent() {
  *   // The element to track when entering and exiting the viewport
  *   const elementRef = useRef(null);
  *
  *   const myTimeline = useAnimare(() => {
- *     return animare.timeline(...params);
+ *   return animare.timeline(...params);
  *   });
  *
  *   useAutoPause(myTimeline, elementRef.current, []);
  *
  *   // or you can pass in the observer options
  *   useAutoPause(myTimeline, elementRef.current, { threshold: 0.2 }, []);
- * }
- * }
+ *   }
+ *   }
+ *
+ * @param timeline - The animation object returned by animare.
+ * @param element - The HTML element to track when entering and exiting the viewport.
+ * @param dependencies - The dependencies for the effect.
+ * @returns A function to remove the intersection observer and stop tracking visibility.
  */
 export function useAutoPause<Name extends string>(
   timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element | null,
-  deps?: React.DependencyList,
+  dependencies?: React.DependencyList
 ): void;
 export function useAutoPause<Name extends string>(
   timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element | null,
   observerOptions?: AutoPauseOptions,
-  deps?: React.DependencyList,
+  dependencies?: React.DependencyList
 ): void;
 export function useAutoPause<Name extends string>(
   timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element | null,
-  observerOptionsOrDeps?: AutoPauseOptions | React.DependencyList,
-  deps: React.DependencyList = [],
+  observerOptionsOrDependencies?: AutoPauseOptions | React.DependencyList,
+  dependencies: React.DependencyList = []
 ): void {
-  const dependencies = Array.isArray(observerOptionsOrDeps) ? observerOptionsOrDeps : deps;
+  const effectDependencies = Array.isArray(observerOptionsOrDependencies) ? observerOptionsOrDependencies : dependencies;
 
   useEffect(() => {
     if (!timeline || !element) return;
 
-    const observerOptions = (Array.isArray(observerOptionsOrDeps) ? {} : observerOptionsOrDeps) as IntersectionObserverInit;
+    const observerOptions = (
+      Array.isArray(observerOptionsOrDependencies) ? {} : observerOptionsOrDependencies
+    ) as IntersectionObserverInit;
 
     return autoPause(timeline, element, observerOptions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeline, element, ...dependencies]);
+  }, [timeline, element, ...effectDependencies]);
 }

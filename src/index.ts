@@ -1,4 +1,3 @@
-import { animare } from './animare.js';
-export default animare;
-
 export * from './types.js';
+
+export { animare as default } from './animare.js';

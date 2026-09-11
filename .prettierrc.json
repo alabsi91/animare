@@ -1,13 +1,22 @@
 {
+  "plugins": ["prettier-plugin-jsdoc", "@trivago/prettier-plugin-sort-imports", "prettier-plugin-merge"],
   "arrowParens": "avoid",
   "printWidth": 130,
+  "tabWidth": 2,
+  "trailingComma": "es5",
   "jsxSingleQuote": true,
+  "singleQuote": true,
   "semi": true,
   "bracketSpacing": true,
   "bracketSameLine": false,
   "endOfLine": "auto",
-  "singleQuote": true,
+  "importOrder": ["<BUILTIN_MODULES>", "<THIRD_PARTY_MODULES>", "<SEPARATOR>", "^[./]", "<SEPARATOR>", "<TS_TYPES>"],
+  "importOrderSeparation": true,
   "overrides": [
+    {
+      "files": ["*.md", "*.mdx"],
+      "options": { "plugins": [] }
+    },
     {
       "files": "*.map",
       "options": { "parser": "json" }

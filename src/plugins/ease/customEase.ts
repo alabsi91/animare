@@ -1,6 +1,6 @@
 /** - Converts a path string to two dimensional array `[[M], ...[C]]` */
 function parsePointsFromPathString(path: string): number[][] {
-  const pathData = path.match(/-?[0-9.]+/g)?.map(parseFloat);
+  const pathData = path.match(/-?[0-9.]+/g)?.map(value => Number.parseFloat(value));
 
   const points: number[][] = [];
 
@@ -9,8 +9,15 @@ function parsePointsFromPathString(path: string): number[][] {
   points.push([pathData[0], pathData[1]]); // M points
 
   // C points
-  for (let i = 2; i < pathData.length; i += 6) {
-    points.push([pathData[i], pathData[i + 1], pathData[i + 2], pathData[i + 3], pathData[i + 4], pathData[i + 5]]);
+  for (let index = 2; index < pathData.length; index += 6) {
+    points.push([
+      pathData[index],
+      pathData[index + 1],
+      pathData[index + 2],
+      pathData[index + 3],
+      pathData[index + 4],
+      pathData[index + 5],
+    ]);
   }
 
   return points;
@@ -26,13 +33,11 @@ function preparePointsForAnimation(array: number[][]): number[][] {
 
   let x = 0;
   let y = 0;
-  for (let i = 0; i < array.length; i++) {
-    const curve = array[i];
-
+  for (const [index, curve] of array.entries()) {
     const c1x = curve[0];
     const c1y = 1 - curve[1];
 
-    if (!i) {
+    if (!index) {
       x = c1x;
       y = c1y;
       continue;
@@ -61,15 +66,10 @@ export function generateEasingFunctionFromString(path: string) {
   return (t: number) => {
     // Special case start and end.
     if (t === 0) return curves[0][1]; // The Y-coordinate of the first point of the first curve
-    if (t === 1) return curves[curves.length - 1][7]; // The Y-coordinate of the end point of the last curve
+    if (t === 1) return curves.at(-1)![7]; // The Y-coordinate of the end point of the last curve
 
-    let from = 0;
-    for (let i = 0; i < curves.length; i++) {
-      const [p0x, p0y, c0x, c0y, c1x, c1y, p1x, p1y] = curves[i];
-
-      if (t < from || t > p1x) continue; // t is outside the range of the current curve
-
-      from = p1x;
+    for (const [p0x, p0y, c0x, c0y, c1x, c1y, p1x, p1y] of curves) {
+      if (t > p1x) continue; // t is outside the range of the current curve
 
       // A binary search algorithm is used to determine the Y-coordinate value
       // corresponding to a specified position on the X-coordinate.

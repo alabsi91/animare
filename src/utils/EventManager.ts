@@ -3,7 +3,7 @@ import { Event } from '../types.js';
 import type { EventCallback, EventUnsubscribe } from '../types.js';
 
 export default class EventManager {
-  #registeredEvents: Record<Event, Set<EventCallback>> = Object.assign({});
+  #registeredEvents = new Map<Event, Set<EventCallback>>();
 
   #onPlayPromise: ((value?: unknown) => void) | null = null;
   #onResumePromise: ((value?: unknown) => void) | null = null;
@@ -13,28 +13,32 @@ export default class EventManager {
   #onRepeatPromise: ((value?: unknown) => void) | null = null;
 
   #remove(event: Event, callback: EventCallback): boolean {
-    if (!this.#registeredEvents[event]) return false;
-    return this.#registeredEvents[event].delete(callback);
+    return this.#registeredEvents.get(event)?.delete(callback) ?? false;
   }
 
   /**
    * Attaches an event listener to the timeline.
    *
+   * @example
+   *   const unsubscribe = on(Event.Play, () => {
+   *     // do something
+   *   });
+   *
+   *   unsubscribe(); // To remove the event listener
+   *
    * @param event - The event to listen for.
    * @param callback - The callback function to be executed when the event is triggered.
    * @returns A function to unsubscribe the event listener.
-   *
-   * @example
-   * const unsubscribe = on(Event.Play, () => {
-   *   // do something
-   * });
-   *
-   * unsubscribe(); // To remove the event listener
    */
   public on(event: Event, callback: EventCallback): EventUnsubscribe {
-    if (!this.#registeredEvents[event]) this.#registeredEvents[event] = new Set();
+    let callbacks = this.#registeredEvents.get(event);
 
-    this.#registeredEvents[event].add(callback);
+    if (!callbacks) {
+      callbacks = new Set();
+      this.#registeredEvents.set(event, callbacks);
+    }
+
+    callbacks.add(callback);
 
     return () => this.#remove(event, callback);
   }
@@ -42,16 +46,16 @@ export default class EventManager {
   /**
    * Attaches an event listener to the timeline that will be triggered only once.
    *
+   * @example
+   *   const unsubscribe = once(Event.Play, () => {
+   *     // do something
+   *   });
+   *
+   *   unsubscribe(); // To remove the event listener
+   *
    * @param event - The event to listen for.
    * @param callback - The callback function to be executed when the event is triggered.
    * @returns A function to unsubscribe the event listener.
-   *
-   * @example
-   * const unsubscribe = once(Event.Play, () => {
-   *   // do something
-   * });
-   *
-   * unsubscribe(); // To remove the event listener
    */
   public once(event: Event, callback: EventCallback): EventUnsubscribe {
     const remove = this.on(event, () => {
@@ -63,9 +67,10 @@ export default class EventManager {
   }
 
   public emit(event: Event) {
-    if (!this.#registeredEvents[event]) return;
+    const callbacks = this.#registeredEvents.get(event);
+    if (!callbacks) return;
 
-    this.#registeredEvents[event].forEach(callback => callback());
+    for (const callback of callbacks) callback();
 
     if (event === Event.Play) {
       this.#onPlayPromise?.();
@@ -105,13 +110,14 @@ export default class EventManager {
 
   /** Removes all event listeners. */
   public clear() {
-    this.#registeredEvents = Object.assign({});
+    this.#registeredEvents.clear();
   }
 
   /**
    * Waits until the timeline starts playing.
+   *
    * @example
-   * await onPlayAsync();
+   *   await onPlayAsync();
    */
   public onPlayAsync() {
     if (this.#onPlayPromise !== null) return;
@@ -122,8 +128,9 @@ export default class EventManager {
 
   /**
    * Waits until the timeline resumes.
+   *
    * @example
-   * await onResumeAsync();
+   *   await onResumeAsync();
    */
   public onResumeAsync() {
     if (this.#onResumePromise !== null) return;
@@ -134,8 +141,9 @@ export default class EventManager {
 
   /**
    * Waits until the timeline pauses.
+   *
    * @example
-   * await onPauseAsync();
+   *   await onPauseAsync();
    */
   public onPauseAsync() {
     if (this.#onPausePromise !== null) return;
@@ -146,8 +154,9 @@ export default class EventManager {
 
   /**
    * Waits until the timeline stops.
+   *
    * @example
-   * await onStopAsync();
+   *   await onStopAsync();
    */
   public onStopAsync() {
     if (this.#onStopPromise !== null) return;
@@ -158,8 +167,9 @@ export default class EventManager {
 
   /**
    * Waits until the timeline completes.
+   *
    * @example
-   * await onCompleteAsync();
+   *   await onCompleteAsync();
    */
   public onCompleteAsync() {
     if (this.#onCompletePromise !== null) return;
@@ -170,8 +180,9 @@ export default class EventManager {
 
   /**
    * Waits until the timeline repeats.
+   *
    * @example
-   * await onRepeatAsync();
+   *   await onRepeatAsync();
    */
   public onRepeatAsync() {
     if (this.#onRepeatPromise !== null) return;

@@ -60,10 +60,8 @@ export enum ScrollElementEdge {
   Right = 'right',
 }
 
-/**
- * **Note:** This function does nothing, used only for type checking.
- */
-export function createAnimations<Name extends string>(animations: AnimationOptionsParam<Name>) {
+/** **Note:** This function does nothing, used only for type checking. */
+export function createAnimations<Name extends string>(animations: AnimationOptionsParameter<Name>) {
   return animations;
 }
 
@@ -80,11 +78,14 @@ type RemoveFunctionType<T> = {
       : RemoveFunction<T[K]>;
 };
 
-/** Extends the types of properties in the given type `T` to allow arrays and functions, except for the 'to' property which only allows arrays. */
+/**
+ * Extends the types of properties in the given type `T` to allow arrays and functions, except for the 'to' property which only
+ * allows arrays.
+ */
 type AllowArray<T> = {
   [K in keyof T]: K extends 'ease'
     ? T[K] | Exclude<T[K], undefined>[]
-    : T[K] | Exclude<T[K], undefined | ((i: number) => unknown)>[];
+    : T[K] | Exclude<T[K], undefined | ((index: number) => unknown)>[];
 };
 
 export type PartialExcept<T, K extends keyof T> = Partial<T> & Pick<T, K>;
@@ -95,44 +96,42 @@ export type EventCallback = () => void;
 
 export type EventUnsubscribe = () => boolean;
 
-export type EaseFn = (t: number) => number;
+export type EaseFunction = (t: number) => number;
 
 export type PercentageString = `${number}%`;
 
 export type AnimationOptions<Name extends string = string> = {
-  /**
-   * The name of the animation, used to identify the animation in the timeline.
-   * **Required**
-   */
+  /** The name of the animation, used to identify the animation in the timeline. **Required** */
   readonly name: Name;
 
-  /**
-   * The ending value of the animation.
-   * **Required**
-   */
+  /** The ending value of the animation. **Required** */
   to: number;
 
   /**
    * The starting value of the animation.
+   *
    * @default 0
    */
   from?: number | ((index: number) => number);
 
   /**
    * The duration of the animation in milliseconds.
+   *
    * @default 350
    */
   duration?: number | ((index: number) => number);
 
   /**
    * This property specifies the delay before the animation starts, in milliseconds.
+   *
    * @default 0
    */
   delay?: number | ((index: number) => number);
 
   /**
-   * Offsets the animation by a specific value in milliseconds.
-   * a positive value will act like a delay, while a negative value will play the animation earlier.
+   * Offsets the animation by a specific value in milliseconds. a positive value will act like a delay, while a negative value
+   * will play the animation earlier.
+   *
    * @default 0
    */
   offset?: number | ((index: number) => number);
@@ -143,41 +142,45 @@ export type AnimationOptions<Name extends string = string> = {
    * For example, with `delayCount: 1` and `playCount: 4`, the delay will be applied only once on the first play.
    *
    * A value higher than `playCount` will be ignored.
+   *
    * @default playCount
    */
   delayCount?: number | ((index: number) => number);
 
   /**
-   * The number of times the animation should play.
-   * A value of `0` means this animation will be ignored.
+   * The number of times the animation should play. A value of `0` means this animation will be ignored.
+   *
    * @default 1
    */
   playCount?: number | ((index: number) => number);
 
   /**
    * The direction in which the animation should play.
+   *
    * @default Direction.Forward
    */
   direction?: Direction | ((index: number) => Direction);
 
   /**
    * The position of the animation in the timeline, determining when it should start relative to the timeline.
+   *
    * @default Timing.AfterPrevious
    */
   timing?: Timing | ((index: number) => Timing);
 
   /**
    * The easing function for the animation, defining the rate of change of the animated value over time.
+   *
    * @default ease.linear
    */
-  ease?: EaseFn;
+  ease?: EaseFunction;
 };
 
-export type AnimationOptionsWithoutFn<Name extends string = string> = RemoveFunctionType<AnimationOptions<Name>>;
+export type AnimationOptionsWithoutFunction<Name extends string = string> = RemoveFunctionType<AnimationOptions<Name>>;
 
 export type FirstAnimationOptions<Name extends string = string> = Omit<AnimationOptions<Name>, 'timing'>;
 
-export type AnimationOptionsParam<Name extends string = string> = [FirstAnimationOptions<Name>, ...AnimationOptions<Name>[]];
+export type AnimationOptionsParameter<Name extends string = string> = [FirstAnimationOptions<Name>, ...AnimationOptions<Name>[]];
 
 export type TimelineOptions = {
   /**
@@ -189,8 +192,10 @@ export type TimelineOptions = {
 
   /**
    * The speed of the timeline, the normal speed is `1`.
+   *
    * - E.g. `2` means the animation plays twice as fast.
    * - E.g. `0.5` means the animation plays half as fast.
+   *
    * @default 1
    */
   timelineSpeed?: number;
@@ -199,9 +204,9 @@ export type TimelineOptions = {
   autoPlay?: boolean;
 };
 
-export type TimelineGlobalOptions = Omit<AnimationOptionsWithoutFn, 'name' | 'to'> & TimelineOptions;
+export type TimelineGlobalOptions = Omit<AnimationOptionsWithoutFunction, 'name' | 'to'> & TimelineOptions;
 
-export type AnimationPreparedOptions = Required<AnimationOptionsWithoutFn>;
+export type AnimationPreparedOptions = Required<AnimationOptionsWithoutFunction>;
 
 export type AnimationInfo<Name extends string = string> = {
   /** The name of the animation. */
@@ -236,6 +241,7 @@ export type AnimationInfo<Name extends string = string> = {
 
   /**
    * Checks if a given progress value is within the current progress.
+   *
    * @param progress - The progress value to check, between `0` and `1`.
    * @param tolerance - The allowable tolerance for the check. Default is `0.001`.
    * @returns `true` if the progress is within the specified tolerance, otherwise `false`.
@@ -244,6 +250,7 @@ export type AnimationInfo<Name extends string = string> = {
 
   /**
    * Checks if a given time value is within the current elapsed time.
+   *
    * @param time - The time value to check, in milliseconds.
    * @param tolerance - The allowable tolerance for the check, in milliseconds. Default is `5` ms.
    * @returns `true` if the time is within the specified tolerance, otherwise `false`.
@@ -265,8 +272,10 @@ export type TimelineInfo = {
 
   /**
    * The speed of the timeline, the normal speed is `1`.
+   *
    * - E.g. `2` means the animation plays twice as fast.
    * - E.g. `0.5` means the animation plays half as fast.
+   *
    * @default 1
    */
   speed: number;
@@ -298,6 +307,7 @@ export type TimelineInfo = {
 
   /**
    * Checks if a given progress value is within the current progress.
+   *
    * @param progress - The progress value to check, between `0` and `1`.
    * @param tolerance - The allowable tolerance for the check. Default is `0.001`.
    * @returns `true` if the progress is within the specified tolerance, otherwise `false`.
@@ -306,6 +316,7 @@ export type TimelineInfo = {
 
   /**
    * Checks if a given time value is within the current elapsed time.
+   *
    * @param time - The time value to check, in milliseconds.
    * @param tolerance - The allowable tolerance for the check, in milliseconds. Default is `5` ms.
    * @returns `true` if the time is within the specified tolerance, otherwise `false`.
@@ -335,7 +346,7 @@ export type PrivateTimelineInfo = {
 
 export type OnUpdateCallback<T extends AnimationOptions[]> = (
   info: CallbackInfo<T[number]['name']>,
-  timelineInfo: TimelineInfo,
+  timelineInfo: TimelineInfo
 ) => void;
 
 export type TimelineObject<Name extends string = string> = {
@@ -347,7 +358,7 @@ export type TimelineObject<Name extends string = string> = {
    * ⚠️ **Warning** ⚠️ This object values will be updated on every frame update if the timeline is playing.
    *
    * @example
-   * timelineInfo.isPaused;
+   *   timelineInfo.isPaused;
    */
   timelineInfo: TimelineInfo;
 
@@ -359,8 +370,8 @@ export type TimelineObject<Name extends string = string> = {
    * ⚠️ **Warning** ⚠️ This object values will be updated on every frame update if the timeline is playing.
    *
    * @example
-   * animations[0].progress; // Accessing the first animation by index
-   * animations['myFirstAnimation'].value; // Accessing the first animation by name
+   *   animations[0].progress; // Accessing the first animation by index
+   *   animations['myFirstAnimation'].value; // Accessing the first animation by name
    */
   animationsInfo: CallbackInfo<Name>;
 
@@ -373,26 +384,29 @@ export type TimelineObject<Name extends string = string> = {
    *
    * **Note:** Updating the animation values while the timeline is playing might result in flickering.
    *
-   * @param newValues - An array of objects containing the new values.
-   *
    * @example
-   * updateValues([{
-   *   name: 'myAnimation', // Animation name to update
-   *   duration: 500
-   * }]);
+   *   updateValues([
+   *     {
+   *       name: 'myAnimation', // Animation name to update
+   *       duration: 500,
+   *     },
+   *   ]);
+   *
+   * @param newValues - An array of objects containing the new values.
    */
   updateValues: (newValues: PartialExcept<AnimationOptions<Name>, 'name'>[]) => void;
 
   /**
-   *  Updates the options of the timeline.
+   * Updates the options of the timeline.
    *
    * ⚠️ **Warning** ⚠️ This method will throw an error if the some of the values are invalid.
-   * @param newOptions - An object containing the new options.
    *
    * @example
-   * updateTimelineOptions({
-   *   timelineSpeed: 0.5
-   *})
+   *   updateTimelineOptions({
+   *     timelineSpeed: 0.5,
+   *   });
+   *
+   * @param newOptions - An object containing the new options.
    */
   updateTimelineOptions: (newOptions: Partial<TimelineOptions>) => void;
 
@@ -402,14 +416,14 @@ export type TimelineObject<Name extends string = string> = {
    * - Accepts an optional `startFrom` parameter that can be a `time` in milliseconds or a percentage value.
    * - Optionally, you can specify a `playCount` to seek to a specific repeat count.
    *
+   * @example
+   *   play(); // Play from the start
+   *   play(500); // Play from 500 milliseconds
+   *   play('50%'); // Play from 50% of the timeline duration
+   *   play('50%', 2); // Play from 50% of the timeline duration on the second repeat
+   *
    * @param startFrom - The point to start from, specified as a `time` in milliseconds or a percentage value.
    * @param playCount - The repeat count to seek to before playing.
-   *
-   * @example
-   * play(); // Play from the start
-   * play(500); // Play from 500 milliseconds
-   * play('50%'); // Play from 50% of the timeline duration
-   * play('50%', 2); // Play from 50% of the timeline duration on the second repeat
    */
   play: (startFrom?: number | PercentageString, playCount?: number) => void;
 
@@ -420,8 +434,8 @@ export type TimelineObject<Name extends string = string> = {
    * - It will not trigger `play` events.
    *
    * @example
-   * seek("50%");
-   * playOneFrame();
+   *   seek('50%');
+   *   playOneFrame();
    */
   playOneFrame: () => void;
 
@@ -448,11 +462,12 @@ export type TimelineObject<Name extends string = string> = {
    * - You can pass parameters to stop at a specific point in the timeline.
    * - If the timeline is not currently playing, it plays only one frame at the specified stop point.
    *
+   * @example
+   *   stop(); // Skip to the end and stop
+   *   stop('50%'); // Skip to 50% of the timeline and stop
+   *
    * @param stopAt - The point to stop at, specified as a `time` in milliseconds or a percentage string.
    * @param playCount - The repeat count to stop at.
-   * @example
-   * stop(); // Skip to the end and stop
-   * stop("50%"); // Skip to 50% of the timeline and stop
    */
   stop: (stopAt?: number | PercentageString, playCount?: number) => void;
 
@@ -461,87 +476,93 @@ export type TimelineObject<Name extends string = string> = {
    *
    * - If the timeline is not playing, it will not start playing.
    *
+   * @example
+   *   seek(500); // Seek to 500 milliseconds
+   *   seek('50%'); // Seek to 50% of the timeline duration
+   *   seek('50%', 2); // Seek to 50% of the timeline duration on the second repeat
+   *
    * @param seekTo - The point to seek to, specified as a `time` in milliseconds or a percentage value.
    * @param playCount - The repeat count to seek to before playing.
-   *
-   * @example
-   * seek(500); // Seek to 500 milliseconds
-   * seek('50%'); // Seek to 50% of the timeline duration
-   * seek('50%', 2); // Seek to 50% of the timeline duration on the second repeat
    */
   seek: (seekTo: number | PercentageString, playCount?: number) => void;
 
   /**
    * Attaches an event listener to the timeline.
    *
+   * @example
+   *   const unsubscribe = on(Event.Play, () => {
+   *     // do something
+   *   });
+   *
+   *   unsubscribe(); // To remove the event listener
+   *
    * @param event - The event to listen for.
    * @param callback - The callback function to be executed when the event is triggered.
    * @returns A function to unsubscribe the event listener.
-   *
-   * @example
-   * const unsubscribe = on(Event.Play, () => {
-   *   // do something
-   * });
-   *
-   * unsubscribe(); // To remove the event listener
    */
   on: (event: Event, callback: EventCallback) => EventUnsubscribe;
 
   /**
    * Attaches an event listener to the timeline that will be triggered only once.
    *
+   * @example
+   *   const unsubscribe = once(Event.Play, () => {
+   *     // do something
+   *   });
+   *
+   *   unsubscribe(); // To remove the event listener
+   *
    * @param event - The event to listen for.
    * @param callback - The callback function to be executed when the event is triggered.
    * @returns A function to unsubscribe the event listener.
-   *
-   * @example
-   * const unsubscribe = once(Event.Play, () => {
-   *   // do something
-   * });
-   *
-   * unsubscribe(); // To remove the event listener
    */
   once: (event: Event, callback: EventCallback) => EventUnsubscribe;
 
   /**
    * Waits until the timeline completes.
+   *
    * @example
-   * await onCompleteAsync();
+   *   await onCompleteAsync();
    */
   onCompleteAsync: () => Promise<unknown> | undefined;
 
   /**
    * Waits until the timeline starts playing.
+   *
    * @example
-   * await onPlayAsync();
+   *   await onPlayAsync();
    */
   onPlayAsync: () => Promise<unknown> | undefined;
 
   /**
    * Waits until the timeline resumes.
+   *
    * @example
-   * await onResumeAsync();
+   *   await onResumeAsync();
    */
   onResumeAsync: () => Promise<unknown> | undefined;
 
   /**
    * Waits until the timeline pauses.
+   *
    * @example
-   * await onPauseAsync();
+   *   await onPauseAsync();
    */
   onPauseAsync: () => Promise<unknown> | undefined;
 
   /**
    * Waits until the timeline stops.
+   *
    * @example
-   * await onStopAsync();
+   *   await onStopAsync();
    */
   onStopAsync: () => Promise<unknown> | undefined;
 
   /**
    * Waits until the timeline repeats.
+   *
    * @example
-   * await onRepeatAsync();
+   *   await onRepeatAsync();
    */
   onRepeatAsync: () => Promise<unknown> | undefined;
 
@@ -549,8 +570,8 @@ export type TimelineObject<Name extends string = string> = {
   clearEvents: () => void;
 };
 
-export type SingleAnimationOptions = Omit<AnimationOptionsWithoutFn, 'name' | 'timing'> & { autoPlay?: boolean };
-export type SingleAnimationOptionsWithoutFn = RemoveFunctionType<SingleAnimationOptions>;
+export type SingleAnimationOptions = Omit<AnimationOptionsWithoutFunction, 'name' | 'timing'> & { autoPlay?: boolean };
+export type SingleAnimationOptionsWithoutFunction = RemoveFunctionType<SingleAnimationOptions>;
 export type SingleOnUpdateCallback = (info: Omit<AnimationInfo, 'name' | 'index'>) => void;
 export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo' | 'updateTimelineOptions'> & {
   /**
@@ -560,12 +581,12 @@ export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo
    *
    * **Note:** Updating the animation values while the timeline is playing might result in flickering.
    *
-   * @param newValues - An object containing the new values.
-   *
    * @example
-   * updateValues({ duration: 500 });
+   *   updateValues({ duration: 500 });
+   *
+   * @param newValues - An object containing the new values.
    */
-  updateValues: (newValues: Partial<AnimationOptionsWithoutFn>) => void;
+  updateValues: (newValues: Partial<AnimationOptionsWithoutFunction>) => void;
   /**
    * Retrieves information about the animation.
    *
@@ -574,8 +595,8 @@ export type SingleObject = Omit<TimelineObject, 'updateValues' | 'animationsInfo
    * ⚠️ **Warning** ⚠️ This object values will be updated on every frame update if the timeline is playing.
    *
    * @example
-   * animations.progress; // Accessing the animation progress
-   * animations.value; // Accessing the animation value
+   *   animations.progress; // Accessing the animation progress
+   *   animations.value; // Accessing the animation value
    */
   animationsInfo: AnimationInfo;
 };
@@ -590,10 +611,10 @@ export type GroupTimelineObject = Omit<TimelineObject<`${number}`>, 'updateValue
    *
    * **Note:** Updating the animation values while the timeline is playing might result in flickering.
    *
-   * @param newValues - An array of objects containing the new values.
-   *
    * @example
-   * updateValues([{ index: 0, duration: 500 }]);
+   *   updateValues([{ index: 0, duration: 500 }]);
+   *
+   * @param newValues - An array of objects containing the new values.
    */
   updateValues: (newValues: (Partial<Omit<AnimationOptions<`${number}`>, 'name'>> & { index: number })[]) => void;
 };

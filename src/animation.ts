@@ -1,6 +1,6 @@
 import { Direction, Timing } from './types.js';
 import { isAlternateDirection, isReverseDirection, validateAnimationValues } from './utils/helpers.js';
-import { clamp, normalizePercentage } from './utils/utils.js';
+import { clamp, normalizePercentage } from './utils/utilities.js';
 
 import type { AnimationInfo, AnimationPreparedOptions } from './types.js';
 
@@ -73,7 +73,7 @@ export default class Animation {
   }
 
   // preserve info object reference
-  #infoRef: AnimationInfo = Object.create(null);
+  #infoRef = Object.create(null) as AnimationInfo;
 
   get info(): AnimationInfo {
     return Object.assign(this.#infoRef, {
@@ -125,17 +125,20 @@ export default class Animation {
     const timing = this.#index === 0 ? Timing.FromStart : this.animationRef.timing;
 
     switch (timing) {
-      case Timing.FromStart:
+      case Timing.FromStart: {
         this.#startPoint = offset;
         break;
-      case Timing.AfterPrevious:
+      }
+      case Timing.AfterPrevious: {
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
         this.#startPoint = this.#previousTimelineRef.endPoint + offset;
         break;
-      case Timing.WithPrevious:
+      }
+      case Timing.WithPrevious: {
         if (!this.#previousTimelineRef) throw new Error('The previous animation is not defined.');
         this.#startPoint = this.#previousTimelineRef.#startPoint + offset;
         break;
+      }
     }
 
     this.endPoint = this.#startPoint + overallDuration;
@@ -210,24 +213,26 @@ export default class Animation {
 
     const targetLength = totalLength * this.#overallProgress;
 
+    let partIndex: number;
+
     // falls under with delay parts
     if (withDelayTotalLength && targetLength <= withDelayTotalLength) {
-      const at = clamp(Math.floor(targetLength / withDelayLength), 0, withDelayCount - 1);
+      partIndex = clamp(Math.floor(targetLength / withDelayLength), 0, withDelayCount - 1);
       const delay = withDelayCount === 0 ? 0 : this.animationRef.delay;
 
-      this.#start = this.#startPoint + withDelayLength * at + delay;
-      this.#delayCount = at + 1;
-      this.#playCount = at + 1;
+      this.#start = this.#startPoint + withDelayLength * partIndex + delay;
+      this.#delayCount = partIndex + 1;
 
       // falls under without delay parts
     } else {
       const remainingLength = targetLength - withDelayTotalLength;
-      const at = withDelayCount + clamp(Math.floor(remainingLength / withoutDelayLength), 0, this.animationRef.playCount - 1);
+      partIndex = withDelayCount + clamp(Math.floor(remainingLength / withoutDelayLength), 0, this.animationRef.playCount - 1);
 
-      this.#start = this.#startPoint + withDelayTotalLength + withoutDelayLength * (at - withDelayCount);
+      this.#start = this.#startPoint + withDelayTotalLength + withoutDelayLength * (partIndex - withDelayCount);
       this.#delayCount = withDelayCount;
-      this.#playCount = at + 1;
     }
+
+    this.#playCount = partIndex + 1;
 
     this.#end = this.#start + this.animationRef.duration;
 

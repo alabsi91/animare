@@ -1,1 +1,0 @@
-import{t as e}from"./utils.D7tQhJ4Q.js";function t(t){let n=e(t),r=n?t.x:t[0],i=n?t.y:t[1],a=n?t.z:t[2],o=n?`w`in t?t.w:void 0:t[3];return typeof o==`number`?`rgb(${Math.round(r)} ${Math.round(i)} ${Math.round(a)} / ${Math.round(o*100)}%)`:`rgb(${Math.round(r)} ${Math.round(i)} ${Math.round(a)})`}export{t};

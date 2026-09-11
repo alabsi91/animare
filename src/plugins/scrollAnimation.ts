@@ -1,26 +1,26 @@
 import { ScrollAxis, ScrollElementEdge } from '../types.js';
-import { normalizePercentage } from './utils.js';
+import { normalizePercentage } from './utilities.js';
 
 import type { ScrollAnimationOptions } from '../types.js';
 
 /**
  * Makes the scroll progress control the timeline.
  *
- * @param options - The options for configuring the scroll-controlled animation.
- * @returns A function to remove the scroll event listener.
- *
  * @example
- * const myAnimation = animare( ... );
+ *   const myAnimation = animare( ... );
  *
- * // The element to track when entering and exiting the viewport
- * const element = document.getElementById('element');
+ *   // The element to track when entering and exiting the viewport
+ *   const element = document.getElementById('element');
  *
- * const unsubscribe = scrollAnimation({
+ *   const unsubscribe = scrollAnimation({
  *   timeline: myAnimation,
  *   element: element
- * });
+ *   });
  *
- * unsubscribe(); // Removes the scroll event listener
+ *   unsubscribe(); // Removes the scroll event listener
+ *
+ * @param options - The options for configuring the scroll-controlled animation.
+ * @returns A function to remove the scroll event listener.
  */
 export function scrollAnimation<Name extends string>(options: ScrollAnimationOptions<Name>) {
   const element = options.root ?? document;
@@ -43,23 +43,23 @@ function onScroll<Name extends string>({
 }: ScrollAnimationOptions<Name>) {
   const isVertical = axis === ScrollAxis.Vertical;
 
-  const viewPortSize = isVertical ? root.clientHeight : root.clientWidth;
+  const viewportSize = isVertical ? root.clientHeight : root.clientWidth;
   const scrollPosition = isVertical ? root.scrollTop : root.scrollLeft;
 
   const startPosition = calcElementPosition(element, root, start) + startOffset;
   const endPosition = calcElementPosition(element, root, end) + endOffset;
 
-  const isEntered = startPosition <= scrollPosition + viewPortSize;
+  const isEntered = startPosition <= scrollPosition + viewportSize;
   const isExited = endPosition < scrollPosition;
 
-  let percentage = 0;
+  let percentage: number;
   if (!isEntered) {
     percentage = 0;
   } else if (isExited) {
     percentage = 1;
   } else {
-    const distance = viewPortSize - (startPosition - endPosition);
-    percentage = normalizePercentage((scrollPosition + viewPortSize - startPosition) / distance);
+    const distance = viewportSize - (startPosition - endPosition);
+    percentage = normalizePercentage((scrollPosition + viewportSize - startPosition) / distance);
   }
 
   timeline.seek(timeline.timelineInfo.duration * percentage);

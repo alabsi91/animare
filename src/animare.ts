@@ -3,12 +3,12 @@ import loop from './variants/loop.js';
 import single from './variants/single.js';
 import timeline from './variants/timeline.js';
 
-import type { AnimationOptionsParam, OnUpdateCallback, TimelineGlobalOptions, TimelineObject } from './types.js';
+import type { AnimationOptionsParameter, OnUpdateCallback, TimelineGlobalOptions, TimelineObject } from './types.js';
 
 export function animare<Name extends string>(
-  animations: AnimationOptionsParam<Name>,
-  callback: OnUpdateCallback<AnimationOptionsParam<Name>>,
-  globalValues: TimelineGlobalOptions = {},
+  animations: AnimationOptionsParameter<Name>,
+  callback: OnUpdateCallback<AnimationOptionsParameter<Name>>,
+  globalValues: TimelineGlobalOptions = {}
 ): TimelineObject<Name> {
   return timeline<Name>(animations, callback, globalValues);
 }

@@ -1,6 +1,12 @@
-import type { SpringParams, EaseFn } from './types.js';
+import type { SpringParameters, EaseFunction } from './types.js';
 
-export function spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 }: SpringParams = {}): EaseFn {
+export function spring({
+  mass = 1,
+  stiffness = 100,
+  damping = 10,
+  velocity = 0,
+  duration = 1000,
+}: SpringParameters = {}): EaseFunction {
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
   return (time: number) => {
     if (time === 0 || time === 1) return time;
@@ -27,13 +33,13 @@ export function spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, 
   };
 }
 
-export function steps(steps = 10, start = true): EaseFn {
+export function steps(steps = 10, shouldStartAtIntervalBeginning = true): EaseFunction {
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
-  const trunc = start ? Math.ceil : Math.floor;
+  const trunc = shouldStartAtIntervalBeginning ? Math.ceil : Math.floor;
   return (progress: number) => trunc(clamp(progress, 0, 1) * steps) / steps;
 }
 
-export function fromPoints(values: Float32List): EaseFn {
+export function fromPoints(values: Float32List): EaseFunction {
   if (!(values instanceof Float32Array) && !Array.isArray(values))
     throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [fromPoints] : first param must be an Array or Float32Array. !!\n\n');
 
@@ -42,7 +48,7 @@ export function fromPoints(values: Float32List): EaseFn {
   return (t: number) => values[Math.floor(t * length)] ?? values[length - 1];
 }
 
-export function wobble(bounciness = 1): EaseFn {
+export function wobble(bounciness = 1): EaseFunction {
   const p = bounciness * Math.PI;
   return (t: number): number => 1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * p);
 }

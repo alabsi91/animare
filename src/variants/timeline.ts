@@ -7,11 +7,11 @@ import {
   prepareAnimationsValues,
   prepareTimelineValues,
 } from '../utils/helpers.js';
-import { clamp, normalizePercentage, percentageStringToNumber } from '../utils/utils.js';
+import { clamp, normalizePercentage, percentageStringToNumber } from '../utils/utilities.js';
 
 import type {
   AnimationOptions,
-  AnimationOptionsParam,
+  AnimationOptionsParameter,
   CallbackInfo,
   OnUpdateCallback,
   PartialExcept,
@@ -24,25 +24,27 @@ import type {
 } from '../types.js';
 
 export default function timeline<Name extends string>(
-  animations: AnimationOptionsParam<Name>,
-  callback: OnUpdateCallback<AnimationOptionsParam<Name>>,
-  globalValues: TimelineGlobalOptions = {},
+  animations: AnimationOptionsParameter<Name>,
+  callback: OnUpdateCallback<AnimationOptionsParameter<Name>>,
+  globalValues: TimelineGlobalOptions = {}
 ): TimelineObject<Name> {
   const timelineOptions = prepareTimelineValues(globalValues);
   const preparedValues = prepareAnimationsValues(animations, globalValues);
 
   const eventManager = new EventManager();
 
+  const calculatedAnimations = calculateTimeline(preparedValues);
+
   const timelineInfo: TimelineInfo & PrivateTimelineInfo = {
     __startTime: 0,
     __pauseTime: 0,
     __lastFrameTime: 0,
-    __animations: [],
+    __animations: calculatedAnimations,
     __requestAnimationId: null,
     __startProgress: 0,
 
     progress: 0,
-    duration: 0,
+    duration: calculateTimelineDuration(calculatedAnimations),
     elapsedTime: 0,
     speed: timelineOptions.timelineSpeed,
 
@@ -62,26 +64,20 @@ export default function timeline<Name extends string>(
     },
   };
 
-  // calculate timeline
-  timelineInfo.__animations = calculateTimeline(preparedValues);
-  timelineInfo.duration = calculateTimelineDuration(timelineInfo.__animations);
-
-  /**
-   * Syncs the frame time to account for browser behavior that may pause animations in inactive tabs.
-   */
+  /** Syncs the frame time to account for browser behavior that may pause animations in inactive tabs. */
   const visibilitychange = {
     isRegistered: false,
     hiddenTime: 0,
-    add() {
-      if (this.isRegistered) return;
-      document.addEventListener('visibilitychange', this.handle);
-      this.isRegistered = true;
+    add: () => {
+      if (visibilitychange.isRegistered) return;
+      document.addEventListener('visibilitychange', visibilitychange.handle);
+      visibilitychange.isRegistered = true;
     },
-    remove() {
-      document.removeEventListener('visibilitychange', this.handle);
-      this.isRegistered = false;
+    remove: () => {
+      document.removeEventListener('visibilitychange', visibilitychange.handle);
+      visibilitychange.isRegistered = false;
     },
-    handle() {
+    handle: () => {
       if (document.visibilityState === 'hidden') {
         visibilitychange.hiddenTime = performance.now();
         return;
@@ -94,29 +90,29 @@ export default function timeline<Name extends string>(
     },
   };
 
-  const callbackAnimationInfo: CallbackInfo<Name> = Object.create(null);
+  const callbackAnimationInfo = Object.create(null) as CallbackInfo<Name>;
   callbackAnimationInfo.length = animations.length;
 
   // fill `callbackAnimationInfo` with initial values
-  for (let i = 0; i < timelineInfo.__animations.length; i++) {
-    const info = timelineInfo.__animations[i].info as CallbackInfo<Name>[Name];
+  for (let index = 0; index < timelineInfo.__animations.length; index++) {
+    const info = timelineInfo.__animations[index].info as CallbackInfo<Name>[Name];
     callbackAnimationInfo[info.name] = info;
     callbackAnimationInfo[info.index] = info;
   }
 
-  const executePerFrame = (now: number, oneFrame?: boolean) => {
+  const executePerFrame = (now: number, isOneFrame?: boolean) => {
     now *= timelineInfo.speed;
 
     timelineInfo.elapsedTime = now - timelineInfo.__startTime + timelineInfo.__startProgress * timelineInfo.duration; // Time passed since the start
     timelineInfo.progress = normalizePercentage(timelineInfo.elapsedTime / timelineInfo.duration);
 
     timelineInfo.fps = Math.round((1000 / (now - timelineInfo.__lastFrameTime)) * timelineInfo.speed);
-    if (!isFinite(timelineInfo.fps)) timelineInfo.fps = 60;
+    if (!Number.isFinite(timelineInfo.fps)) timelineInfo.fps = 60;
 
     timelineInfo.__lastFrameTime = now;
 
-    for (let i = 0; i < timelineInfo.__animations.length; i++) {
-      const animation = timelineInfo.__animations[i];
+    for (let index = 0; index < timelineInfo.__animations.length; index++) {
+      const animation = timelineInfo.__animations[index];
 
       animation.Update(timelineInfo.elapsedTime);
       const info = animation.info as CallbackInfo<Name>[Name];
@@ -128,7 +124,7 @@ export default function timeline<Name extends string>(
     // didn't reach the end? -> continue
     if (timelineInfo.progress !== 1) {
       callback(callbackAnimationInfo, timelineInfo);
-      if (oneFrame) return; // stop. we play only one frame
+      if (isOneFrame) return; // stop. we play only one frame
       timelineInfo.__requestAnimationId = requestAnimationFrame(executePerFrame);
       return;
     }
@@ -146,7 +142,7 @@ export default function timeline<Name extends string>(
       return;
     }
 
-    if (oneFrame) return; // stop. we play only one frame
+    if (isOneFrame) return; // stop. we play only one frame
 
     // repeat? -> restart
     callback(callbackAnimationInfo, timelineInfo);
@@ -164,12 +160,12 @@ export default function timeline<Name extends string>(
 
   const seek = (seekTo: number | PercentageString, playCount: number = timelineInfo.playCount) => {
     // disabled timeline
-    if (timelineOptions.timelinePlayCount === 0 || playCount === 0) {
+    if (playCount === 0 || timelineOptions.timelinePlayCount === 0) {
       console.warn('[seek] Cannot seek the timeline because the `playCount` is set to 0.');
       return;
     }
 
-    if (timelineOptions.timelinePlayCount > 0 && typeof playCount === 'number' && playCount > timelineOptions.timelinePlayCount) {
+    if (timelineOptions.timelinePlayCount > 0 && playCount > timelineOptions.timelinePlayCount) {
       console.warn('[seek] Cannot seek the timeline because the param `playCount` is greater than the `timelinePlayCount`.');
       return;
     }
@@ -229,8 +225,8 @@ export default function timeline<Name extends string>(
     }
 
     // reset all animations
-    for (let i = 0; i < callbackAnimationInfo.length; i++) {
-      timelineInfo.__animations[i].Setup();
+    for (let index = 0; index < callbackAnimationInfo.length; index++) {
+      timelineInfo.__animations[index].Setup();
     }
 
     seek(startFrom, playCount); // sets the start progress and play count
@@ -323,7 +319,7 @@ export default function timeline<Name extends string>(
 
   const stop = (
     stopAt: number | PercentageString = timelineInfo.duration,
-    playCount: number = timelineOptions.timelinePlayCount,
+    playCount: number = timelineOptions.timelinePlayCount
   ) => {
     // timeline is already playing? -> cancel
     if (timelineInfo.isPlaying && timelineInfo.__requestAnimationId !== null) {
@@ -340,8 +336,7 @@ export default function timeline<Name extends string>(
   };
 
   const updateValues = (newValues: PartialExcept<AnimationOptions<Name>, 'name'>[]) => {
-    for (let i = 0; i < newValues.length; i++) {
-      const newValuesItem = newValues[i];
+    for (const newValuesItem of newValues) {
       if (!newValuesItem.name) throw new Error('[updateValues] Animation name is required.');
 
       const animIndex = timelineInfo.__animations.findIndex(a => a.animationRef.name === newValuesItem.name);
@@ -351,8 +346,8 @@ export default function timeline<Name extends string>(
       timelineInfo.__animations[animIndex].Set(prepared);
     }
 
-    for (let i = 0; i < callbackAnimationInfo.length; i++) {
-      timelineInfo.__animations[i].Setup();
+    for (let index = 0; index < callbackAnimationInfo.length; index++) {
+      timelineInfo.__animations[index].Setup();
     }
 
     // to make a smooth transition if the duration was changed
@@ -371,7 +366,7 @@ export default function timeline<Name extends string>(
       console.warn('The `timelinePlayCount` with the value `0` will make the timeline not play.');
     }
 
-    if (typeof newOptions.timelineSpeed === 'number' && (newOptions.timelineSpeed === 0 || newOptions.timelineSpeed < 0)) {
+    if (typeof newOptions.timelineSpeed === 'number' && newOptions.timelineSpeed <= 0) {
       throw new Error('The `timelineSpeed` value cannot be a negative value or a zero.');
     }
 
@@ -385,7 +380,7 @@ export default function timeline<Name extends string>(
 
   if (timelineOptions.autoPlay) play();
 
-  const returnObj: TimelineObject<Name> = {
+  const returnObject: TimelineObject<Name> = {
     timelineInfo,
     animationsInfo: callbackAnimationInfo,
     updateValues,
@@ -407,5 +402,5 @@ export default function timeline<Name extends string>(
     clearEvents: eventManager.clear.bind(eventManager),
   };
 
-  return returnObj;
+  return returnObject;
 }

@@ -4,9 +4,7 @@ export function isObjectVector(vector: Vec1 | Vec2 | Vec3 | Vec4): vector is Vec
   return typeof vector === 'object' && !Array.isArray(vector);
 }
 
-/**
- * - Returns a number between `0` and `1`
- */
+/** - Returns a number between `0` and `1` */
 export function normalizePercentage(percentage: number) {
-  return percentage < 0 ? 0 : percentage > 1 ? 1 : percentage;
+  return percentage < 0 ? 0 : Math.min(percentage, 1);
 }

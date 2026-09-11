@@ -10,19 +10,17 @@ export function isValidNumber(value: unknown): value is number {
  * - Returns `0` on parsing error.
  */
 export function percentageStringToNumber(percentageString: PercentageString): number {
-  const percentage = parseFloat(percentageString);
+  const percentage = Number.parseFloat(percentageString);
   const isNumber = isValidNumber(percentage);
   if (!isNumber) return 0;
   return percentage / 100;
 }
 
-/**
- * - Returns a number between `0` and `1`
- */
+/** - Returns a number between `0` and `1` */
 export function normalizePercentage(percentage: number) {
-  return percentage < 0 ? 0 : percentage > 1 ? 1 : percentage;
+  return percentage < 0 ? 0 : Math.min(percentage, 1);
 }
 
 export function clamp(value: number, min: number, max: number) {
-  return value < min ? min : value > max ? max : value;
+  return value < min ? min : Math.min(value, max);
 }

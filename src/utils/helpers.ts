@@ -3,7 +3,7 @@ import { Direction, Timing } from '../types.js';
 
 import type {
   AnimationOptions,
-  AnimationOptionsWithoutFn,
+  AnimationOptionsWithoutFunction,
   AnimationPreparedOptions,
   RemoveFunction,
   TimelineGlobalOptions,
@@ -21,16 +21,12 @@ export const defaultValues = {
   ease: (t: number) => t,
 };
 
-/**
- * Returns `true` if the animation is an alternate or alternate-reverse direction
- */
+/** Returns `true` if the animation is an alternate or alternate-reverse direction */
 export function isAlternateDirection(direction: Direction): direction is Direction.Alternate | Direction.AlternateReverse {
   return direction === Direction.Alternate || direction === Direction.AlternateReverse;
 }
 
-/**
- * Returns `true` if the animation is an reverse or alternate-reverse direction
- */
+/** Returns `true` if the animation is an reverse or alternate-reverse direction */
 export function isReverseDirection(direction: Direction): direction is Direction.Reverse | Direction.AlternateReverse {
   return direction === Direction.Reverse || direction === Direction.AlternateReverse;
 }
@@ -62,22 +58,24 @@ export function validateAnimationValues(animation: AnimationOptions) {
 
 /**
  * - Set the default values for a single animation.
- * - If a value is optional and not passed, the default value from the global values will be used, else a default value will be used.
+ * - If a value is optional and not passed, the default value from the global values will be used, else a default value will be
+ *   used.
  */
 export function setDefaultValues(
   animation: AnimationOptions,
   globalValues: TimelineGlobalOptions,
-  index: number,
+  index: number
 ): AnimationPreparedOptions {
   // call functions with the current index
-  const perValue = <T>(value: T): RemoveFunction<T> => (typeof value === 'function' ? value(index) : value);
+  const perValue = <T>(value: T): RemoveFunction<T> =>
+    typeof value === 'function' ? (value as (index: number) => RemoveFunction<T>)(index) : (value as RemoveFunction<T>);
 
   const from = perValue(animation.from) ?? globalValues.from ?? defaultValues.from,
     duration = perValue(animation.duration) ?? globalValues.duration ?? defaultValues.duration,
     delay = perValue(animation.delay) ?? globalValues.delay ?? defaultValues.delay,
     offset = perValue(animation.offset) ?? globalValues.offset ?? defaultValues.offset,
     playCount = perValue(animation.playCount) ?? globalValues.playCount ?? defaultValues.playCount,
-    delayCount = typeof delay === 'number' ? perValue(animation.delayCount) ?? globalValues.delayCount ?? playCount : 0,
+    delayCount = typeof delay === 'number' ? (perValue(animation.delayCount) ?? globalValues.delayCount ?? playCount) : 0,
     direction = perValue(animation.direction) ?? globalValues.direction ?? defaultValues.direction,
     timing = perValue(animation.timing) ?? globalValues.timing ?? defaultValues.timing;
 
@@ -100,14 +98,15 @@ export function setDefaultValues(
 
 export function prepareAnimationsPartialOptions<Name extends string>(
   newValues: Partial<AnimationOptions>,
-  index: number,
-): Partial<AnimationOptionsWithoutFn<Name>> {
-  const hasValue = <T>(value: T | undefined): value is T => typeof value !== 'undefined';
+  index: number
+): Partial<AnimationOptionsWithoutFunction<Name>> {
+  const hasValue = <T>(value: T | undefined): value is T => value !== undefined;
 
   // call functions with the current index
-  const perValue = <T>(value: T): RemoveFunction<T> => (typeof value === 'function' ? value(index) : value);
+  const perValue = <T>(value: T): RemoveFunction<T> =>
+    typeof value === 'function' ? (value as (index: number) => RemoveFunction<T>)(index) : (value as RemoveFunction<T>);
 
-  const results: Partial<AnimationOptionsWithoutFn<Name>> = {};
+  const results: Partial<AnimationOptionsWithoutFunction<Name>> = {};
 
   if (hasValue(newValues.from)) results.from = perValue(newValues.from);
   if (hasValue(newValues.duration)) results.duration = perValue(newValues.duration);
@@ -126,17 +125,15 @@ export function prepareAnimationsPartialOptions<Name extends string>(
 
 export function prepareAnimationsValues(
   animations: AnimationOptions[],
-  globalValues: TimelineGlobalOptions,
+  globalValues: TimelineGlobalOptions
 ): AnimationPreparedOptions[] {
   const results: AnimationPreparedOptions[] = [];
 
-  for (let i = 0; i < animations.length; i++) {
-    const animation = animations[i];
-
-    const withDefaultValues = setDefaultValues(animation, globalValues, i);
+  for (const [index, animation] of animations.entries()) {
+    const withDefaultValues = setDefaultValues(animation, globalValues, index);
 
     // first animation always should play from the start.
-    if (i === 0) withDefaultValues.timing = Timing.FromStart;
+    if (index === 0) withDefaultValues.timing = Timing.FromStart;
 
     validateAnimationValues(withDefaultValues);
 
@@ -151,7 +148,7 @@ export function prepareTimelineValues(options: TimelineGlobalOptions) {
     console.warn('The `timelinePlayCount` with the value `0` will make the timeline not play.');
   }
 
-  if (typeof options.timelineSpeed === 'number' && (options.timelineSpeed === 0 || options.timelineSpeed < 0)) {
+  if (typeof options.timelineSpeed === 'number' && options.timelineSpeed <= 0) {
     throw new Error('The `timelineSpeed` value cannot be a negative value or a zero.');
   }
 
@@ -162,22 +159,19 @@ export function prepareTimelineValues(options: TimelineGlobalOptions) {
   };
 }
 
-/**
- * Create `Animation` classes and return them in an array
- */
+/** Create `Animation` classes and return them in an array */
 export function calculateTimeline(animations: AnimationPreparedOptions[]) {
   const timelines: Animation[] = [];
 
-  for (let i = 0; i < animations.length; i++) {
-    const animation = animations[i];
-    const previousTimeline: Animation | undefined = timelines[i - 1];
-
+  for (const [index, animation] of animations.entries()) {
     // should not throw, because we already forced it to be `AnimationTiming.FromStart`
-    if (i === 0 && animation.timing !== Timing.FromStart) {
+    if (index === 0 && animation.timing !== Timing.FromStart) {
       throw new Error(`The timing value in the first animation must be "${Timing.FromStart}".`);
     }
 
-    timelines.push(new Animation(animation, previousTimeline, i));
+    const previousTimeline: Animation | undefined = timelines[index - 1];
+
+    timelines.push(new Animation(animation, previousTimeline, index));
   }
 
   return timelines;

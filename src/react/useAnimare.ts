@@ -6,25 +6,23 @@ import type { GroupTimelineObject, SingleObject, TimelineObject } from '../types
  * `useAnimare` custom React hook.
  *
  * @example
+ *   import { useAnimare } from 'animare/react';
  *
- * import { useAnimare } from 'animare/react';
- *
- * useAnimare(() => {
- *   return animare(...params);
- *   // or
- *   return animare.single(...params);
- * }, []);
- *
+ *   useAnimare(() => {
+ *     return animare(...params);
+ *     // or
+ *     return animare.single(...params);
+ *   }, []);
  */
 export function useAnimare<Name extends string>(
   callback: () => TimelineObject<Name>,
-  deps?: React.DependencyList,
+  dependencies?: React.DependencyList
 ): TimelineObject<Name>;
-export function useAnimare(callback: () => GroupTimelineObject, deps?: React.DependencyList): GroupTimelineObject;
-export function useAnimare(callback: () => SingleObject, deps?: React.DependencyList): SingleObject;
+export function useAnimare(callback: () => GroupTimelineObject, dependencies?: React.DependencyList): GroupTimelineObject;
+export function useAnimare(callback: () => SingleObject, dependencies?: React.DependencyList): SingleObject;
 export function useAnimare<Name extends string, R extends TimelineObject<Name> | GroupTimelineObject | SingleObject>(
   callback: () => R,
-  deps: React.DependencyList = [],
+  dependencies: React.DependencyList = []
 ): R {
   const [animation, setAnimation] = useState<R>();
 
@@ -37,6 +35,7 @@ export function useAnimare<Name extends string, R extends TimelineObject<Name> |
 
     // set new
     const newAnimation = callback();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnimation(newAnimation);
 
     // clean current
@@ -46,7 +45,7 @@ export function useAnimare<Name extends string, R extends TimelineObject<Name> |
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, dependencies);
 
   return animation as R;
 }

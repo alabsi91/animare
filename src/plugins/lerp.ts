@@ -1,4 +1,4 @@
-import { isObjectVector } from './utils.js';
+import { isObjectVector } from './utilities.js';
 
 import type {
   Vec,
@@ -42,17 +42,17 @@ export function lerp(start: Vec, end: Vec, t: number): Vec {
 
   // Array-based vector interpolation
   if (Array.isArray(start) && Array.isArray(end)) {
-    return start.map((s, i) => s + t * (end[i] - s)) as Vec1Array | Vec2Array | Vec3Array;
+    return start.map((s, index) => s + t * (end[index] - s)) as Vec1Array | Vec2Array | Vec3Array;
   }
 
   // Object-based vector interpolation
   if (isObjectVector(start) && isObjectVector(end)) {
-    const result: Vec4Object = Object.assign({});
-    for (const key in start) {
-      if (key in start && key in end) {
-        const k = key as keyof Vec1Object; // x | y | z | w
-        result[k] = start[k] + t * (end[k] - start[k]);
-      }
+    const result = {} as Vec4Object;
+    for (const key of Object.keys(start)) {
+      if (!Object.hasOwn(end, key)) continue;
+
+      const k = key as keyof Vec1Object; // x | y | z | w
+      result[k] = start[k] + t * (end[k] - start[k]);
     }
     return result;
   }

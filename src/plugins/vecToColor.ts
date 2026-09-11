@@ -1,18 +1,18 @@
-import { isObjectVector } from './utils.js';
+import { isObjectVector } from './utilities.js';
 
 import type { Vec3Array, Vec3Object, Vec4Array, Vec4Object } from '../types.js';
 
 /**
  * Converts vector to RGB string
  *
+ * @example
+ *   const color1: Vec4Array = [255, 0, 0, 1]; // or { x: 255, y: 0, z: 0, w: 1 } as Vec4Object
+ *   const color2: Vec4Array = [0, 0, 255, 1]; // or { x: 0, y: 0, z: 255, w: 1 } as Vec4Object
+ *   const resultColor = lerp(color1, color2, progress);
+ *   const rgbString = vecToRGB(resultColor);
+ *
  * @param vec - The vector to convert
  * @returns - The RGB string
- *
- * @example
- * const color1: Vec4Array = [255, 0, 0, 1]; // or { x: 255, y: 0, z: 0, w: 1 } as Vec4Object
- * const color2: Vec4Array = [0, 0, 255, 1]; // or { x: 0, y: 0, z: 255, w: 1 } as Vec4Object
- * const resultColor = lerp(color1, color2, progress);
- * const rgbString = vecToRGB(resultColor);
  */
 export function vecToRGB(vec: Vec3Array | Vec4Array | Vec3Object | Vec4Object): string {
   const isObject = isObjectVector(vec);
@@ -30,14 +30,14 @@ export function vecToRGB(vec: Vec3Array | Vec4Array | Vec3Object | Vec4Object): 
 /**
  * Converts vector to HSL string
  *
+ * @example
+ *   const color1: Vec3Array = [50, 100, 50]; // or { x: 50, y: 100, z: 50 } as Vec3Object
+ *   const color2: Vec3Array = [200, 100, 50]; // or { x: 200, y: 100, z: 50 } as Vec3Object
+ *   const resultColor = lerp(color1, color2, progress);
+ *   const hslString = vecToHSL(resultColor);
+ *
  * @param vec - The vector to convert
  * @returns - The HSL string
- *
- * @example
- * const color1: Vec3Array = [50, 100, 50]; // or { x: 50, y: 100, z: 50 } as Vec3Object
- * const color2: Vec3Array = [200, 100, 50]; // or { x: 200, y: 100, z: 50 } as Vec3Object
- * const resultColor = lerp(color1, color2, progress);
- * const hslString = vecToHSL(resultColor);
  */
 export function vecToHSL(vec: Vec3Array | Vec4Array | Vec3Object | Vec4Object): string {
   const isObject = isObjectVector(vec);
@@ -55,14 +55,14 @@ export function vecToHSL(vec: Vec3Array | Vec4Array | Vec3Object | Vec4Object): 
 /**
  * Converts vector to HWB string
  *
+ * @example
+ *   const color1: Vec3Array = [50, 100, 50]; // or { x: 50, y: 100, z: 50 } as Vec3Object
+ *   const color2: Vec3Array = [200, 100, 50]; // or { x: 200, y: 100, z: 50 } as Vec3Object
+ *   const resultColor = lerp(color1, color2, progress);
+ *   const hslString = vecToHWB(resultColor);
+ *
  * @param vec - The vector to convert
  * @returns - The HWB string
- *
- * @example
- * const color1: Vec3Array = [50, 100, 50]; // or { x: 50, y: 100, z: 50 } as Vec3Object
- * const color2: Vec3Array = [200, 100, 50]; // or { x: 200, y: 100, z: 50 } as Vec3Object
- * const resultColor = lerp(color1, color2, progress);
- * const hslString = vecToHWB(resultColor);
  */
 export function vecToHWB(vec: Vec3Array | Vec4Array | Vec3Object | Vec4Object): string {
   const isObject = isObjectVector(vec);

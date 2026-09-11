@@ -1,6 +1,6 @@
 import { bounce, wobble } from './ease.js';
 
-import type { Ease_in_out_inOut, EaseFn } from './types.js';
+import type { Ease_in_out_inOut, EaseFunction } from './types.js';
 
 const easeInOut: Ease_in_out_inOut = {
   back: (c1 = 1.70158) => {
@@ -38,11 +38,10 @@ const easeInOut: Ease_in_out_inOut = {
 };
 
 /**
- * Makes any easing function symmetrical. The easing function will run
- * forwards for half of the duration, then backwards for the rest of the
- * duration.
+ * Makes any easing function symmetrical. The easing function will run forwards for half of the duration, then backwards for the
+ * rest of the duration.
  */
-function inOut(easing: EaseFn): EaseFn {
+function inOut(easing: EaseFunction): EaseFunction {
   return t => {
     if (t < 0.5) return easing(t * 2) / 2;
     return 1 - easing((1 - t) * 2) / 2;

@@ -5,34 +5,33 @@ import type { AutoPauseOptions, GroupTimelineObject, SingleObject, TimelineObjec
  *
  * Plays the timeline when the element becomes visible, even if the timeline was not playing before.
  *
+ * @example
+ *   const myTimeline = animare.timeline(...params);
+ *
+ *   // The element to track when entering and exiting the viewport
+ *   const element = document.getElementById('element');
+ *
+ *   const unsubscribe = autoPause(myTimeline, element);
+ *
+ *   unsubscribe(); // Disconnect the intersection observer
+ *
  * @param timeline - The animation object returned by animare.
  * @param element - The HTML element to track when entering and exiting the viewport.
  * @param options - The options for the intersection observer.
  * @returns A function to remove the intersection observer and stop tracking visibility.
- *
- * @example
- * const myTimeline = animare.timeline(...params);
- *
- * // The element to track when entering and exiting the viewport
- * const element = document.getElementById('element');
- *
- * const unsubscribe = autoPause(myTimeline, element);
- *
- * unsubscribe(); // Disconnect the intersection observer
  */
 export function autoPause<Name extends string>(
   timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject,
   element: Element,
-  observerOptions?: AutoPauseOptions,
+  observerOptions?: AutoPauseOptions
 ): () => void {
-  const forcePlay = observerOptions?.forcePlay ?? true;
+  const isForcePlay = observerOptions?.forcePlay ?? true;
   let isPausedByMe = false;
 
   const observer = new IntersectionObserver(entries => {
     if (!timeline) return;
 
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
+    for (const entry of entries) {
       const isVisible = entry.isIntersecting;
 
       observerOptions?.onVisibilityChange?.(isVisible);
@@ -45,14 +44,14 @@ export function autoPause<Name extends string>(
       // enter the viewport
       if (isVisible) {
         // resume if paused
-        if (timeline.timelineInfo.isPaused && isPausedByMe) {
+        if (isPausedByMe && timeline.timelineInfo.isPaused) {
           isPausedByMe = false;
           timeline.resume();
           return;
         }
 
         // play anyway
-        if (forcePlay && !timeline.timelineInfo.isPaused) timeline.play();
+        if (isForcePlay && !timeline.timelineInfo.isPaused) timeline.play();
 
         return;
       }

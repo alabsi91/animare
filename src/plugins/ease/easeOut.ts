@@ -1,6 +1,6 @@
 import { bounce, wobble } from './ease.js';
 
-import type { Ease_in_out_inOut, EaseFn } from './types.js';
+import type { Ease_in_out_inOut, EaseFunction } from './types.js';
 
 const easeOut: Ease_in_out_inOut = {
   back: (c1 = 1.70158) => {
@@ -26,7 +26,7 @@ const easeOut: Ease_in_out_inOut = {
 };
 
 /** Runs an easing function backwards. */
-function out(easing: EaseFn): EaseFn {
+function out(easing: EaseFunction): EaseFunction {
   return t => 1 - easing(1 - t);
 }
 
