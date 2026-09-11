@@ -14,7 +14,9 @@ export default function DirectionExample() {
     return animare.group(
       {
         to: Array<number>(circles.length).fill(100),
-        duration: 1500,
+        // alternate flips on every play, so the last two get two plays of half the duration
+        duration: [1500, 1500, 750, 750],
+        playCount: [1, 1, 2, 2],
         direction: [Direction.Forward, Direction.Reverse, Direction.Alternate, Direction.AlternateReverse],
         autoPlay: false,
       },

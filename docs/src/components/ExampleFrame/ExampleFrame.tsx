@@ -3,13 +3,13 @@ import styles from './ExampleFrame.module.css';
 
 import { Event, type GroupTimelineObject, type SingleObject, type TimelineObject } from 'animare';
 
-type Props = {
+type Props<Name extends string> = {
   title: string;
-  timeline: TimelineObject<string> | GroupTimelineObject | SingleObject;
+  timeline: TimelineObject<Name> | GroupTimelineObject | SingleObject;
   slider: React.RefObject<HTMLInputElement | null>;
   children: React.ReactNode;
 };
-export default function Example(props: Props) {
+export default function Example<Name extends string>(props: Props<Name>) {
   const playButtonIcon = useRef<SVGPathElement>(null);
   const slider = useRef<HTMLInputElement>(null);
   props.slider.current = slider.current;

@@ -34,7 +34,7 @@ const Title = 'animare';
   const delay = 500;
 
   const logoAnimation = animare.single(
-    { from: 1, to: 0.9, duration: 500, direction: Direction.Alternate, ease: ease.out.quart, autoPlay: false },
+    { from: 1, to: 0.9, duration: 250, playCount: 2, direction: Direction.Alternate, ease: ease.out.quart, autoPlay: false },
     ({ value }) => {
       svg.style.transform = `scale(${value})`;
     },

@@ -11,18 +11,20 @@ export default function UpdateAnimationValues() {
   const animation = useAnimare(() => {
     const circle = container.current.querySelector<HTMLDivElement>('span');
 
-    const timeline = animare.single(
-      { to: 100, duration: 1000, direction: Direction.Alternate, autoPlay: false, playCount: -1 },
-      info => {
-        if (slider.current) slider.current.value = info.progress.toString();
+    // there and back forever: two alternate plays per timeline loop
+    const timeline = animare.timeline(
+      [{ name: 'circle', to: 100, duration: 500, direction: Direction.Alternate, playCount: 2 }],
+      (info, timelineInfo) => {
+        if (slider.current) slider.current.value = timelineInfo.progress.toString();
 
         if (!circle) return;
 
-        const value = info.value;
+        const value = info.circle.value;
 
         circle.style.marginLeft = `${value}%`;
         circle.style.translate = `-${value}%`;
       },
+      { autoPlay: false, timelinePlayCount: -1 },
     );
 
     return timeline;
@@ -32,8 +34,8 @@ export default function UpdateAnimationValues() {
 
   const updateDuration = (e: React.PointerEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
-    const value = parseFloat(target.value);
-    animation.updateValues({ duration: value });
+    const roundTripDuration = parseFloat(target.value);
+    animation.updateValues([{ name: 'circle', duration: roundTripDuration / 2 }]);
   };
 
   return (

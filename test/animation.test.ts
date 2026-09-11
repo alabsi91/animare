@@ -77,12 +77,13 @@ describe('delay and repeat', () => {
 });
 
 describe('direction', () => {
-  const valuesAt = (direction: Direction) => {
-    const timeline = createTimeline([{ name: 'a', to: 100, duration: 1000, direction }]);
+  /** Samples the value every 250 ms over `playCount` plays of 500 ms. */
+  const valuesAt = (direction: Direction, playCount: number) => {
+    const timeline = createTimeline([{ name: 'a', to: 100, duration: 500, direction, playCount }]);
     const info = timeline.animationsInfo.a;
     const values = [info.value];
 
-    for (let step = 0; step < 4; step++) {
+    for (let step = 0; step < playCount * 2; step++) {
       advance(250);
       values.push(info.value);
     }
@@ -90,10 +91,19 @@ describe('direction', () => {
     return values;
   };
 
-  it('forward', () => assert.deepEqual(valuesAt(Direction.Forward), [0, 25, 50, 75, 100]));
-  it('reverse', () => assert.deepEqual(valuesAt(Direction.Reverse), [100, 75, 50, 25, 0]));
-  it('alternate', () => assert.deepEqual(valuesAt(Direction.Alternate), [0, 50, 100, 50, 0]));
-  it('alternate-reverse', () => assert.deepEqual(valuesAt(Direction.AlternateReverse), [100, 50, 0, 50, 100]));
+  it('forward', () => assert.deepEqual(valuesAt(Direction.Forward, 1), [0, 50, 100]));
+  it('reverse', () => assert.deepEqual(valuesAt(Direction.Reverse, 1), [100, 50, 0]));
+
+  it('alternate flips on every play, each play takes the full duration', () => {
+    assert.deepEqual(valuesAt(Direction.Alternate, 1), [0, 50, 100]);
+    assert.deepEqual(valuesAt(Direction.Alternate, 2), [0, 50, 100, 50, 0]);
+    assert.deepEqual(valuesAt(Direction.Alternate, 3), [0, 50, 100, 50, 0, 50, 100]);
+  });
+
+  it('alternate-reverse starts backwards', () => {
+    assert.deepEqual(valuesAt(Direction.AlternateReverse, 1), [100, 50, 0]);
+    assert.deepEqual(valuesAt(Direction.AlternateReverse, 2), [100, 50, 0, 50, 100]);
+  });
 });
 
 describe('timing', () => {

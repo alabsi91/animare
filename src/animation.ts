@@ -1,4 +1,4 @@
-import { Direction, Timing } from './types.js';
+import { Timing } from './types.js';
 import { isAlternateDirection, isReverseDirection, validateAnimationValues } from './utils/helpers.js';
 import { clamp, normalizePercentage } from './utils/utilities.js';
 
@@ -20,20 +20,11 @@ export default class Animation {
   /** The end point in time, including delays and repeats, in milliseconds. */
   endPoint: number;
 
-  /** The starting value of the animation, relative to its direction. */
-  #startValue: number;
-
   /** The current animated value. */
   #value: number;
 
-  /** The ending value of the animation, relative to its direction. */
-  #endValue: number;
-
   /** The number of remaining times to apply the delay. */
   #delayCount: number;
-
-  /** The current lap of the alternate direction. */
-  #alternateLap: 0 | 1 = 0;
 
   /** The number of remaining times the animation should play. */
   #playCount: number;
@@ -106,16 +97,13 @@ export default class Animation {
     this.#elapsedTime = 0;
     this.#progress = 0;
     this.#overallProgress = 0;
-    this.#alternateLap = 0;
     this.#playCount = 0;
     this.#delayCount = 0;
 
     this.#isAlternate = isAlternateDirection(this.animationRef.direction);
     this.#isReverse = isReverseDirection(this.animationRef.direction);
 
-    this.#startValue = this.#isReverse ? this.animationRef.to : this.animationRef.from;
     this.#value = this.#isReverse ? this.animationRef.to : this.animationRef.from;
-    this.#endValue = this.#isReverse ? this.animationRef.from : this.animationRef.to;
 
     const offset = this.animationRef.offset;
     const delayCount = this.#getEffectiveDelayCount();
@@ -163,8 +151,8 @@ export default class Animation {
       this.#overallProgress = 1;
       this.#elapsedTime = this.animationRef.duration;
 
-      const isReverse = this.animationRef.direction === Direction.Reverse || this.animationRef.direction === Direction.Alternate;
-      this.#value = isReverse ? this.animationRef.from : this.animationRef.to;
+      const isLastPlayReversed = this.#isPlayReversed(this.animationRef.playCount);
+      this.#value = isLastPlayReversed ? this.animationRef.from : this.animationRef.to;
 
       return;
     }
@@ -246,27 +234,18 @@ export default class Animation {
     this.#elapsedTime = elapsedTime - this.#start;
     this.#progress = normalizePercentage(this.#elapsedTime / (this.#end - this.#start));
 
-    const internalProgress = this.#calculateProgress();
-    this.#value = this.#startValue + (this.#endValue - this.#startValue) * this.animationRef.ease(internalProgress);
+    const isReversed = this.#isPlayReversed(this.#playCount);
+    const startValue = isReversed ? this.animationRef.to : this.animationRef.from;
+    const endValue = isReversed ? this.animationRef.from : this.animationRef.to;
+
+    this.#value = startValue + (endValue - startValue) * this.animationRef.ease(this.#progress);
   }
 
-  /** - Calculate the internal progress relative to the direction. */
-  #calculateProgress(): number {
-    if (!this.#isAlternate) return this.#progress;
+  /** Whether the given play (counted from 1) runs from `to` to `from`. Alternate directions flip on every play, like CSS. */
+  #isPlayReversed(playCount: number): boolean {
+    if (!this.#isAlternate) return this.#isReverse;
 
-    const progress = (this.#progress <= 0.5 ? this.#progress : this.#progress - 0.5) * 2;
-    this.#alternateLap = this.#progress <= 0.5 ? 0 : 1;
-
-    // first lap
-    if (this.#alternateLap === 0) {
-      this.#startValue = this.#isReverse ? this.animationRef.to : this.animationRef.from;
-      this.#endValue = this.#isReverse ? this.animationRef.from : this.animationRef.to;
-      return progress;
-    }
-
-    // second lap
-    this.#startValue = this.#isReverse ? this.animationRef.from : this.animationRef.to;
-    this.#endValue = this.#isReverse ? this.animationRef.to : this.animationRef.from;
-    return progress;
+    const isEvenPlay = playCount % 2 === 0;
+    return this.#isReverse !== isEvenPlay;
   }
 }
