@@ -112,8 +112,15 @@ export type Ease_in_out_inOut = {
   /** **Back** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#back) to learn more. */
   back: (c1?: number) => EaseFunction;
 
-  /** **Bounce** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#bounce) to learn more. */
-  bounce: EaseFunction;
+  /**
+   * Creates a bouncing ball easing function.
+   *
+   * **Bounce** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#bounce) to learn more.
+   *
+   * @param bounces - How many times the ball rebounds after the first drop. Defaults to `3`.
+   * @param bounciness - How much speed the ball keeps on each rebound, from `0` (none) to `1` (all). Defaults to `0.5`.
+   */
+  bounce: (bounces?: number, bounciness?: number) => EaseFunction;
 
   /** **Cric** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#cric) to learn more. */
   circ: EaseFunction;

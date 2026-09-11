@@ -105,15 +105,21 @@ Default linear easing function.
 <Ease title='out.elastic' padding={74} easing='ease.out.elastic' client:idle />
 <Ease title='inOut.elastic' padding={74} easing='ease.inOut.elastic' client:idle />
 
-## Bounce
+## Bounce()
 
-`ease.in.Bounce` <Badge text="in" variant="caution" size="small" /> <br />
-`ease.out.Bounce` <Badge text="out" variant="caution" size="small" /> <br />
-`ease.inOut.Bounce` <Badge text="in-out" variant="caution" size="small" />
+`ease.in.bounce(bounces = 3, bounciness = 0.5)` <Badge text="in" variant="caution" size="small" /> <br />
+`ease.out.bounce(bounces = 3, bounciness = 0.5)` <Badge text="out" variant="caution" size="small" /> <br />
+`ease.inOut.bounce(bounces = 3, bounciness = 0.5)` <Badge text="in-out" variant="caution" size="small" />
 
-<Ease title='in.bounce' easing='ease.in.bounce' client:idle />
-<Ease title='out.bounce' easing='ease.out.bounce' client:idle />
-<Ease title='inOut.bounce' easing='ease.inOut.bounce' client:idle />
+Creates a bouncing ball easing function.
+`bounces` is how many times the ball rebounds after the first drop.
+`bounciness` is how much speed the ball keeps on each rebound, from `0` (none) to `1` (all).
+
+<Ease title='in.bounce()' easing='ease.in.bounce()' client:idle />
+<Ease title='out.bounce()' easing='ease.out.bounce()' client:idle />
+<Ease title='inOut.bounce()' easing='ease.inOut.bounce()' client:idle />
+<Ease title='out.bounce(2, 0.3)' easing='ease.out.bounce(2, 0.3)' client:idle />
+<Ease title='out.bounce(6, 0.8)' easing='ease.out.bounce(6, 0.8)' client:idle />
 
 ## Back()
 

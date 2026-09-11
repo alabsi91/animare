@@ -6,7 +6,10 @@ const easeIn: Ease_in_out_inOut = {
   back: (c1 = 1.70158) => {
     return t => (c1 + 1) * t * t * t - c1 * t * t;
   },
-  bounce: t => 1 - bounce(1 - t),
+  bounce: (bounces, bounciness) => {
+    const bounceOut = bounce(bounces, bounciness);
+    return t => 1 - bounceOut(1 - t);
+  },
   circ: t => 1 - Math.sqrt(1 - Math.pow(t, 2)),
   cubic: t => t * t * t,
   elastic: t => {

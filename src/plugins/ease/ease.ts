@@ -53,13 +53,36 @@ export function wobble(bounciness = 1): EaseFunction {
   return (t: number): number => 1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * p);
 }
 
-export function bounce(t: number): number {
-  const n1 = 7.5625;
-  const d1 = 2.75;
-  if (t < 1 / d1) return n1 * t * t;
-  if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
-  if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
-  return n1 * (t -= 2.625 / d1) * t + 0.984375;
+export function bounce(bounces = 3, bounciness = 0.5): EaseFunction {
+  // A ball dropped from height 1. Each rebound keeps `bounciness` of its speed.
+  let totalDuration = 1;
+  for (let reboundIndex = 1; reboundIndex <= bounces; reboundIndex++) {
+    totalDuration += 2 * Math.pow(bounciness, reboundIndex);
+  }
+
+  const dropDuration = 1 / totalDuration;
+  const gravity = 1 / (dropDuration * dropDuration);
+
+  return (t: number): number => {
+    if (t < dropDuration) return gravity * t * t;
+
+    let reboundStart = dropDuration;
+    let reboundDuration = 2 * dropDuration * bounciness;
+    let reboundHeight = bounciness * bounciness;
+
+    for (let reboundIndex = 0; reboundIndex < bounces; reboundIndex++) {
+      if (t < reboundStart + reboundDuration) {
+        const timeFromPeak = t - reboundStart - reboundDuration / 2;
+        return gravity * timeFromPeak * timeFromPeak + 1 - reboundHeight;
+      }
+
+      reboundStart += reboundDuration;
+      reboundDuration *= bounciness;
+      reboundHeight *= bounciness * bounciness;
+    }
+
+    return 1;
+  };
 }
 
 export function linear(t: number) {
