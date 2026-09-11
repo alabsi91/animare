@@ -13,7 +13,7 @@ export default defineConfig(
 
   // prettier
   {
-    files: ['**/*.md', 'src/**/*.ts'],
+    files: ['**/*.md', 'src/**/*.ts', 'test/**/*.ts'],
     extends: [eslintPluginPrettierRecommended],
     rules: {
       'prettier/prettier': 'warn',
@@ -22,7 +22,7 @@ export default defineConfig(
 
   // TypeScript
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'test/**/*.ts'],
     extends: [
       pluginJs.configs.recommended,
       tsEslint.configs.recommendedTypeChecked,
@@ -102,6 +102,17 @@ export default defineConfig(
   {
     files: ['src/react/**/*.ts', 'src/preact/**/*.ts'],
     extends: [reactHooks.configs.flat['recommended-latest']],
+  },
+
+  // Tests
+  {
+    files: ['test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        { allowForKnownSafeCalls: [{ from: 'package', package: 'node:test', name: ['describe', 'it'] }] },
+      ],
+    },
   },
 
   // Markdown

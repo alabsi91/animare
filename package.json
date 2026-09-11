@@ -44,8 +44,10 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "tsc --noEmit && eslint src",
-    "lint:fix": "eslint src --fix",
+    "lint": "tsc --noEmit && tsc -p test && eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "npm run lint && npm run build && npm run test:unit",
+    "test:unit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test 'test/**/*.test.ts'",
     "deploy-docs": "npm --prefix docs run build && git -C docs/dist init && git -C docs/dist add . && git -C docs/dist commit -m 'docs: deploy' && (git -C docs/dist fetch $(git remote get-url origin) gh-pages && git -C docs/dist checkout gh-pages || git -C docs/dist checkout -b gh-pages) && git -C docs/dist push -f $(git remote get-url origin) HEAD:gh-pages && rm -rf docs/dist/.git",
     "prepare": "npm run build"
   },
@@ -86,6 +88,7 @@
     "@eslint/js": "^10.0.1",
     "@eslint/markdown": "^8.0.3",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "esbuild": "^0.28.2",
