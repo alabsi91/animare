@@ -6,7 +6,9 @@ const Title = 'animare';
 <h1>Welcome to</h1>
 <div class='container not-content'>
   <h1 class='title'>
-    {[...Title].map(c => <span class='letter'>{c}</span>)}
+    {[...Title].map(c => (
+      <span class='letter'>{c}</span>
+    ))}
   </h1>
   <div class='slider-container'>
     <button class='play-pause'>
@@ -30,12 +32,15 @@ const Title = 'animare';
 </div>
 
 <CardGrid>
-  <Card title='Light' icon='seti:salesforce'>Advanced animation library for modern JavaScript.</Card>
-  <Card title='Modern' icon='seti:crystal_embedded'>Based on `requestAnimationFrame`</Card>
+  <Card title='Light' icon='seti:salesforce'>
+    Advanced animation library for modern JavaScript.
+  </Card>
+  <Card title='Modern' icon='seti:crystal_embedded'>
+    Based on `requestAnimationFrame`
+  </Card>
 </CardGrid>
 
 <script>
-  import { TRANSITION_BEFORE_PREPARATION } from 'astro:transitions/client';
   import animare from 'animare';
   import { ease, lerp, vecToRGB } from 'animare/plugins';
 
@@ -48,9 +53,14 @@ const Title = 'animare';
   const playSvg = playPauseButton.querySelector<SVGSVGElement>('.play-svg path')!;
 
   // force reload on transition
-  document.addEventListener(TRANSITION_BEFORE_PREPARATION, e => {
+  document.addEventListener('astro:before-preparation', e => {
     if (e.to.pathname === '/animare/') {
-      e.navigationType === 'traverse' ? location.reload() : e.preventDefault();
+      if (e.navigationType === 'traverse') {
+        location.reload();
+        return;
+      }
+
+      e.preventDefault();
     }
   });
 

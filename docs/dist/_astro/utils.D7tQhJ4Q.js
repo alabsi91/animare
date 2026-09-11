@@ -1,0 +1,1 @@
+function e(e){return typeof e==`object`&&!Array.isArray(e)}function t(e){return e<0?0:Math.min(e,1)}export{t as n,e as t};

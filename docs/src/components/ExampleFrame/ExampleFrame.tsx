@@ -6,7 +6,7 @@ import { Event, type GroupTimelineObject, type SingleObject, type TimelineObject
 type Props = {
   title: string;
   timeline: TimelineObject<string> | GroupTimelineObject | SingleObject;
-  slider: React.MutableRefObject<HTMLInputElement | null>;
+  slider: React.RefObject<HTMLInputElement | null>;
   children: React.ReactNode;
 };
 export default function Example(props: Props) {

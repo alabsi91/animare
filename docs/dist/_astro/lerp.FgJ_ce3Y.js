@@ -1,0 +1,1 @@
+import{t as e}from"./utils.D7tQhJ4Q.js";function t(t,n,r){if(typeof t==`number`&&typeof n==`number`)return t+r*(n-t);if(Array.isArray(t)&&Array.isArray(n))return t.map((e,t)=>e+r*(n[t]-e));if(e(t)&&e(n)){let e=Object.assign({});for(let i in t){if(!(i in t&&i in n))continue;let a=i;e[a]=t[a]+r*(n[a]-t[a])}return e}throw Error(`Invalid input types for lerp function`)}export{t};

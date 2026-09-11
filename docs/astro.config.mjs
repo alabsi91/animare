@@ -39,10 +39,10 @@ export default defineConfig({
         },
         themes: ['dracula'],
       },
-      social: {
-        'github': 'https://github.com/alabsi91/animare',
-        'x.com': 'https://x.com/alabsi91',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/alabsi91/animare' },
+        { icon: 'x.com', label: 'X', href: 'https://x.com/alabsi91' },
+      ],
     }),
     react(),
   ],
