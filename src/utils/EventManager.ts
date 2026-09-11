@@ -5,15 +5,21 @@ import type { EventCallback, EventUnsubscribe } from '../types.js';
 export default class EventManager {
   #registeredEvents = new Map<Event, Set<EventCallback>>();
 
-  #onPlayPromise: ((value?: unknown) => void) | null = null;
-  #onResumePromise: ((value?: unknown) => void) | null = null;
-  #onPausePromise: ((value?: unknown) => void) | null = null;
-  #onStopPromise: ((value?: unknown) => void) | null = null;
-  #onCompletePromise: ((value?: unknown) => void) | null = null;
-  #onRepeatPromise: ((value?: unknown) => void) | null = null;
+  #pendingPromises = new Map<Event, PromiseWithResolvers<void>>();
 
   #remove(event: Event, callback: EventCallback): boolean {
     return this.#registeredEvents.get(event)?.delete(callback) ?? false;
+  }
+
+  /** Returns one shared promise per event. Every caller waits on the same one until the event is emitted. */
+  #waitFor(event: Event): Promise<void> {
+    const alreadyPending = this.#pendingPromises.get(event);
+    if (alreadyPending) return alreadyPending.promise;
+
+    const pending = Promise.withResolvers<void>();
+    this.#pendingPromises.set(event, pending);
+
+    return pending.promise;
   }
 
   /**
@@ -63,48 +69,19 @@ export default class EventManager {
       remove();
     });
 
-    return () => this.#remove(event, callback);
+    return remove;
   }
 
   public emit(event: Event) {
     const callbacks = this.#registeredEvents.get(event);
-    if (!callbacks) return;
-
-    for (const callback of callbacks) callback();
-
-    if (event === Event.Play) {
-      this.#onPlayPromise?.();
-      this.#onPlayPromise = null;
-      return;
+    if (callbacks) {
+      for (const callback of callbacks) callback();
     }
 
-    if (event === Event.Resume) {
-      this.#onResumePromise?.();
-      this.#onResumePromise = null;
-      return;
-    }
-
-    if (event === Event.Pause) {
-      this.#onPausePromise?.();
-      this.#onPausePromise = null;
-      return;
-    }
-
-    if (event === Event.Complete) {
-      this.#onCompletePromise?.();
-      this.#onCompletePromise = null;
-      return;
-    }
-
-    if (event === Event.Repeat) {
-      this.#onRepeatPromise?.();
-      this.#onRepeatPromise = null;
-      return;
-    }
-
-    if (event === Event.Stop) {
-      this.#onStopPromise?.();
-      this.#onStopPromise = null;
+    const pending = this.#pendingPromises.get(event);
+    if (pending) {
+      this.#pendingPromises.delete(event);
+      pending.resolve();
     }
   }
 
@@ -119,11 +96,8 @@ export default class EventManager {
    * @example
    *   await onPlayAsync();
    */
-  public onPlayAsync() {
-    if (this.#onPlayPromise !== null) return;
-    return new Promise(resolve => {
-      this.#onPlayPromise = resolve;
-    });
+  public onPlayAsync(): Promise<void> {
+    return this.#waitFor(Event.Play);
   }
 
   /**
@@ -132,11 +106,8 @@ export default class EventManager {
    * @example
    *   await onResumeAsync();
    */
-  public onResumeAsync() {
-    if (this.#onResumePromise !== null) return;
-    return new Promise(resolve => {
-      this.#onResumePromise = resolve;
-    });
+  public onResumeAsync(): Promise<void> {
+    return this.#waitFor(Event.Resume);
   }
 
   /**
@@ -145,11 +116,8 @@ export default class EventManager {
    * @example
    *   await onPauseAsync();
    */
-  public onPauseAsync() {
-    if (this.#onPausePromise !== null) return;
-    return new Promise(resolve => {
-      this.#onPausePromise = resolve;
-    });
+  public onPauseAsync(): Promise<void> {
+    return this.#waitFor(Event.Pause);
   }
 
   /**
@@ -158,11 +126,8 @@ export default class EventManager {
    * @example
    *   await onStopAsync();
    */
-  public onStopAsync() {
-    if (this.#onStopPromise !== null) return;
-    return new Promise(resolve => {
-      this.#onStopPromise = resolve;
-    });
+  public onStopAsync(): Promise<void> {
+    return this.#waitFor(Event.Stop);
   }
 
   /**
@@ -171,11 +136,8 @@ export default class EventManager {
    * @example
    *   await onCompleteAsync();
    */
-  public onCompleteAsync() {
-    if (this.#onCompletePromise !== null) return;
-    return new Promise(resolve => {
-      this.#onCompletePromise = resolve;
-    });
+  public onCompleteAsync(): Promise<void> {
+    return this.#waitFor(Event.Complete);
   }
 
   /**
@@ -184,10 +146,7 @@ export default class EventManager {
    * @example
    *   await onRepeatAsync();
    */
-  public onRepeatAsync() {
-    if (this.#onRepeatPromise !== null) return;
-    return new Promise(resolve => {
-      this.#onRepeatPromise = resolve;
-    });
+  public onRepeatAsync(): Promise<void> {
+    return this.#waitFor(Event.Repeat);
   }
 }

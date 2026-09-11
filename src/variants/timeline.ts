@@ -72,6 +72,9 @@ export default function timeline<Name extends string>(
       if (visibilitychange.isRegistered) return;
       document.addEventListener('visibilitychange', visibilitychange.handle);
       visibilitychange.isRegistered = true;
+
+      // registered while the tab is already hidden, count the hidden time from now on
+      if (document.visibilityState === 'hidden') visibilitychange.hiddenTime = performance.now();
     },
     remove: () => {
       document.removeEventListener('visibilitychange', visibilitychange.handle);
@@ -84,7 +87,7 @@ export default function timeline<Name extends string>(
       }
 
       if (document.visibilityState === 'visible') {
-        timelineInfo.__startTime += performance.now() - visibilitychange.hiddenTime;
+        timelineInfo.__startTime += (performance.now() - visibilitychange.hiddenTime) * timelineInfo.speed;
         visibilitychange.hiddenTime = 0;
       }
     },
@@ -100,11 +103,17 @@ export default function timeline<Name extends string>(
     callbackAnimationInfo[info.index] = info;
   }
 
+  const notify = () => {
+    callback(callbackAnimationInfo, timelineInfo);
+    timelineInfo.isFirstFrame = false;
+  };
+
   const executePerFrame = (now: number, isOneFrame?: boolean) => {
     now *= timelineInfo.speed;
 
     timelineInfo.elapsedTime = now - timelineInfo.__startTime + timelineInfo.__startProgress * timelineInfo.duration; // Time passed since the start
-    timelineInfo.progress = normalizePercentage(timelineInfo.elapsedTime / timelineInfo.duration);
+    timelineInfo.progress =
+      timelineInfo.duration === 0 ? 1 : normalizePercentage(timelineInfo.elapsedTime / timelineInfo.duration);
 
     timelineInfo.fps = Math.round((1000 / (now - timelineInfo.__lastFrameTime)) * timelineInfo.speed);
     if (!Number.isFinite(timelineInfo.fps)) timelineInfo.fps = 60;
@@ -123,7 +132,7 @@ export default function timeline<Name extends string>(
 
     // didn't reach the end? -> continue
     if (timelineInfo.progress !== 1) {
-      callback(callbackAnimationInfo, timelineInfo);
+      notify();
       if (isOneFrame) return; // stop. we play only one frame
       timelineInfo.__requestAnimationId = requestAnimationFrame(executePerFrame);
       return;
@@ -136,7 +145,7 @@ export default function timeline<Name extends string>(
       timelineInfo.isFinished = true;
       timelineInfo.isPlaying = false;
       visibilitychange.remove();
-      callback(callbackAnimationInfo, timelineInfo);
+      notify();
       eventManager.emit(Event.Complete);
       timelineInfo.__requestAnimationId = null;
       return;
@@ -145,7 +154,7 @@ export default function timeline<Name extends string>(
     if (isOneFrame) return; // stop. we play only one frame
 
     // repeat? -> restart
-    callback(callbackAnimationInfo, timelineInfo);
+    notify();
     eventManager.emit(Event.Repeat);
 
     timelineInfo.__requestAnimationId = requestAnimationFrame(next => {
@@ -213,13 +222,23 @@ export default function timeline<Name extends string>(
       timelineInfo.__lastFrameTime = now;
     }
 
+    // while paused the start time is anchored to the pause moment, so `resume` lands on the seek point
+    if (timelineInfo.isPaused) {
+      timelineInfo.__startTime = timelineInfo.__pauseTime * timelineInfo.speed;
+    }
+
     timelineInfo.playCount = playCount;
     timelineInfo.__startProgress = seekTo;
   };
 
   const play = (startFrom: number | PercentageString = 0, playCount: number = 1) => {
-    // timeline is already playing? -> reset
-    if (timelineInfo.isPlaying && timelineInfo.__requestAnimationId !== null) {
+    if (timelineOptions.timelinePlayCount === 0) {
+      console.warn('[play] Cannot play the timeline because the `timelinePlayCount` is set to 0.');
+      return;
+    }
+
+    // a frame is already scheduled (playing, or a previous `play` that has not rendered yet)? -> cancel it
+    if (timelineInfo.__requestAnimationId !== null) {
       cancelAnimationFrame(timelineInfo.__requestAnimationId);
       timelineInfo.__requestAnimationId = null;
     }
@@ -231,41 +250,44 @@ export default function timeline<Name extends string>(
 
     seek(startFrom, playCount); // sets the start progress and play count
 
-    timelineInfo.__requestAnimationId = requestAnimationFrame(now => {
-      timelineInfo.__startTime = now * timelineInfo.speed;
-      timelineInfo.__lastFrameTime = now * timelineInfo.speed;
-      timelineInfo.progress = timelineInfo.__startProgress;
+    // the state is set right away, so `pause` and `stop` work before the first frame renders
+    const now = performance.now() * timelineInfo.speed;
+    timelineInfo.__startTime = now;
+    timelineInfo.__lastFrameTime = now;
+    timelineInfo.__pauseTime = 0;
+    timelineInfo.progress = timelineInfo.__startProgress;
 
-      timelineInfo.isPlaying = timelineInfo.progress !== 1;
-      timelineInfo.isFinished = timelineInfo.progress === 1;
-      timelineInfo.isPaused = false;
-      timelineInfo.isFirstFrame = true;
+    timelineInfo.isPlaying = timelineInfo.progress !== 1;
+    timelineInfo.isFinished = timelineInfo.progress === 1;
+    timelineInfo.isPaused = false;
+    timelineInfo.isFirstFrame = true;
 
-      visibilitychange.add(); // add if not already added
+    visibilitychange.add(); // add if not already added
+
+    timelineInfo.__requestAnimationId = requestAnimationFrame(frameTime => {
+      // the first frame lands exactly on the start point
+      timelineInfo.__startTime = frameTime * timelineInfo.speed;
+      timelineInfo.__lastFrameTime = frameTime * timelineInfo.speed;
 
       eventManager.emit(Event.Play);
 
-      executePerFrame(now);
-
-      timelineInfo.isFirstFrame = false;
+      executePerFrame(frameTime);
     });
   };
 
   const playOneFrame = () => {
-    // timeline is already playing? -> reset
-    if (timelineInfo.isPlaying && timelineInfo.__requestAnimationId !== null) {
+    if (timelineInfo.isPlaying) {
       console.warn('[playOneFrame] The timeline is already playing.');
       return;
     }
 
-    const now = performance.now();
+    // while paused, keep the frame time at the pause moment so `resume` continues from the same position
+    const now = timelineInfo.isPaused ? timelineInfo.__pauseTime : performance.now();
     timelineInfo.__startTime = now * timelineInfo.speed;
     timelineInfo.__lastFrameTime = now * timelineInfo.speed;
     timelineInfo.progress = timelineInfo.__startProgress;
 
-    timelineInfo.isPlaying = false;
     timelineInfo.isFinished = timelineInfo.progress === 1;
-    timelineInfo.isPaused = false;
     timelineInfo.isFirstFrame = false;
 
     executePerFrame(now, true);
@@ -289,7 +311,12 @@ export default function timeline<Name extends string>(
 
     cancelAnimationFrame(timelineInfo.__requestAnimationId);
     timelineInfo.__requestAnimationId = null;
+
+    // freeze the position: while paused the start time is anchored to the pause moment
     timelineInfo.__pauseTime = performance.now();
+    timelineInfo.__startTime = timelineInfo.__pauseTime * timelineInfo.speed;
+    timelineInfo.__startProgress = timelineInfo.progress;
+
     timelineInfo.isPaused = true;
     timelineInfo.isPlaying = false;
     visibilitychange.remove();
@@ -322,11 +349,15 @@ export default function timeline<Name extends string>(
     playCount: number = timelineOptions.timelinePlayCount
   ) => {
     // timeline is already playing? -> cancel
-    if (timelineInfo.isPlaying && timelineInfo.__requestAnimationId !== null) {
+    if (timelineInfo.__requestAnimationId !== null) {
       cancelAnimationFrame(timelineInfo.__requestAnimationId);
       timelineInfo.__requestAnimationId = null;
-      timelineInfo.isPlaying = false;
     }
+
+    timelineInfo.isPlaying = false;
+    timelineInfo.isPaused = false;
+    timelineInfo.__pauseTime = 0;
+    visibilitychange.remove();
 
     seek(stopAt, playCount);
 
@@ -350,15 +381,11 @@ export default function timeline<Name extends string>(
       timelineInfo.__animations[index].Setup();
     }
 
-    // to make a smooth transition if the duration was changed
-    if (timelineInfo.isPlaying) {
-      const currentProgress = timelineInfo.progress;
-      timelineInfo.duration = calculateTimelineDuration(timelineInfo.__animations);
-      seek(timelineInfo.duration * currentProgress);
-      return;
-    }
-
+    const currentProgress = timelineInfo.progress;
     timelineInfo.duration = calculateTimelineDuration(timelineInfo.__animations);
+
+    // keep the relative position if the duration was changed
+    if (timelineInfo.isPlaying || timelineInfo.isPaused) seek(timelineInfo.duration * currentProgress);
   };
 
   const updateTimelineOptions = (newOptions: Partial<TimelineOptions>) => {
@@ -375,7 +402,8 @@ export default function timeline<Name extends string>(
     const currentProgress = timelineInfo.progress;
     timelineInfo.speed = timelineOptions.timelineSpeed;
 
-    if (timelineInfo.isPlaying) seek(currentProgress * timelineInfo.duration);
+    // the start time is stored in speed-scaled units, re-anchor it for the new speed
+    if (timelineInfo.isPlaying || timelineInfo.isPaused) seek(currentProgress * timelineInfo.duration);
   };
 
   if (timelineOptions.autoPlay) play();

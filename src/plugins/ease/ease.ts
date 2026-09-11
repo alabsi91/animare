@@ -14,7 +14,7 @@ export function spring({
     mass = clamp(mass, 0.1, 1000);
     stiffness = clamp(stiffness, 0.1, 1000);
     damping = clamp(damping, 0.1, 1000);
-    velocity = clamp(velocity, 0.1, 1000);
+    velocity = clamp(velocity, -1000, 1000);
 
     const w0 = Math.sqrt(stiffness / mass),
       zeta = damping / (2 * Math.sqrt(stiffness * mass)),

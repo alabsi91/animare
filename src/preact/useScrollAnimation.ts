@@ -27,6 +27,9 @@ export function useScrollAnimation<Name extends string>(
   dependencies: React.DependencyList = []
 ) {
   useEffect(() => {
+    // `useAnimare` returns undefined on the first render
+    if (!options.timeline) return;
+
     const unSub = scrollAnimation(options);
     return unSub;
     // eslint-disable-next-line react-hooks/exhaustive-deps

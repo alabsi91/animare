@@ -56,7 +56,7 @@ const LinearEasing = (x: number) => x;
 
 export default function cubicBezier(mX1: number, mY1: number, mX2: number, mY2: number): EaseFunction {
   if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1))
-    throw new Error('/n/n⛔ [animare] ➡️ [ease] ➡️ [cubicBezier] : bezier x values must be in [0, 1] range. !!\n\n');
+    throw new Error('\n\n⛔ [animare] ➡️ [ease] ➡️ [cubicBezier] : bezier x values must be in [0, 1] range. !!\n\n');
 
   if (mX1 === mY1 && mX2 === mY2) return LinearEasing;
 

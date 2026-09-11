@@ -29,38 +29,38 @@ export function autoPause<Name extends string>(
   let isPausedByMe = false;
 
   const observer = new IntersectionObserver(entries => {
-    if (!timeline) return;
+    if (!timeline) {
+      console.error('[autoPause] The timeline is not defined.');
+      return;
+    }
 
-    for (const entry of entries) {
-      const isVisible = entry.isIntersecting;
+    // entries are in chronological order, only the latest state matters
+    const latestEntry = entries.at(-1);
+    if (!latestEntry) return;
 
-      observerOptions?.onVisibilityChange?.(isVisible);
+    const isVisible = latestEntry.isIntersecting;
 
-      if (!timeline) {
-        console.error('[autoPause] The timeline is not defined.');
+    observerOptions?.onVisibilityChange?.(isVisible);
+
+    // enter the viewport
+    if (isVisible) {
+      // resume if paused
+      if (isPausedByMe && timeline.timelineInfo.isPaused) {
+        isPausedByMe = false;
+        timeline.resume();
         return;
       }
 
-      // enter the viewport
-      if (isVisible) {
-        // resume if paused
-        if (isPausedByMe && timeline.timelineInfo.isPaused) {
-          isPausedByMe = false;
-          timeline.resume();
-          return;
-        }
+      // play anyway, unless the user paused it or it is already running
+      if (isForcePlay && !timeline.timelineInfo.isPaused && !timeline.timelineInfo.isPlaying) timeline.play();
 
-        // play anyway
-        if (isForcePlay && !timeline.timelineInfo.isPaused) timeline.play();
+      return;
+    }
 
-        return;
-      }
-
-      // exit the viewport
-      if (timeline.timelineInfo.isPlaying) {
-        isPausedByMe = true;
-        timeline.pause();
-      }
+    // exit the viewport
+    if (timeline.timelineInfo.isPlaying) {
+      isPausedByMe = true;
+      timeline.pause();
     }
   }, observerOptions);
 

@@ -45,9 +45,11 @@ export default function single(animation: SingleAnimationOptions, onUpdateCallba
       delete newValues.autoPlay;
     }
 
-    if ('playCount' in newValues) {
-      timelineReturnObject.updateTimelineOptions({ timelinePlayCount: newValues.playCount });
-      delete newValues.playCount;
+    // same mapping as on creation: a negative playCount repeats the timeline forever, otherwise the animation repeats
+    if (typeof newValues.playCount === 'number') {
+      const isInfinite = newValues.playCount < 0;
+      timelineReturnObject.updateTimelineOptions({ timelinePlayCount: isInfinite ? -1 : 1 });
+      newValues = { ...newValues, playCount: isInfinite ? 1 : newValues.playCount };
     }
 
     timelineUpdateValues([{ name: 'single', ...newValues }]);

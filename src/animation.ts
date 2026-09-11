@@ -118,8 +118,9 @@ export default class Animation {
     this.#endValue = this.#isReverse ? this.animationRef.from : this.animationRef.to;
 
     const offset = this.animationRef.offset;
-    const delay = this.animationRef.delayCount === 0 ? 0 : this.animationRef.delay;
-    const overallDuration = this.animationRef.duration * this.animationRef.playCount + delay * this.animationRef.delayCount;
+    const delayCount = this.#getEffectiveDelayCount();
+    const delay = delayCount === 0 ? 0 : this.animationRef.delay;
+    const overallDuration = this.animationRef.duration * this.animationRef.playCount + delay * delayCount;
 
     // ensure that the first animation is always `Timing.FromStart`
     const timing = this.#index === 0 ? Timing.FromStart : this.animationRef.timing;
@@ -156,11 +157,11 @@ export default class Animation {
       this.#isFinished = true;
 
       this.#playCount = this.animationRef.playCount;
-      this.#delayCount = this.animationRef.delayCount;
+      this.#delayCount = this.#getEffectiveDelayCount();
 
       this.#progress = 1;
       this.#overallProgress = 1;
-      this.#elapsedTime = this.endPoint - this.#startPoint;
+      this.#elapsedTime = this.animationRef.duration;
 
       const isReverse = this.animationRef.direction === Direction.Reverse || this.animationRef.direction === Direction.Alternate;
       this.#value = isReverse ? this.animationRef.from : this.animationRef.to;
@@ -196,18 +197,24 @@ export default class Animation {
    * ⚠️ **Warning** ⚠️ This method will throw an error if the animation values are invalid.
    */
   public Set(animation: Partial<AnimationPreparedOptions>) {
-    Object.assign(this.animationRef, animation);
-    validateAnimationValues(this.animationRef);
+    const updatedAnimation = { ...this.animationRef, ...animation };
+    validateAnimationValues(updatedAnimation);
+    Object.assign(this.animationRef, updatedAnimation);
+  }
+
+  /** A `delayCount` higher than `playCount` is ignored. */
+  #getEffectiveDelayCount(): number {
+    return Math.min(this.animationRef.delayCount, this.animationRef.playCount);
   }
 
   #calculateValues(elapsedTime: number): void {
-    const withDelayCount = this.animationRef.delayCount;
+    const withDelayCount = this.#getEffectiveDelayCount();
 
     const withoutDelayLength = this.animationRef.duration;
     const withoutDelayTotalLength = withoutDelayLength * (this.animationRef.playCount - withDelayCount);
 
     const withDelayLength = this.animationRef.duration + this.animationRef.delay;
-    const withDelayTotalLength = withDelayLength * withDelayCount + this.animationRef.delay * withDelayCount;
+    const withDelayTotalLength = withDelayLength * withDelayCount;
 
     const totalLength = withDelayTotalLength + withoutDelayTotalLength;
 

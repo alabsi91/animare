@@ -47,13 +47,6 @@ export function validateAnimationValues(animation: AnimationOptions) {
 
   if (typeof animation.delayCount === 'number' && animation.delayCount < 0)
     throw new Error('The `delayCount` value cannot be a negative value.');
-
-  if (
-    typeof animation.playCount === 'number' &&
-    typeof animation.delayCount === 'number' &&
-    animation.delayCount > animation.playCount
-  )
-    throw new Error('The `delayCount` value cannot be greater than the `playCount` value.');
 }
 
 /**

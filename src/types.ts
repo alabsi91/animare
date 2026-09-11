@@ -524,7 +524,7 @@ export type TimelineObject<Name extends string = string> = {
    * @example
    *   await onCompleteAsync();
    */
-  onCompleteAsync: () => Promise<unknown> | undefined;
+  onCompleteAsync: () => Promise<void>;
 
   /**
    * Waits until the timeline starts playing.
@@ -532,7 +532,7 @@ export type TimelineObject<Name extends string = string> = {
    * @example
    *   await onPlayAsync();
    */
-  onPlayAsync: () => Promise<unknown> | undefined;
+  onPlayAsync: () => Promise<void>;
 
   /**
    * Waits until the timeline resumes.
@@ -540,7 +540,7 @@ export type TimelineObject<Name extends string = string> = {
    * @example
    *   await onResumeAsync();
    */
-  onResumeAsync: () => Promise<unknown> | undefined;
+  onResumeAsync: () => Promise<void>;
 
   /**
    * Waits until the timeline pauses.
@@ -548,7 +548,7 @@ export type TimelineObject<Name extends string = string> = {
    * @example
    *   await onPauseAsync();
    */
-  onPauseAsync: () => Promise<unknown> | undefined;
+  onPauseAsync: () => Promise<void>;
 
   /**
    * Waits until the timeline stops.
@@ -556,7 +556,7 @@ export type TimelineObject<Name extends string = string> = {
    * @example
    *   await onStopAsync();
    */
-  onStopAsync: () => Promise<unknown> | undefined;
+  onStopAsync: () => Promise<void>;
 
   /**
    * Waits until the timeline repeats.
@@ -564,7 +564,7 @@ export type TimelineObject<Name extends string = string> = {
    * @example
    *   await onRepeatAsync();
    */
-  onRepeatAsync: () => Promise<unknown> | undefined;
+  onRepeatAsync: () => Promise<void>;
 
   /** Removes all attached event listeners. */
   clearEvents: () => void;

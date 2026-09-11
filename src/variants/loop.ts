@@ -14,7 +14,7 @@
  */
 export default function loop(onUpdateCallback: (delta: number) => void) {
   let requestFrameId = 0;
-  let lastFrameTime = 0;
+  let lastFrameTime = performance.now();
 
   const execute = (now: number) => {
     const delta = now - lastFrameTime; // Time between the current and previous frame

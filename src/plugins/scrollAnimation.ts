@@ -28,6 +28,9 @@ export function scrollAnimation<Name extends string>(options: ScrollAnimationOpt
 
   element.addEventListener('scroll', handler, { passive: true });
 
+  // sync with the current scroll position, no scroll event fires on subscribe
+  handler();
+
   return () => element.removeEventListener('scroll', handler);
 }
 
