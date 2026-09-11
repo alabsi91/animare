@@ -95,15 +95,21 @@ Default linear easing function.
 <Ease title='out.circ' easing='ease.out.circ' client:idle />
 <Ease title='inOut.circ' easing='ease.inOut.circ' client:idle />
 
-## Elastic
+## Elastic()
 
-`ease.in.elastic` <Badge text="in" variant="caution" size="small" /> <br />
-`ease.out.elastic` <Badge text="out" variant="caution" size="small" /> <br />
-`ease.inOut.elastic` <Badge text="in-out" variant="caution" size="small" />
+`ease.in.elastic(amplitude = 1, period = 0.3)` <Badge text="in" variant="caution" size="small" /> <br />
+`ease.out.elastic(amplitude = 1, period = 0.3)` <Badge text="out" variant="caution" size="small" /> <br />
+`ease.inOut.elastic(amplitude = 1, period = 0.45)` <Badge text="in-out" variant="caution" size="small" />
 
-<Ease title='in.elastic' padding={74} easing='ease.in.elastic' client:idle />
-<Ease title='out.elastic' padding={74} easing='ease.out.elastic' client:idle />
-<Ease title='inOut.elastic' padding={74} easing='ease.inOut.elastic' client:idle />
+Creates a spring-like easing function that overshoots the target and oscillates back.
+`amplitude` is how far it overshoots. Values below `1` are treated as `1`.
+`period` is how long one oscillation takes, as a fraction of the duration. Smaller means more wiggles.
+
+<Ease title='in.elastic()' padding={74} easing='ease.in.elastic()' client:idle />
+<Ease title='out.elastic()' padding={74} easing='ease.out.elastic()' client:idle />
+<Ease title='inOut.elastic()' padding={74} easing='ease.inOut.elastic()' client:idle />
+<Ease title='out.elastic(1, 0.15)' padding={74} easing='ease.out.elastic(1, 0.15)' client:idle />
+<Ease title='out.elastic(2, 0.5)' padding={74} easing='ease.out.elastic(2, 0.5)' client:idle />
 
 ## Bounce()
 

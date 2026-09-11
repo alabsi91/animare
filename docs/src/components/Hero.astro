@@ -100,7 +100,7 @@ const Title = 'animare';
       const t = info[i].value;
 
       const x = lerp(i >= info.length / 2 ? -400 : 400, 0, ease.in.wobble(2)(t)),
-        y = lerp(i >= info.length / 2 ? 200 : -200, 0, ease.out.elastic(t)),
+        y = lerp(i >= info.length / 2 ? 200 : -200, 0, ease.out.elastic()(t)),
         z = lerp(400, 0, ease.out.back()(t)),
         rotate = lerp(i % 2 === 0 ? 90 : -90, 0, ease.in.wobble(6)(t)),
         scale = lerp(0, 1.2, ease.in.wobble(4)(t));

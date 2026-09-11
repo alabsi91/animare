@@ -53,6 +53,16 @@ export function wobble(bounciness = 1): EaseFunction {
   return (t: number): number => 1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * p);
 }
 
+export function elastic(amplitude = 1, period = 0.3): EaseFunction {
+  const clampedAmplitude = Math.max(amplitude, 1);
+  const phaseShift = (period / (2 * Math.PI)) * Math.asin(1 / clampedAmplitude);
+
+  return (t: number): number => {
+    if (t === 0 || t === 1) return t;
+    return clampedAmplitude * Math.pow(2, -10 * t) * Math.sin(((t - phaseShift) * 2 * Math.PI) / period) + 1;
+  };
+}
+
 export function bounce(bounces = 3, bounciness = 0.5): EaseFunction {
   // A ball dropped from height 1. Each rebound keeps `bounciness` of its speed.
   let totalDuration = 1;

@@ -1,4 +1,4 @@
-import { bounce, wobble } from './ease.js';
+import { bounce, elastic, wobble } from './ease.js';
 
 import type { Ease_in_out_inOut, EaseFunction } from './types.js';
 
@@ -17,15 +17,9 @@ const easeInOut: Ease_in_out_inOut = {
   },
   circ: t => (t < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2),
   cubic: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
-  elastic: t => {
-    const c5 = (2 * Math.PI) / 4.5;
-    return t === 0
-      ? 0
-      : t === 1
-        ? 1
-        : t < 0.5
-          ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * c5)) / 2
-          : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * c5)) / 2 + 1;
+  elastic: (amplitude, period = 0.45) => {
+    const elasticOut = elastic(amplitude, period);
+    return inOut(t => 1 - elasticOut(1 - t));
   },
   expo: t => (t === 0 ? 0 : t === 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2),
   sine: t => -(Math.cos(Math.PI * t) - 1) / 2,

@@ -128,8 +128,16 @@ export type Ease_in_out_inOut = {
   /** **Cubic** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#cubic) to learn more. */
   cubic: EaseFunction;
 
-  /** **Elastic** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#elastic) to learn more. */
-  elastic: EaseFunction;
+  /**
+   * Creates a spring-like easing function that overshoots the target and oscillates back.
+   *
+   * **Elastic** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#elastic) to learn more.
+   *
+   * @param amplitude - How far it overshoots. Values below `1` are treated as `1`. Defaults to `1`.
+   * @param period - How long one oscillation takes, as a fraction of the duration. Smaller means more wiggles. Defaults to `0.3`,
+   *   or `0.45` for `inOut`.
+   */
+  elastic: (amplitude?: number, period?: number) => EaseFunction;
 
   /** **Expo** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#expo) to learn more. */
   expo: EaseFunction;
