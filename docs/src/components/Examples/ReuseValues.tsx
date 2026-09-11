@@ -37,7 +37,7 @@ export default function ReuseValues() {
         el.style.rotate = `${rotate}deg`;
 
         // scale
-        const scale = lerp(2, 1, ease.in.wobble(1.6)(t));
+        const scale = lerp(2, 1, ease.out.wobble(1.6)(t));
         el.style.scale = `${scale}`;
 
         // blur

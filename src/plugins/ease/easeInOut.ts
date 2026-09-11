@@ -29,8 +29,9 @@ const easeInOut: Ease_in_out_inOut = {
   poly: n => {
     return t => (t < 0.5 ? Math.pow(2, n - 1) * Math.pow(t, n) : 1 - Math.pow(-2 * t + 2, n) / 2);
   },
-  wobble(bounciness = 1) {
-    return inOut(wobble(bounciness));
+  wobble: bounciness => {
+    const wobbleOut = wobble(bounciness);
+    return inOut(t => 1 - wobbleOut(1 - t));
   },
   spring: options => {
     const springOut = spring(options);

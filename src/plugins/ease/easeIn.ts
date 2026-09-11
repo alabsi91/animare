@@ -22,7 +22,10 @@ const easeIn: Ease_in_out_inOut = {
   quart: t => t * t * t * t,
   quint: t => t * t * t * t * t,
   poly: n => t => Math.pow(t, n),
-  wobble,
+  wobble: bounciness => {
+    const wobbleOut = wobble(bounciness);
+    return t => 1 - wobbleOut(1 - t);
+  },
   spring: options => {
     const springOut = spring(options);
     return t => 1 - springOut(1 - t);

@@ -99,11 +99,11 @@ const Title = 'animare';
       const letter = letters[i];
       const t = info[i].value;
 
-      const x = lerp(i >= info.length / 2 ? -400 : 400, 0, ease.in.wobble(2)(t)),
+      const x = lerp(i >= info.length / 2 ? -400 : 400, 0, ease.out.wobble(2)(t)),
         y = lerp(i >= info.length / 2 ? 200 : -200, 0, ease.out.elastic()(t)),
         z = lerp(400, 0, ease.out.back()(t)),
-        rotate = lerp(i % 2 === 0 ? 90 : -90, 0, ease.in.wobble(6)(t)),
-        scale = lerp(0, 1.2, ease.in.wobble(4)(t));
+        rotate = lerp(i % 2 === 0 ? 90 : -90, 0, ease.out.wobble(6)(t)),
+        scale = lerp(0, 1.2, ease.out.wobble(4)(t));
 
       letter.style.scale = `${scale}`;
       letter.style.translate = `${x}px ${y}px ${z}px`;
@@ -123,7 +123,7 @@ const Title = 'animare';
     if (a.isPlaying || a.isFinished) {
       for (let i = 0; i < letters.length; i++) {
         const letter = letters[i];
-        letter.style.scale = `${lerp(1.2, 1, ease.in.wobble(i % 2 === 0 ? 4 : 3)(t))}`;
+        letter.style.scale = `${lerp(1.2, 1, ease.out.wobble(i % 2 === 0 ? 4 : 3)(t))}`;
         letter.style.color = vecToRGB(lerp(colors.white, colors.orange, ease.out.back(4)(t)));
         letter.style.filter = `blur(${lerp(0, i % 2 === 0 ? 2 : 3, alternate(t))}px)`;
       }
