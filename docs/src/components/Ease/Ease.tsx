@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import styles from './Ease.module.css';
 import { ease } from 'animare/plugins';
 
-import type { EaseFn, OnUpdateCallback, TimelineGlobalOptions } from 'animare';
+import type { EaseFunction, OnUpdateCallback, TimelineGlobalOptions } from 'animare';
 
 type Ease = typeof ease;
 type EaseKeys = keyof Ease;
@@ -25,7 +25,7 @@ const ballColor = '#f46036';
 const lineThickness = 1;
 const lineColor = '#fff';
 
-function parseEase(str: EaseString): EaseFn {
+function parseEase(str: EaseString): EaseFunction {
   if (!str) return ease.linear;
 
   const regex = /\(.*\)$/;
@@ -35,7 +35,7 @@ function parseEase(str: EaseString): EaseFn {
     const key = keys[1] as EaseKeys;
 
     const matches = str.match(regex);
-    if (!matches) return ease[key] as EaseFn;
+    if (!matches) return ease[key] as EaseFunction;
 
     const params = matches[0]
       .substring(1, matches[0].length - 1)
@@ -46,14 +46,14 @@ function parseEase(str: EaseString): EaseFn {
         return isNaN(num) ? e : num;
       });
 
-    return (ease[key] as (...arg: unknown[]) => EaseFn)(...params);
+    return (ease[key] as (...arg: unknown[]) => EaseFunction)(...params);
   }
 
   const firstKey = keys[1] as 'in' | 'out' | 'inOut';
   const secondKey = keys[2] as NestedKeys<Ease[EaseKeys]>;
 
   const matches = str.match(regex);
-  if (!matches) return ease[firstKey][secondKey] as EaseFn;
+  if (!matches) return ease[firstKey][secondKey] as EaseFunction;
 
   const params = matches[0]
     .substring(1, matches[0].length - 1)
@@ -64,7 +64,7 @@ function parseEase(str: EaseString): EaseFn {
       return isNaN(num) ? e : num;
     });
 
-  return (ease[firstKey][secondKey] as (...arg: unknown[]) => EaseFn)(...params);
+  return (ease[firstKey][secondKey] as (...arg: unknown[]) => EaseFunction)(...params);
 }
 
 export default function Ease({ title = 'Linear', padding = 10, duration = 2000, easing }: Props) {
