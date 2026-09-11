@@ -2,7 +2,6 @@ node_modules
 lib
 dist/
 *.tgz
-package-lock.json
 
 # Logs
 logs
