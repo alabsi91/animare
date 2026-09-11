@@ -104,6 +104,26 @@ describe('direction', () => {
     assert.deepEqual(valuesAt(Direction.AlternateReverse, 1), [100, 50, 0]);
     assert.deepEqual(valuesAt(Direction.AlternateReverse, 2), [100, 50, 0, 50, 100]);
   });
+
+  it('alternate keeps flipping across timeline repeats', () => {
+    const timeline = animare.timeline([{ name: 'a', to: 100, duration: 500, direction: Direction.Alternate }], () => {}, {
+      autoPlay: false,
+      timelinePlayCount: 3,
+    });
+    const info = timeline.animationsInfo.a;
+    const values: number[] = [];
+
+    timeline.play();
+    advance(0);
+    for (let step = 0; step < 9; step++) {
+      advance(250);
+      values.push(info.value);
+    }
+
+    // repeat frames land on the start of the next play, so the end values show twice
+    assert.deepEqual(values, [50, 100, 100, 50, 0, 0, 50, 100, 100]);
+    assert.equal(timeline.timelineInfo.isFinished, true);
+  });
 });
 
 describe('timing', () => {

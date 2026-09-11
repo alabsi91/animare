@@ -50,6 +50,9 @@ export default class Animation {
   /** Indicates whether the animation alternates direction. */
   #isAlternate: boolean;
 
+  /** Plays done in earlier timeline repeats. Alternate directions keep flipping across repeats. */
+  #playsInPreviousTimelineRepeats = 0;
+
   /** The reference to the prepared animation values. */
   animationRef: AnimationPreparedOptions;
 
@@ -135,9 +138,11 @@ export default class Animation {
     this.#end = this.#start + this.animationRef.duration;
   }
 
-  public Update(elapsedTime: number) {
+  public Update(elapsedTime: number, timelinePlayCount = 1) {
     // technically disabled
     if (this.animationRef.playCount === 0) return;
+
+    this.#playsInPreviousTimelineRepeats = (timelinePlayCount - 1) * this.animationRef.playCount;
 
     // the current time is after this animation (finished)
     if (elapsedTime >= this.endPoint) {
@@ -169,7 +174,7 @@ export default class Animation {
       this.#overallProgress = 0;
       this.#elapsedTime = 0;
 
-      this.#value = this.#isReverse ? this.animationRef.to : this.animationRef.from;
+      this.#value = this.#isPlayReversed(1) ? this.animationRef.to : this.animationRef.from;
       return;
     }
 
@@ -245,7 +250,7 @@ export default class Animation {
   #isPlayReversed(playCount: number): boolean {
     if (!this.#isAlternate) return this.#isReverse;
 
-    const isEvenPlay = playCount % 2 === 0;
+    const isEvenPlay = (this.#playsInPreviousTimelineRepeats + playCount) % 2 === 0;
     return this.#isReverse !== isEvenPlay;
   }
 }

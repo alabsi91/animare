@@ -123,7 +123,7 @@ export default function timeline<Name extends string>(
     for (let index = 0; index < timelineInfo.__animations.length; index++) {
       const animation = timelineInfo.__animations[index];
 
-      animation.Update(timelineInfo.elapsedTime);
+      animation.Update(timelineInfo.elapsedTime, timelineInfo.playCount);
       const info = animation.info as CallbackInfo<Name>[Name];
 
       callbackAnimationInfo[info.name] = info;

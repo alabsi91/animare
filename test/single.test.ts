@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import animare, { Event } from 'animare';
+import animare, { Direction, Event } from 'animare';
 
 import { advance } from './harness.ts';
 
@@ -60,6 +60,18 @@ describe('single', () => {
 
     assert.equal(single.timelineInfo.isPlaying, true);
     assert.equal(single.timelineInfo.playCount, 6);
+  });
+
+  it('goes back and forth forever with alternate and a negative playCount', () => {
+    const values: number[] = [];
+    animare.single({ to: 100, duration: 500, direction: Direction.Alternate, playCount: -1 }, info => {
+      values.push(info.value);
+    });
+
+    advance(0);
+    for (let step = 0; step < 7; step++) advance(250);
+
+    assert.deepEqual(values, [0, 50, 100, 100, 50, 0, 0, 50]);
   });
 
   it('switches from infinite to finite while playing', () => {

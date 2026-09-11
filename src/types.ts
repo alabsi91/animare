@@ -7,10 +7,10 @@ export enum Direction {
   /** Play the animation in reverse direction. */
   Reverse = 'reverse',
 
-  /** Alternate the animation direction on each iteration, starting with normal. */
+  /** Alternate the animation direction on each iteration, starting with normal. Timeline repeats count as iterations too. */
   Alternate = 'alternate',
 
-  /** Alternate the animation direction on each iteration, starting with reverse. */
+  /** Alternate the animation direction on each iteration, starting with reverse. Timeline repeats count as iterations too. */
   AlternateReverse = 'alternate-reverse',
 }
 
