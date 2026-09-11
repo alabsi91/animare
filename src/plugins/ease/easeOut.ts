@@ -1,4 +1,4 @@
-import { bounce, elastic, wobble } from './ease.js';
+import { bounce, elastic, spring, wobble } from './ease.js';
 
 import type { Ease_in_out_inOut, EaseFunction } from './types.js';
 
@@ -20,6 +20,7 @@ const easeOut: Ease_in_out_inOut = {
   quint: t => 1 - Math.pow(1 - t, 5),
   poly: n => t => 1 - Math.pow(1 - t, n),
   wobble: (bounciness = 1) => out(wobble(bounciness)),
+  spring,
 };
 
 /** Runs an easing function backwards. */

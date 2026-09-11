@@ -1,6 +1,6 @@
 import cubicBezier from './cubicBezier.js';
 import { generateEasingFunctionFromString } from './customEase.js';
-import { fromPoints, linear, spring, steps } from './ease.js';
+import { fromPoints, linear, steps } from './ease.js';
 import easeIn from './easeIn.js';
 import easeInOut from './easeInOut.js';
 import easeOut from './easeOut.js';
@@ -16,5 +16,4 @@ export const ease: Ease = {
   custom: generateEasingFunctionFromString,
   fromPoints,
   steps,
-  spring,
 };

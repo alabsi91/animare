@@ -166,7 +166,9 @@ and a bounciness of `N > 1` will overshoot about `N` times.
 
 ## Spring()
 
-`ease.spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 })`
+`ease.in.spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 })` <Badge text="in" variant="caution" size="small" /> <br />
+`ease.out.spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 })` <Badge text="out" variant="caution" size="small" /> <br />
+`ease.inOut.spring({ mass = 1, stiffness = 100, damping = 10, velocity = 0, duration = 1000 })` <Badge text="in-out" variant="caution" size="small" />
 
 Creates a spring easing function.
 
@@ -174,7 +176,9 @@ Creates a spring easing function.
 The spring easing function will only look smooth at certain durations and with certain parameters.
 :::
 
-<Ease title='spring()' padding={44} easing='ease.spring()' client:idle />
+<Ease title='in.spring()' padding={44} easing='ease.in.spring()' client:idle />
+<Ease title='out.spring()' padding={44} easing='ease.out.spring()' client:idle />
+<Ease title='inOut.spring()' padding={44} easing='ease.inOut.spring()' client:idle />
 
 ## Steps()
 

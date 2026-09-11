@@ -117,7 +117,7 @@ const Title = 'animare';
     // last animation
     const a = info[info.length - 1];
     const t = a.value;
-    if (title) title.style.letterSpacing = `${lerp(15, 0, ease.spring({ damping: 7, duration: 1400 })(t))}px`;
+    if (title) title.style.letterSpacing = `${lerp(15, 0, ease.out.spring({ damping: 7, duration: 1400 })(t))}px`;
 
     // apply only when the last animation is playing to prevent conflict with previous animations
     if (a.isPlaying || a.isFinished) {

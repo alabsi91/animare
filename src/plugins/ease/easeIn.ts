@@ -1,4 +1,4 @@
-import { bounce, elastic, wobble } from './ease.js';
+import { bounce, elastic, spring, wobble } from './ease.js';
 
 import type { Ease_in_out_inOut } from './types.js';
 
@@ -23,6 +23,10 @@ const easeIn: Ease_in_out_inOut = {
   quint: t => t * t * t * t * t,
   poly: n => t => Math.pow(t, n),
   wobble,
+  spring: options => {
+    const springOut = spring(options);
+    return t => 1 - springOut(1 - t);
+  },
 };
 
 export default easeIn;

@@ -83,29 +83,6 @@ export type Ease = {
    * @param shouldStartAtIntervalBeginning - Whether to start at the beginning or at the end of each interval.
    */
   steps(steps?: number, shouldStartAtIntervalBeginning?: boolean): EaseFunction;
-
-  /**
-   * Creates a spring easing function.
-   *
-   * ⚠️ **Warning** ⚠️ The spring easing function will only look smooth at certain durations and with certain parameters.
-   *
-   * **Spring** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#spring) to learn more.
-   *
-   * @example
-   *   ```js
-   *   import animare from 'animare';
-   *   import { ease } from 'animare/plugins';
-   *
-   *   animare.timeline([
-   *   {
-   *     name: 'anim',
-   *     to: 100,
-   *     ease: ease.spring({ mass: 1, stiffness: 100, damping: 10, velocity: 0, duration: 1000 })
-   *   }
-   *   ], onUpdate);
-   *   ```;
-   */
-  spring: (options?: SpringParameters) => EaseFunction;
 };
 
 export type Ease_in_out_inOut = {
@@ -166,4 +143,27 @@ export type Ease_in_out_inOut = {
    * **Wobble** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#wobble) to learn more.
    */
   wobble: (bounciness?: number) => EaseFunction;
+
+  /**
+   * Creates a spring easing function.
+   *
+   * ⚠️ **Warning** ⚠️ The spring easing function will only look smooth at certain durations and with certain parameters.
+   *
+   * **Spring** check out [animare docs](https://alabsi91.github.io/animare/api/plugins/ease/#spring) to learn more.
+   *
+   * @example
+   *   ```js
+   *   import animare from 'animare';
+   *   import { ease } from 'animare/plugins';
+   *
+   *   animare.timeline([
+   *   {
+   *     name: 'anim',
+   *     to: 100,
+   *     ease: ease.out.spring({ mass: 1, stiffness: 100, damping: 10, velocity: 0, duration: 1000 })
+   *   }
+   *   ], onUpdate);
+   *   ```;
+   */
+  spring: (options?: SpringParameters) => EaseFunction;
 };
