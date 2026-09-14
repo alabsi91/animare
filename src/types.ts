@@ -171,6 +171,9 @@ export type AnimationOptions<Name extends string = string> = {
   /**
    * The easing function for the animation, defining the rate of change of the animated value over time.
    *
+   * The easing decides the value at every frame, the first and the last one included, like CSS. An easing that does not return
+   * exactly `0` and `1` at the edges will not start at `from` or end at `to`.
+   *
    * @default ease.linear
    */
   ease?: EaseFunction;

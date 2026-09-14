@@ -196,6 +196,18 @@ describe('options', () => {
     assertClose(timeline.animationsInfo.a.value, 25);
   });
 
+  it('honors the easing at the first and the last frame, like CSS', () => {
+    // never reaches 0 or 1, so the animation never reaches `from` or `to`
+    const timeline = createTimeline([{ name: 'a', from: 0, to: 100, duration: 100, ease: t => 0.1 + t * 0.8 }]);
+    const info = timeline.animationsInfo.a;
+
+    assertClose(info.value, 10);
+
+    advance(100);
+    assert.equal(info.isFinished, true);
+    assertClose(info.value, 90);
+  });
+
   it('throws on invalid values', () => {
     const create = (animation: AnimationOptions) => () => animare.timeline([animation], () => {}, { autoPlay: false });
 

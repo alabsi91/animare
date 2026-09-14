@@ -106,7 +106,7 @@ export default class Animation {
     this.#isAlternate = isAlternateDirection(this.animationRef.direction);
     this.#isReverse = isReverseDirection(this.animationRef.direction);
 
-    this.#value = this.#isReverse ? this.animationRef.to : this.animationRef.from;
+    this.#value = this.#getValueAtProgress(1, 0);
 
     const offset = this.animationRef.offset;
     const delayCount = this.#getEffectiveDelayCount();
@@ -156,8 +156,7 @@ export default class Animation {
       this.#overallProgress = 1;
       this.#elapsedTime = this.animationRef.duration;
 
-      const isLastPlayReversed = this.#isPlayReversed(this.animationRef.playCount);
-      this.#value = isLastPlayReversed ? this.animationRef.from : this.animationRef.to;
+      this.#value = this.#getValueAtProgress(this.animationRef.playCount, 1);
 
       return;
     }
@@ -174,7 +173,7 @@ export default class Animation {
       this.#overallProgress = 0;
       this.#elapsedTime = 0;
 
-      this.#value = this.#isPlayReversed(1) ? this.animationRef.to : this.animationRef.from;
+      this.#value = this.#getValueAtProgress(1, 0);
       return;
     }
 
@@ -239,11 +238,15 @@ export default class Animation {
     this.#elapsedTime = elapsedTime - this.#start;
     this.#progress = normalizePercentage(this.#elapsedTime / (this.#end - this.#start));
 
-    const isReversed = this.#isPlayReversed(this.#playCount);
+    this.#value = this.#getValueAtProgress(this.#playCount, this.#progress);
+  }
+
+  #getValueAtProgress(playCount: number, progress: number): number {
+    const isReversed = this.#isPlayReversed(playCount);
     const startValue = isReversed ? this.animationRef.to : this.animationRef.from;
     const endValue = isReversed ? this.animationRef.from : this.animationRef.to;
 
-    this.#value = startValue + (endValue - startValue) * this.animationRef.ease(this.#progress);
+    return startValue + (endValue - startValue) * this.animationRef.ease(progress);
   }
 
   /** Whether the given play (counted from 1) runs from `to` to `from`. Alternate directions flip on every play, like CSS. */
